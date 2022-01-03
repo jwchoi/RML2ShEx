@@ -8,25 +8,35 @@ import java.util.Optional;
 
 public class TriplesMap {
 
-    private Optional<URI> uri;
-    private LogicalTable logicalTable;
+    private URI uri;
+    private Optional<LogicalTable> logicalTable;
+    private Optional<LogicalSource> logicalSource;
     private SubjectMap subjectMap;
     private List<PredicateObjectMap> predicateObjectMaps;
 
+    TriplesMap(URI uri) { this.uri = uri; }
+
     TriplesMap(URI uri, LogicalTable logicalTable, SubjectMap subjectMap) {
-        this.logicalTable = logicalTable;
+        this(uri);
+
+        this.logicalTable = Optional.of(logicalTable);
         this.subjectMap = subjectMap;
         predicateObjectMaps = new ArrayList<>();
-        this.uri = Optional.ofNullable(uri);
     }
 
-    public void addPredicateObjectMap(PredicateObjectMap predicateObjectMap) { predicateObjectMaps.add(predicateObjectMap); }
+    void setLogicalSource(LogicalSource logicalSource) { this.logicalSource = Optional.of(logicalSource); }
 
-    public LogicalTable getLogicalTable() { return logicalTable; }
+    void setLogicalTable(LogicalTable logicalTable) { this.logicalTable = Optional.of(logicalTable); }
+
+    public void addPredicateObjectMap(PredicateObjectMap predicateObjectMap) {
+        predicateObjectMaps.add(predicateObjectMap);
+    }
+
+    public LogicalTable getLogicalTable() { return logicalTable.orElse(null); }
 
     public SubjectMap getSubjectMap() { return subjectMap; }
 
-    public URI getUri() { return uri.isPresent() ? uri.get() : null; }
+    public URI getUri() { return uri; }
 
     public List<PredicateObjectMap> getPredicateObjectMaps() { return predicateObjectMaps; }
 

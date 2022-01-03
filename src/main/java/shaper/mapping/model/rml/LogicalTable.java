@@ -24,15 +24,11 @@ public class LogicalTable {
         sqlVersions = new TreeSet<>();
     }
 
-    public void setUri(URI uri) {
-        this.uri = Optional.ofNullable(uri);
-    }
+    public void setUri(URI uri) { this.uri = Optional.ofNullable(uri); }
 
     public void setTableName(String tableName) { this.tableName = Optional.ofNullable(tableName); }
 
-    public void setSqlQuery(String sqlQuery) {
-        this.sqlQuery = Optional.ofNullable(sqlQuery);
-    }
+    public void setSqlQuery(String sqlQuery) { this.sqlQuery = Optional.ofNullable(sqlQuery); }
 
     public void addSqlVersion(URI sqlVersion) {
         sqlVersions.add(sqlVersion);

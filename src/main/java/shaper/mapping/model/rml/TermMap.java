@@ -27,6 +27,8 @@ public abstract class TermMap {
     private Optional<URI> datatype; // rr:datatype
     private Optional<String> inverseExpression; // rr:inverseExpression
 
+    private Optional<String> reference; // rml:reference
+
     TermMap() {
         constant = Optional.empty();
         column = Optional.empty();
@@ -35,6 +37,8 @@ public abstract class TermMap {
         language = Optional.empty();
         datatype = Optional.empty();
         inverseExpression = Optional.empty();
+
+        reference = Optional.empty();
     }
 
     public void setConstant(String constant) { this.constant = Optional.ofNullable(constant); }
@@ -57,6 +61,8 @@ public abstract class TermMap {
     public void setLanguage(String language) { this.language = Optional.ofNullable(language); }
     public void setDatatype(URI datatype) { this.datatype = Optional.ofNullable(datatype); }
     public void setinverseExpression(String inverseExpression) { this.inverseExpression = Optional.ofNullable(inverseExpression); }
+
+    void setReference(String reference) { this.reference = Optional.ofNullable(reference); }
 
     public Optional<Template> getTemplate() { return template; }
     public Optional<TermTypes> getTermType() { return termType; }

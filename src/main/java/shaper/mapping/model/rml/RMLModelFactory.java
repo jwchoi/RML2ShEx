@@ -2,7 +2,6 @@ package shaper.mapping.model.rml;
 
 import janus.database.SQLResultSet;
 import janus.database.SQLSelectField;
-import shaper.Shaper;
 import shaper.mapping.rml.RMLParser;
 
 import java.net.URI;
@@ -16,12 +15,25 @@ public class RMLModelFactory {
         // prefixes
         Map<String, String> prefixMap = parser.getPrefixes();
         Set<String> keySet = prefixMap.keySet();
-        for (String key: keySet)
+        for (String key : keySet)
             rmlModel.addPrefixMap(key, prefixMap.get(key));
+
+        // databases
+        Set<String> databases = parser.getDatabases();
+        for (String databaseAsResource : databases) {
+            Database database = new Database(URI.create(databaseAsResource),
+                    parser.getJdbcDSN(databaseAsResource),
+                    parser.getJdbcDriver(databaseAsResource),
+                    parser.getUsername(databaseAsResource),
+                    parser.getPassword(databaseAsResource));
+
+            rmlModel.addDatabase(database);
+        }
 
         // triples maps
         Set<String> triplesMaps = parser.getTriplesMaps();
-        for (String triplesMapAsResource: triplesMaps) {
+        for (String triplesMapAsResource : triplesMaps) {
+            TriplesMap triplesMap = new TriplesMap(URI.create(triplesMapAsResource));
 
             // logical source or logical table
 
@@ -34,55 +46,115 @@ public class RMLModelFactory {
 
                 // rml:source -> string or URI
                 Source source = new Source(parser.getSource(logicalSourceAsResource));
+                logicalSource.setSource(source);
+
+                // rml:referenceFormulation
+                logicalSource.setReferenceFormulation(parser.getReferenceFormulation(logicalSourceAsResource));
+
+                // rml:iterator
+                logicalSource.setIterator(parser.getIterator(logicalSourceAsResource));
+
+                // rr:tableName
+                logicalSource.setTableName(parser.getTableName(logicalSourceAsResource));
+
+                // rml:query
+                logicalSource.setQuery(parser.getQuery(logicalSourceAsResource));
+
+                // rr:sqlVersion
+                logicalSource.setSqlVersions(parser.getSQLVersions(logicalSourceAsResource));
+
+                triplesMap.setLogicalSource(logicalSource);
             }
 
             // logical table
             String logicalTableAsResource = parser.getLogicalTable(triplesMapAsResource);
-
             if (logicalTableAsResource != null) {
                 LogicalTable logicalTable = new LogicalTable();
 
                 logicalTable.setUri(URI.create(logicalTableAsResource));
                 logicalTable.setTableName(parser.getTableName(logicalTableAsResource));
+
+                triplesMap.setLogicalTable(logicalTable);
             }
 
-//            // subject map
-//            String subjectMapAsResource = parser.getSubjectMap(triplesMapAsResource);
-//
-//            // rr:class
-//            Set<URI> classes = parser.getClasses(subjectMapAsResource); // the size of classes could be zero.
-//
-//            SubjectMap subjectMap = new SubjectMap(classes);
-//
-//            // ?x rr:subject ?y.
-//            URI constant = parser.getIRIConstant(subjectMapAsResource);
-//            if (constant != null)
-//                subjectMap.setConstant(constant.toString());
+            // subject map
+            Set<String> subjectMaps = parser.getSubjectMaps(triplesMapAsResource);
+            if (subjectMaps.size() == 1) {
+                String subjectMapAsResource = subjectMaps.stream().toList().get(0);
+
+                SubjectMap subjectMap = new SubjectMap();
+
+                // rr:template
+                String templateOfSubjectMap = parser.getTemplate(subjectMapAsResource);
+                if (templateOfSubjectMap != null) {
+                    subjectMap.setTemplate(new Template(templateOfSubjectMap));
+                }
+
+                // rr:termType
+                URI termType = parser.getTermType(subjectMapAsResource);
+                if (termType != null) {
+
+                    if (termType.equals(TermMap.TermTypes.LITERAL)) {
+                        System.err.println("the presence of rr:termType rr:Literal on rr:subjectMap");
+                        return null;
+                    }
+
+                    subjectMap.setTermType(termType);
+                } else
+                    subjectMap.setTermType(TermMap.TermTypes.IRI);
+
+                // rr:class
+                Set<URI> classes = parser.getClasses(subjectMapAsResource); // the size of classes could be zero.
+                subjectMap.setClassIRIs(classes);
+
+                // rml:reference
+                String reference = parser.getReference(subjectMapAsResource);
+                if (reference != null)
+                    subjectMap.setReference(reference);
+
+                // rr:subject
+                URI constantOfSubjectMap = parser.getIRIConstant(subjectMapAsResource);
+                if (constantOfSubjectMap != null)
+                    subjectMap.setConstant(constantOfSubjectMap.toString());
+
+                // rr:graphMap
+                Set<String> graphMaps = parser.getGraphMaps(subjectMapAsResource);
+                for (String graphMapAsResource: graphMaps) {
+                    GraphMap graphMap = new GraphMap();
+
+                    // rr:constant
+                    URI constantOfGraphMap = parser.getIRIConstant(graphMapAsResource);
+                    if (constantOfGraphMap != null)
+                        graphMap.setConstant(constantOfGraphMap.toString());
+
+                    // rr:template
+                    String templateOfGraphMap = parser.getTemplate(graphMapAsResource);
+                    if (templateOfGraphMap != null) {
+                        graphMap.setTemplate(new Template(templateOfGraphMap));
+                    }
+
+                    subjectMap.addGraphMap(graphMap);
+                }
+
+                // rr:graph
+                Set<URI> graphs = parser.getGraphs(subjectMapAsResource);
+                for (URI graph: graphs) {
+                    GraphMap graphMap = new GraphMap();
+                    graphMap.setConstant(graph.toString());
+
+                    subjectMap.addGraphMap(graphMap);
+                }
+
+            } else {
+                System.err.println("A triples map must have exactly one subject map.");
+                return null;
+            }
 //
 //            String query = logicalTable.getSqlQuery(Shaper.DBMSType);
 //            SQLResultSet resultSet = Shaper.dbBridge.executeQuery(query);
 //
-//            // rr:column
-//            String column = parser.getColumn(subjectMapAsResource);
-//            if (column != null)
-//                subjectMap.setColumn(createSQLSelectField(column, query, resultSet));
-//
-//            // rr:template
-//            String template = parser.getTemplate(subjectMapAsResource);
-//            if (template != null) {
-//                List<SQLSelectField> columnNames = createSQLSelectFields(getColumnNamesIn(template), query, resultSet);
-//                subjectMap.setTemplate(new Template(template, columnNames));
-//            }
-//
 //            // rr:inverseExpression
 //            subjectMap.setinverseExpression(parser.getInverseExpression(subjectMapAsResource));
-//
-//            // rr:termType
-//            URI termType = parser.getTermType(subjectMapAsResource);
-//            if (termType != null)
-//                subjectMap.setTermType(termType);
-//            else
-//                subjectMap.setTermType(TermMap.TermTypes.IRI);
 //
 //            // triples map
 //            TriplesMap triplesMap = new TriplesMap(URI.create(triplesMapAsResource), logicalTable, subjectMap);
@@ -225,7 +297,7 @@ public class RMLModelFactory {
 
     private static List<SQLSelectField> createSQLSelectFields(List<String> selectFields, String selectQuery, SQLResultSet sqlResultSet) {
         List<SQLSelectField> selectFieldList = new ArrayList<>();
-        for (String selectField: selectFields)
+        for (String selectField : selectFields)
             selectFieldList.add(createSQLSelectField(selectField, selectQuery, sqlResultSet));
 
         return selectFieldList;
@@ -238,7 +310,7 @@ public class RMLModelFactory {
             selectField = selectField.substring(1, selectField.length() - 1);
 
         // nullable
-        Optional<Integer> nullable =  sqlResultSet.isNullable(selectField);
+        Optional<Integer> nullable = sqlResultSet.isNullable(selectField);
         if (nullable.isPresent())
             sqlSelectField.setNullable(nullable.get());
 
@@ -253,13 +325,13 @@ public class RMLModelFactory {
         return sqlSelectField;
     }
 
-    private static List<String> getColumnNamesIn(String template) {
+    private static List<String> getLogicalReferencesIn(String template) {
         // because backslashes need to be escaped by a second backslash in the Turtle syntax,
         // a double backslash is needed to escape each curly brace,
         // and to get one literal backslash in the output one needs to write four backslashes in the template.
         template = template.replace("\\\\", "\\");
 
-        List<String> columnNames = new LinkedList<>();
+        List<String> logicalReferences = new LinkedList<>();
 
         int length = template.length();
         int fromIndex = 0;
@@ -274,14 +346,14 @@ public class RMLModelFactory {
             while (closeBrace > 0 && template.charAt(closeBrace - 1) == '\\')
                 closeBrace = template.indexOf("}", closeBrace + 1);
 
-            String columnName = template.substring(openBrace + 1, closeBrace);
-            columnName = columnName.replace("\\{", "{");
-            columnName = columnName.replace("\\}", "}");
+            String reference = template.substring(openBrace + 1, closeBrace);
+            reference = reference.replace("\\{", "{");
+            reference = reference.replace("\\}", "}");
 
-            columnNames.add(columnName);
+            logicalReferences.add(reference);
             fromIndex = closeBrace + 1;
         }
 
-        return columnNames;
+        return logicalReferences;
     }
 }

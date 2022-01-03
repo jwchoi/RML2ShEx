@@ -32,17 +32,17 @@ public class RMLParser {
         model = getModel(rmlFile, base, lang.toString());
     }
 
-    public String getSQLQuery(String logicalTable) {
-        Resource s = createResource(logicalTable);
-        Property p = createRRProperty("sqlQuery");
+    public String getQuery(String logicalSource) {
+        Resource s = createResource(logicalSource);
+        Property p = createRMLProperty("query");
 
         Set<String> set = getLiteralObjectsOf(s, p);
 
         return set.size() > 0 ? set.toArray(new String[0])[0].trim() : null;
     }
 
-    public String getTableName(String logicalTable) {
-        Resource s = createResource(logicalTable);
+    public String getTableName(String logicalTableOrLogicalSource) {
+        Resource s = createResource(logicalTableOrLogicalSource);
         Property p = createRRProperty("tableName");
 
         Set<String> set = getLiteralObjectsOf(s, p);
@@ -57,8 +57,8 @@ public class RMLParser {
         return getIRIObjectsOf(s, p);
     }
 
-    public Set<URI> getSQLVersions(String logicalTable) {
-        Resource s = createResource(logicalTable);
+    public Set<URI> getSQLVersions(String logicalTableOrLogicalSource) {
+        Resource s = createResource(logicalTableOrLogicalSource);
         Property p = createRRProperty("sqlVersion");
 
         return getIRIObjectsOf(s, p);
@@ -97,6 +97,69 @@ public class RMLParser {
         return subjects.mapWith(resource -> resource.toString()).toSet();
     }
 
+    public URI getReferenceFormulation(String logicalSource) {
+        Resource s = createResource(logicalSource);
+        Property p = createRMLProperty("referenceFormulation");
+
+        Set<URI> objects = getIRIObjectsOf(s, p);
+
+        return objects.size() > 0 ? objects.toArray(new URI[0])[0] : null;
+    }
+
+    public String getIterator(String logicalSource) {
+        Resource s = createResource(logicalSource);
+        Property p = createRMLProperty("iterator");
+
+        Set<String> objects = getLiteralObjectsOf(s, p);
+
+        return objects.size() > 0 ? objects.toArray(new String[0])[0] : null;
+    }
+
+    public Set<String> getDatabases() {
+        // a d2rq:Database
+        Property p = model.createProperty("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
+        Resource o = model.createResource("http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#Database");
+
+        ResIterator subjects = model.listSubjectsWithProperty(p, o);
+        return subjects.mapWith(resource -> resource.toString()).toSet();
+    }
+
+    public String getJdbcDSN(String database) {
+        Resource s = createResource(database);
+        Property p = createD2RQProperty("jdbcDSN");
+
+        Set<String> objects = getLiteralObjectsOf(s, p);
+
+        return objects.toArray(new String[0])[0];
+    }
+
+    public String getJdbcDriver(String database) {
+        Resource s = createResource(database);
+        Property p = createD2RQProperty("jdbcDriver");
+
+        Set<String> objects = getLiteralObjectsOf(s, p);
+
+        return objects.toArray(new String[0])[0];
+    }
+
+    public String getUsername(String database) {
+        Resource s = createResource(database);
+        Property p = createD2RQProperty("username");
+
+        Set<String> objects = getLiteralObjectsOf(s, p);
+
+        return objects.toArray(new String[0])[0];
+    }
+
+    public String getPassword(String database) {
+        Resource s = createResource(database);
+        Property p = createD2RQProperty("password");
+
+        Set<String> objects = getLiteralObjectsOf(s, p);
+
+        return objects.toArray(new String[0])[0];
+    }
+
     public static boolean isURI(String str) {
         try { return new org.apache.jena.ext.xerces.util.URI(str) != null; }
         catch (org.apache.jena.ext.xerces.util.URI.MalformedURIException e) { return false; }
@@ -112,6 +175,10 @@ public class RMLParser {
 
     private Property createRMLProperty(String localName) {
         return model.createProperty(model.getNsPrefixURI("rml"), localName);
+    }
+
+    private Property createD2RQProperty(String localName) {
+        return model.createProperty(model.getNsPrefixURI("d2rq"), localName);
     }
 
     public String getInverseExpression(String termMap) {
@@ -187,9 +254,9 @@ public class RMLParser {
         return objects.size() > 0 ? objects.toArray(new String[0])[0] : null;
     }
 
-    public String getColumn(String termMap) {
+    public String getReference(String termMap) {
         Resource s = createResource(termMap);
-        Property p = createRRProperty("column");
+        Property p = createRMLProperty("reference");
 
         Set<String> objects = getLiteralObjectsOf(s, p);
 
@@ -278,13 +345,13 @@ public class RMLParser {
         return getResourceObjectsOf(s, p);
     }
 
-    public String getSubjectMap(String triplesMap) {
+    public Set<String> getSubjectMaps(String triplesMap) {
         Resource s = createResource(triplesMap);
         Property p = createRRProperty("subjectMap");
 
         Set<String> objects = getResourceObjectsOf(s, p);
 
-        return objects.toArray(new String[0])[0];
+        return objects;
     }
 
     public String getLogicalTable(String triplesMap) {

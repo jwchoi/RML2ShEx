@@ -6,15 +6,19 @@ import java.util.*;
 public class RMLModel {
     private Map<String, String> prefixMap;
     private Set<TriplesMap> triplesMaps;
+    private Set<Database> databases;
 
     RMLModel() {
         prefixMap = new HashMap<>();
         triplesMaps = new HashSet<>();
+        databases = new HashSet<>();
     }
 
     public void addPrefixMap(String prefix, String uri) { prefixMap.put(prefix, uri); }
 
     public void addTriplesMap(TriplesMap triplesMap) { triplesMaps.add(triplesMap); }
+
+    void addDatabase(Database database) { databases.add(database); }
 
     public Set<TriplesMap> getTriplesMaps() { return triplesMaps; }
 
