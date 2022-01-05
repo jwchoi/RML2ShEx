@@ -2,10 +2,10 @@ package shaper.mapping.shex;
 
 import shaper.Shaper;
 import shaper.mapping.Symbols;
-import shaper.mapping.model.r2rml.ObjectMap;
-import shaper.mapping.model.r2rml.PredicateObjectMap;
-import shaper.mapping.model.r2rml.TriplesMap;
+import shaper.mapping.model.rml.ObjectMap;
+import shaper.mapping.model.rml.PredicateObjectMap;
 import shaper.mapping.model.rml.RMLModelFactory;
+import shaper.mapping.model.rml.TriplesMap;
 import shaper.mapping.model.shex.NodeConstraint;
 import shaper.mapping.model.shex.ShExSchemaFactory;
 import shaper.mapping.model.shex.Shape;
@@ -33,14 +33,14 @@ public class RMLShExMapper extends ShExMapper {
         writer.println(Symbols.PREFIX + Symbols.SPACE + shExSchema.getPrefix() + Symbols.COLON + Symbols.SPACE + Symbols.LT + shExSchema.getBaseIRI() + Symbols.HASH + Symbols.GT);
 
         // prefixes
-        Set<Map.Entry<String, String>> entrySet = r2rmlModel.getPrefixMap().entrySet();
+        Set<Map.Entry<String, String>> entrySet = rmlModel.getPrefixMap().entrySet();
         for (Map.Entry<String, String> entry: entrySet)
             writer.println(Symbols.PREFIX + Symbols.SPACE + entry.getKey() + Symbols.COLON + Symbols.SPACE + Symbols.LT + entry.getValue() + Symbols.GT);
         writer.println();
     }
 
     private void writeShEx() {
-        Set<TriplesMap> triplesMaps = r2rmlModel.getTriplesMaps();
+        Set<TriplesMap> triplesMaps = rmlModel.getTriplesMaps();
 
         for (TriplesMap triplesMap : triplesMaps) {
             List<PredicateObjectMap> predicateObjectMaps = triplesMap.getPredicateObjectMaps();
@@ -49,14 +49,14 @@ public class RMLShExMapper extends ShExMapper {
                 for (PredicateObjectMap.PredicateObjectPair predicateObjectPair: predicateObjectPairs) {
                     Optional<ObjectMap> objectMap = predicateObjectPair.getObjectMap();
                     if (objectMap.isPresent()) {
-                        if (NodeConstraint.isPossibleToHaveXSFacet(objectMap.get())) {
-                            String nodeConstraintID = shExSchema.getMappedNodeConstraintID(objectMap.get());
-                            String nodeConstraint = shExSchema.getMappedNodeConstraint(objectMap.get());
-                            if (nodeConstraintID != null && nodeConstraint != null) {
-                                String id = shExSchema.getPrefix() + Symbols.COLON + nodeConstraintID;
-                                writer.println(id + Symbols.SPACE + nodeConstraint);
-                            }
-                        }
+//                        if (NodeConstraint.isPossibleToHaveXSFacet(objectMap.get())) {
+//                            String nodeConstraintID = shExSchema.getMappedNodeConstraintID(objectMap.get());
+//                            String nodeConstraint = shExSchema.getMappedNodeConstraint(objectMap.get());
+//                            if (nodeConstraintID != null && nodeConstraint != null) {
+//                                String id = shExSchema.getPrefix() + Symbols.COLON + nodeConstraintID;
+//                                writer.println(id + Symbols.SPACE + nodeConstraint);
+//                            }
+//                        }
                     }
                 }
             }

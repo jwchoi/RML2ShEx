@@ -14,7 +14,10 @@ public class TriplesMap {
     private SubjectMap subjectMap;
     private List<PredicateObjectMap> predicateObjectMaps;
 
-    TriplesMap(URI uri) { this.uri = uri; }
+    TriplesMap(URI uri) {
+        this.uri = uri;
+        predicateObjectMaps = new ArrayList<>();
+    }
 
     TriplesMap(URI uri, LogicalTable logicalTable, SubjectMap subjectMap) {
         this(uri);
@@ -27,6 +30,8 @@ public class TriplesMap {
     void setLogicalSource(LogicalSource logicalSource) { this.logicalSource = Optional.of(logicalSource); }
 
     void setLogicalTable(LogicalTable logicalTable) { this.logicalTable = Optional.of(logicalTable); }
+
+    void setSubjectMap(SubjectMap subjectMap) { this.subjectMap = subjectMap; }
 
     public void addPredicateObjectMap(PredicateObjectMap predicateObjectMap) {
         predicateObjectMaps.add(predicateObjectMap);

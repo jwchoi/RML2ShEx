@@ -1,24 +1,27 @@
 package shaper.mapping.model.rml;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public class PredicateObjectMap {
     private Set<PredicateMap> predicateMaps;
     private List<ObjectMap> objectMaps;
     private List<RefObjectMap> refObjectMaps;
 
+    private Set<GraphMap> graphMaps; // the size of graphMaps >= 0
+
     PredicateObjectMap() {
         objectMaps = new ArrayList<>();
         refObjectMaps = new ArrayList<>();
+
+        graphMaps = new HashSet<>();
     }
 
     void setPredicateMaps(Set<PredicateMap> predicateMaps) { this.predicateMaps = predicateMaps; }
 
     void addObjectMap(ObjectMap objectMap) { objectMaps.add(objectMap); }
     void addRefObjectMap(RefObjectMap refObjectMap) { refObjectMaps.add(refObjectMap); }
+
+    void addGraphMap(GraphMap graphMap) { graphMaps.add(graphMap); }
 
     public List<PredicateObjectPair> getPredicateObjectPairs() {
         List<PredicateObjectPair> predicateObjectPairs = new ArrayList<>();
