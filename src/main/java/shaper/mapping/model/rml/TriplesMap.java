@@ -9,25 +9,17 @@ import java.util.Optional;
 public class TriplesMap {
 
     private URI uri;
-    private Optional<LogicalTable> logicalTable;
-    private Optional<LogicalSource> logicalSource;
+    private Optional<LogicalTable> logicalTable; // It can be a logicalSource which is a subclass of LogicalTable.
     private SubjectMap subjectMap;
     private List<PredicateObjectMap> predicateObjectMaps;
 
     TriplesMap(URI uri) {
         this.uri = uri;
+
         predicateObjectMaps = new ArrayList<>();
     }
 
-    TriplesMap(URI uri, LogicalTable logicalTable, SubjectMap subjectMap) {
-        this(uri);
-
-        this.logicalTable = Optional.of(logicalTable);
-        this.subjectMap = subjectMap;
-        predicateObjectMaps = new ArrayList<>();
-    }
-
-    void setLogicalSource(LogicalSource logicalSource) { this.logicalSource = Optional.of(logicalSource); }
+    void setLogicalSource(LogicalSource logicalSource) { this.logicalTable = Optional.of(logicalSource); }
 
     void setLogicalTable(LogicalTable logicalTable) { this.logicalTable = Optional.of(logicalTable); }
 

@@ -12,8 +12,6 @@ public class PredicateObjectMap {
     PredicateObjectMap() {
         objectMaps = new ArrayList<>();
         refObjectMaps = new ArrayList<>();
-
-        graphMaps = new HashSet<>();
     }
 
     void setPredicateMaps(Set<PredicateMap> predicateMaps) { this.predicateMaps = predicateMaps; }
@@ -21,7 +19,7 @@ public class PredicateObjectMap {
     void addObjectMap(ObjectMap objectMap) { objectMaps.add(objectMap); }
     void addRefObjectMap(RefObjectMap refObjectMap) { refObjectMaps.add(refObjectMap); }
 
-    void addGraphMap(GraphMap graphMap) { graphMaps.add(graphMap); }
+    void setGraphMaps(Set<GraphMap> graphMaps) { this.graphMaps = graphMaps; }
 
     public List<PredicateObjectPair> getPredicateObjectPairs() {
         List<PredicateObjectPair> predicateObjectPairs = new ArrayList<>();

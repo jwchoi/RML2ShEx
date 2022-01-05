@@ -41,8 +41,8 @@ public class RMLParser {
         return set.size() > 0 ? set.toArray(new String[0])[0].trim() : null;
     }
 
-    public String getTableName(String logicalTableOrLogicalSource) {
-        Resource s = createResource(logicalTableOrLogicalSource);
+    public String getTableName(String logicalTable) {
+        Resource s = createResource(logicalTable);
         Property p = createRRProperty("tableName");
 
         Set<String> set = getLiteralObjectsOf(s, p);
@@ -57,8 +57,17 @@ public class RMLParser {
         return getIRIObjectsOf(s, p);
     }
 
-    public Set<URI> getSQLVersions(String logicalTableOrLogicalSource) {
-        Resource s = createResource(logicalTableOrLogicalSource);
+    public String getSQLQuery(String logicalTable) {
+        Resource s = createResource(logicalTable);
+        Property p = createRRProperty("sqlQuery");
+
+        Set<String> set = getLiteralObjectsOf(s, p);
+
+        return set.size() > 0 ? set.toArray(new String[0])[0].trim() : null;
+    }
+
+    public Set<URI> getSQLVersions(String logicalTable) {
+        Resource s = createResource(logicalTable);
         Property p = createRRProperty("sqlVersion");
 
         return getIRIObjectsOf(s, p);
@@ -248,6 +257,15 @@ public class RMLParser {
     public String getTemplate(String termMap) {
         Resource s = createResource(termMap);
         Property p = createRRProperty("template");
+
+        Set<String> objects = getLiteralObjectsOf(s, p);
+
+        return objects.size() > 0 ? objects.toArray(new String[0])[0] : null;
+    }
+
+    public String getColumn(String termMap) {
+        Resource s = createResource(termMap);
+        Property p = createRRProperty("column");
 
         Set<String> objects = getLiteralObjectsOf(s, p);
 

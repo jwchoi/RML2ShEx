@@ -14,60 +14,90 @@ public abstract class TermMap {
 
         private URI uri;
 
-        TermTypes(URI uri) { this.uri = uri; }
+        TermTypes(URI uri) {
+            this.uri = uri;
+        }
 
-        public URI getUri() { return uri; }
+        public URI getUri() {
+            return uri;
+        }
     }
 
-    private Optional<String> constant; // rr:constant //  IRI in subject map
-    private Optional<SQLSelectField> column; // rr:column
+    private Optional<String> constant; // rr:constant -> IRI(in subject map, predicate map, object map or graph map) or literal(in object map)
+    //    private Optional<SQLSelectField> column; // rr:column
+    private Optional<String> column; // rr:column
     private Optional<Template> template; // rr:template
-    private Optional<TermTypes> termType; // rr:termType
-    private Optional<String> language; // rr:language
-    private Optional<URI> datatype; // rr:datatype
+    private TermTypes termType; // rr:termType
     private Optional<String> inverseExpression; // rr:inverseExpression
 
-    private Optional<String> reference; // rml:reference
+    private Optional<String> reference; // rml:reference overrides rr:column
 
     TermMap() {
         constant = Optional.empty();
         column = Optional.empty();
         template = Optional.empty();
-        termType = Optional.empty();
-        language = Optional.empty();
-        datatype = Optional.empty();
         inverseExpression = Optional.empty();
 
         reference = Optional.empty();
     }
 
-    public void setConstant(String constant) { this.constant = Optional.ofNullable(constant); }
-    public void setColumn(SQLSelectField column) { this.column = Optional.ofNullable(column); }
-    public void setTemplate(Template template) { this.template = Optional.ofNullable(template); }
-
-    public void setTermType(URI uri) {
-        if (uri.equals(TermTypes.BLANKNODE.getUri()))
-            termType = Optional.of(TermTypes.BLANKNODE);
-        else if (uri.equals(TermTypes.IRI.getUri()))
-            termType = Optional.of(TermTypes.IRI);
-        else if (uri.equals(TermTypes.LITERAL.getUri()))
-            termType = Optional.of(TermTypes.LITERAL);
-        else
-            termType = Optional.empty();
+    void setConstant(String constant) {
+        if (constant != null) {
+            this.constant = Optional.of(constant);
+            setTermType(TermTypes.LITERAL);
+        }
     }
 
-    public void setTermType(TermTypes termType) { this.termType = Optional.of(termType); }
+    void setConstant(URI constant) {
+        if (constant != null) {
+            this.constant = Optional.of(constant.toString());
+            setTermType(TermTypes.IRI);
+        }
+    }
 
-    public void setLanguage(String language) { this.language = Optional.ofNullable(language); }
-    public void setDatatype(URI datatype) { this.datatype = Optional.ofNullable(datatype); }
-    public void setinverseExpression(String inverseExpression) { this.inverseExpression = Optional.ofNullable(inverseExpression); }
+//    void setColumn(SQLSelectField column) { this.column = Optional.ofNullable(column); }
+    void setColumn(String column) { this.column = Optional.ofNullable(column); }
 
-    void setReference(String reference) { this.reference = Optional.ofNullable(reference); }
 
-    public Optional<Template> getTemplate() { return template; }
-    public Optional<TermTypes> getTermType() { return termType; }
-    public Optional<String> getConstant() { return constant; }
-    public Optional<String> getLanguage() { return language; }
-    public Optional<URI> getDatatype() { return datatype; }
-    public Optional<SQLSelectField> getColumn() { return column; }
+    void setTemplate(Template template) {
+        this.template = Optional.ofNullable(template);
+    }
+
+    void setTermType(URI uri) {
+        if (uri == null) return;
+
+        if (uri.equals(TermTypes.BLANKNODE.getUri()))
+            termType = TermTypes.BLANKNODE;
+        else if (uri.equals(TermTypes.IRI.getUri()))
+            termType = TermTypes.IRI;
+        else if (uri.equals(TermTypes.LITERAL.getUri()))
+            termType = TermTypes.LITERAL;
+    }
+
+    void setTermType(TermTypes termType) {
+        if (termType != null) this.termType = termType;
+    }
+
+    void setinverseExpression(String inverseExpression) {
+        this.inverseExpression = Optional.ofNullable(inverseExpression);
+    }
+
+    void setReference(String reference) {
+        this.reference = Optional.ofNullable(reference);
+    }
+
+    public Optional<Template> getTemplate() {
+        return template;
+    }
+
+    public TermTypes getTermType() {
+        return termType;
+    }
+
+    public Optional<String> getConstant() {
+        return constant;
+    }
+
+//    public Optional<SQLSelectField> getColumn() { return column; }
+    public Optional<String> getColumn() { return column; }
 }

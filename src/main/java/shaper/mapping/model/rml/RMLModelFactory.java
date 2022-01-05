@@ -37,12 +37,22 @@ public class RMLModelFactory {
 
             // logical source or logical table
 
+            // logical table
+            String logicalTableAsResource = parser.getLogicalTable(triplesMapAsResource);
+            if (logicalTableAsResource != null) {
+                LogicalTable logicalTable = new LogicalTable();
+
+                buildLogicalTable(parser, logicalTableAsResource, logicalTable);
+
+                triplesMap.setLogicalTable(logicalTable);
+            }
+
             // logical source
             String logicalSourceAsResource = parser.getLogicalSource(triplesMapAsResource);
             if (logicalSourceAsResource != null) {
                 LogicalSource logicalSource = new LogicalSource();
 
-                logicalSource.setUri(URI.create(logicalSourceAsResource));
+                buildLogicalTable(parser, logicalSourceAsResource, logicalSource);
 
                 // rml:source -> string or URI
                 Source source = new Source(parser.getSource(logicalSourceAsResource));
@@ -54,27 +64,10 @@ public class RMLModelFactory {
                 // rml:iterator
                 logicalSource.setIterator(parser.getIterator(logicalSourceAsResource));
 
-                // rr:tableName
-                logicalSource.setTableName(parser.getTableName(logicalSourceAsResource));
-
                 // rml:query
                 logicalSource.setQuery(parser.getQuery(logicalSourceAsResource));
 
-                // rr:sqlVersion
-                logicalSource.setSqlVersions(parser.getSQLVersions(logicalSourceAsResource));
-
                 triplesMap.setLogicalSource(logicalSource);
-            }
-
-            // logical table
-            String logicalTableAsResource = parser.getLogicalTable(triplesMapAsResource);
-            if (logicalTableAsResource != null) {
-                LogicalTable logicalTable = new LogicalTable();
-
-                logicalTable.setUri(URI.create(logicalTableAsResource));
-                logicalTable.setTableName(parser.getTableName(logicalTableAsResource));
-
-                triplesMap.setLogicalTable(logicalTable);
             }
 
             // subject map
@@ -84,24 +77,13 @@ public class RMLModelFactory {
 
                 SubjectMap subjectMap = new SubjectMap();
 
-                // rr:template
-                String templateOfSubjectMap = parser.getTemplate(subjectMapAsResource);
-                if (templateOfSubjectMap != null) {
-                    subjectMap.setTemplate(new Template(templateOfSubjectMap));
+                buildTermMap(parser, subjectMapAsResource, subjectMap);
+
+                // rr:termType <- to check error
+                if (subjectMap.getTermType().equals(TermMap.TermTypes.LITERAL)) {
+                    System.err.println("the presence of rr:termType rr:Literal on rr:subjectMap");
+                    return null;
                 }
-
-                // rr:termType
-                URI termTypeOfSubjectMap = parser.getTermType(subjectMapAsResource);
-                if (termTypeOfSubjectMap != null) {
-
-                    if (termTypeOfSubjectMap.equals(TermMap.TermTypes.LITERAL)) {
-                        System.err.println("the presence of rr:termType rr:Literal on rr:subjectMap");
-                        return null;
-                    }
-
-                    subjectMap.setTermType(termTypeOfSubjectMap);
-                } else
-                    subjectMap.setTermType(TermMap.TermTypes.IRI);
 
                 // rr:class
                 Set<URI> classes = parser.getClasses(subjectMapAsResource); // the size of classes could be zero.
@@ -117,33 +99,9 @@ public class RMLModelFactory {
                 if (constantOfSubjectMap != null)
                     subjectMap.setConstant(constantOfSubjectMap.toString());
 
-                // rr:graphMap
-                Set<String> graphMaps = parser.getGraphMaps(subjectMapAsResource);
-                for (String graphMapAsResource: graphMaps) {
-                    GraphMap graphMap = new GraphMap();
-
-                    // rr:constant
-                    URI constantOfGraphMap = parser.getIRIConstant(graphMapAsResource);
-                    if (constantOfGraphMap != null)
-                        graphMap.setConstant(constantOfGraphMap.toString());
-
-                    // rr:template
-                    String templateOfGraphMap = parser.getTemplate(graphMapAsResource);
-                    if (templateOfGraphMap != null) {
-                        graphMap.setTemplate(new Template(templateOfGraphMap));
-                    }
-
-                    subjectMap.addGraphMap(graphMap);
-                }
-
-                // rr:graph
-                Set<URI> graphs = parser.getGraphs(subjectMapAsResource);
-                for (URI graph: graphs) {
-                    GraphMap graphMap = new GraphMap();
-                    graphMap.setConstant(graph.toString());
-
-                    subjectMap.addGraphMap(graphMap);
-                }
+                // rr:graphMap and rr:graph
+                Set<GraphMap> graphMaps = getGraphMapsAssociatedWith(subjectMapAsResource, parser);
+                subjectMap.setGraphMaps(graphMaps);
 
                 triplesMap.setSubjectMap(subjectMap);
 
@@ -154,7 +112,7 @@ public class RMLModelFactory {
 
             // predicate object map
             Set<String> predicateObjectMaps = parser.getPredicateObjectMaps(triplesMapAsResource);
-            for (String predicateObjectMapAsResource: predicateObjectMaps) {
+            for (String predicateObjectMapAsResource : predicateObjectMaps) {
                 PredicateObjectMap predicateObjectMap = new PredicateObjectMap();
 
                 // predicate or predicate map
@@ -163,13 +121,12 @@ public class RMLModelFactory {
 
                 // ?x rr:predicateMap [ rr:constant ?y ].
                 Set<String> predicateMapsAsResource = parser.getPredicateMaps(predicateObjectMapAsResource);
-                for (String predicateMapAsResource: predicateMapsAsResource)
+                for (String predicateMapAsResource : predicateMapsAsResource)
                     predicates.add(parser.getIRIConstant(predicateMapAsResource));
 
                 Set<PredicateMap> predicateMaps = new TreeSet<>();
-                for (URI predicate: predicates) {
-                    PredicateMap predicateMap = new PredicateMap(predicate.toString());
-                    predicateMap.setTermType(TermMap.TermTypes.IRI);
+                for (URI predicate : predicates) {
+                    PredicateMap predicateMap = new PredicateMap(predicate);
                     predicateMaps.add(predicateMap);
                 }
 
@@ -179,7 +136,7 @@ public class RMLModelFactory {
 
                 // ?x rr:object ?y.
                 Set<URI> IRIObjects = parser.getIRIObjects(predicateObjectMapAsResource);
-                for (URI IRIObject: IRIObjects) {
+                for (URI IRIObject : IRIObjects) {
                     ObjectMap objectMap = new ObjectMap();
                     objectMap.setConstant(IRIObject.toString());
                     objectMap.setTermType(TermMap.TermTypes.IRI);
@@ -189,7 +146,7 @@ public class RMLModelFactory {
 
                 // ?x rr:object ?y.
                 Set<String> literalObjects = parser.getLiteralObjects(predicateObjectMapAsResource);
-                for (String literalObject: literalObjects) {
+                for (String literalObject : literalObjects) {
                     ObjectMap objectMap = new ObjectMap();
                     objectMap.setConstant(literalObject);
                     objectMap.setTermType(TermMap.TermTypes.LITERAL);
@@ -199,7 +156,7 @@ public class RMLModelFactory {
 
                 // rr:objectMap
                 Set<String> objectMapsAsResource = parser.getObjectMaps(predicateObjectMapAsResource);
-                for (String objectMapAsResource: objectMapsAsResource) {
+                for (String objectMapAsResource : objectMapsAsResource) {
                     String parentTriplesMap = parser.getParentTriplesMap(objectMapAsResource);
                     if (parentTriplesMap != null) {
 
@@ -207,7 +164,7 @@ public class RMLModelFactory {
                         RefObjectMap refObjectMap = new RefObjectMap(URI.create(parentTriplesMap));
 
                         Set<String> joinConditions = parser.getJoinConditions(objectMapAsResource);
-                        for (String joinCondition: joinConditions) {
+                        for (String joinCondition : joinConditions) {
                             String child = parser.getChild(joinCondition);
                             String parent = parser.getParent(joinCondition);
 
@@ -279,33 +236,9 @@ public class RMLModelFactory {
                     }
                 }
 
-                // rr:graphMap
-                Set<String> graphMaps = parser.getGraphMaps(predicateObjectMapAsResource);
-                for (String graphMapAsResource: graphMaps) {
-                    GraphMap graphMap = new GraphMap();
-
-                    // rr:constant
-                    URI constantOfGraphMap = parser.getIRIConstant(graphMapAsResource);
-                    if (constantOfGraphMap != null)
-                        graphMap.setConstant(constantOfGraphMap.toString());
-
-                    // rr:template
-                    String templateOfGraphMap = parser.getTemplate(graphMapAsResource);
-                    if (templateOfGraphMap != null) {
-                        graphMap.setTemplate(new Template(templateOfGraphMap));
-                    }
-
-                    predicateObjectMap.addGraphMap(graphMap);
-                }
-
-                // rr:graph
-                Set<URI> graphs = parser.getGraphs(predicateObjectMapAsResource);
-                for (URI graph: graphs) {
-                    GraphMap graphMap = new GraphMap();
-                    graphMap.setConstant(graph.toString());
-
-                    predicateObjectMap.addGraphMap(graphMap);
-                }
+                // rr:graphMap and rr:graph
+                Set<GraphMap> graphMaps = getGraphMapsAssociatedWith(predicateObjectMapAsResource, parser);
+                predicateObjectMap.setGraphMaps(graphMaps);
 
                 triplesMap.addPredicateObjectMap(predicateObjectMap);
             }
@@ -316,65 +249,69 @@ public class RMLModelFactory {
         return rmlModel;
     }
 
-    private static List<SQLSelectField> createSQLSelectFields(List<String> selectFields, String selectQuery, SQLResultSet sqlResultSet) {
-        List<SQLSelectField> selectFieldList = new ArrayList<>();
-        for (String selectField : selectFields)
-            selectFieldList.add(createSQLSelectField(selectField, selectQuery, sqlResultSet));
+    private static void buildLogicalTable(RMLParser parser, String logicalTableAsResource, LogicalTable logicalTable) {
+        logicalTable.setUri(URI.create(logicalTableAsResource));
 
-        return selectFieldList;
+        // rr:tableName
+        logicalTable.setTableName(parser.getTableName(logicalTableAsResource));
+
+        // rr:sqlVersion
+        logicalTable.setSqlVersions(parser.getSQLVersions(logicalTableAsResource));
+
+        // rr:sqlQuery
+        logicalTable.setSqlQuery(parser.getSQLQuery(logicalTableAsResource));
     }
 
-    private static SQLSelectField createSQLSelectField(String selectField, String selectQuery, SQLResultSet sqlResultSet) {
-        SQLSelectField sqlSelectField = new SQLSelectField(selectField, selectQuery);
+    private static Set<GraphMap> getGraphMapsAssociatedWith(String subjectMapOrPredicateObjectMapAsResource, RMLParser parser) {
+        Set<GraphMap> graphMaps = new HashSet<>();
 
-        if (selectField.startsWith("\"") && selectField.endsWith("\""))
-            selectField = selectField.substring(1, selectField.length() - 1);
+        // rr:graphMap
+        Set<String> graphMapsAsResource = parser.getGraphMaps(subjectMapOrPredicateObjectMapAsResource);
+        for (String graphMapAsResource : graphMapsAsResource) {
+            GraphMap graphMap = new GraphMap();
 
-        // nullable
-        Optional<Integer> nullable = sqlResultSet.isNullable(selectField);
-        if (nullable.isPresent())
-            sqlSelectField.setNullable(nullable.get());
+            // rr:constant
+            URI constantOfGraphMap = parser.getIRIConstant(graphMapAsResource);
+            if (constantOfGraphMap != null)
+                graphMap.setConstant(constantOfGraphMap.toString());
 
-        // sql type
-        Optional<Integer> columnType = sqlResultSet.getColumnType(selectField);
-        if (columnType.isPresent())
-            sqlSelectField.setSqlType(columnType.get());
+            buildTermMap(parser, graphMapAsResource, graphMap);
 
-        // display size
-        sqlSelectField.setDisplaySize(sqlResultSet.getColumnDisplaySize(selectField));
-
-        return sqlSelectField;
-    }
-
-    private static List<String> getLogicalReferencesIn(String template) {
-        // because backslashes need to be escaped by a second backslash in the Turtle syntax,
-        // a double backslash is needed to escape each curly brace,
-        // and to get one literal backslash in the output one needs to write four backslashes in the template.
-        template = template.replace("\\\\", "\\");
-
-        List<String> logicalReferences = new LinkedList<>();
-
-        int length = template.length();
-        int fromIndex = 0;
-        while (fromIndex < length) {
-            int openBrace = template.indexOf("{", fromIndex);
-            if (openBrace == -1) break;
-            while (openBrace > 0 && template.charAt(openBrace - 1) == '\\')
-                openBrace = template.indexOf("{", openBrace + 1);
-
-            int closeBrace = template.indexOf("}", fromIndex);
-            if (closeBrace == -1) break;
-            while (closeBrace > 0 && template.charAt(closeBrace - 1) == '\\')
-                closeBrace = template.indexOf("}", closeBrace + 1);
-
-            String reference = template.substring(openBrace + 1, closeBrace);
-            reference = reference.replace("\\{", "{");
-            reference = reference.replace("\\}", "}");
-
-            logicalReferences.add(reference);
-            fromIndex = closeBrace + 1;
+            graphMaps.add(graphMap);
         }
 
-        return logicalReferences;
+        // rr:graph
+        Set<URI> graphs = parser.getGraphs(subjectMapOrPredicateObjectMapAsResource);
+        for (URI graph : graphs) {
+            GraphMap graphMap = new GraphMap();
+
+            graphMap.setConstant(graph.toString());
+
+            graphMaps.add(graphMap);
+        }
+
+        return graphMaps;
+    }
+
+    private static void buildTermMap(RMLParser parser, String termMapAsResource, TermMap termMap) {
+        // rr:constant -> IRI
+        URI IRIConstant = parser.getIRIConstant(termMapAsResource);
+        termMap.setConstant(IRIConstant);
+
+        // rr:constant -> Literal
+        String literalConstant = parser.getLiteralConstant(termMapAsResource);
+        termMap.setConstant(literalConstant);
+
+        // rr:column
+        String column = parser.getColumn(termMapAsResource);
+        termMap.setColumn(column);
+
+        // rr:template
+        String template = parser.getTemplate(termMapAsResource);
+        termMap.setTemplate(new Template(template));
+
+        // rr:termType
+        URI termType = parser.getTermType(termMapAsResource);
+        termMap.setTermType(termType);
     }
 }
