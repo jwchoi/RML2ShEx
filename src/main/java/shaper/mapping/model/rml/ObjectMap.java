@@ -4,17 +4,18 @@ import java.net.URI;
 import java.util.Optional;
 
 public class ObjectMap extends TermMap {
-    private Optional<String> language; // rr:language
     private Optional<URI> datatype; // rr:datatype
 
+    private Optional<LanguageMap> languageMap; // rml:languageMap -> the shortest form is rr:language
+
     ObjectMap() {
-        language = Optional.empty();
+        languageMap = Optional.empty();
         datatype = Optional.empty();
     }
 
-    void setLanguage(String language) {
-        if (language != null) {
-            this.language = Optional.of(language);
+    void setLanguageMap(LanguageMap languageMap) {
+        if (languageMap != null) {
+            this.languageMap = Optional.of(languageMap);
             setTermType(TermTypes.LITERAL);
         }
     }
@@ -26,8 +27,8 @@ public class ObjectMap extends TermMap {
         }
     }
 
-    public Optional<String> getLanguage() {
-        return language;
+    public Optional<LanguageMap> getLanguageMap() {
+        return languageMap;
     }
 
     public Optional<URI> getDatatype() {
@@ -38,6 +39,14 @@ public class ObjectMap extends TermMap {
     void setColumn(String column) {
         if (column != null) {
             super.setColumn(column);
+            setTermType(TermTypes.LITERAL);
+        }
+    }
+
+    @Override
+    void setReference(String reference) {
+        if (reference != null) {
+            super.setColumn(reference);
             setTermType(TermTypes.LITERAL);
         }
     }

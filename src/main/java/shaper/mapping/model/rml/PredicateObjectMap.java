@@ -10,11 +10,12 @@ public class PredicateObjectMap {
     private Set<GraphMap> graphMaps; // the size of graphMaps >= 0
 
     PredicateObjectMap() {
+        predicateMaps = new TreeSet<>();
         objectMaps = new ArrayList<>();
         refObjectMaps = new ArrayList<>();
     }
 
-    void setPredicateMaps(Set<PredicateMap> predicateMaps) { this.predicateMaps = predicateMaps; }
+    void addPredicateMap(PredicateMap predicateMap) { predicateMaps.add(predicateMap); }
 
     void addObjectMap(ObjectMap objectMap) { objectMaps.add(objectMap); }
     void addRefObjectMap(RefObjectMap refObjectMap) { refObjectMaps.add(refObjectMap); }

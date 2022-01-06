@@ -1,7 +1,5 @@
 package shaper.mapping.model.rml;
 
-import janus.database.SQLSelectField;
-
 import java.net.URI;
 import java.util.Optional;
 
@@ -56,11 +54,19 @@ public abstract class TermMap {
     }
 
 //    void setColumn(SQLSelectField column) { this.column = Optional.ofNullable(column); }
-    void setColumn(String column) { this.column = Optional.ofNullable(column); }
+    void setColumn(String column) {
+        if (column != null) {
+            this.column = Optional.of(column);
+            setTermType(TermTypes.IRI);
+        }
+    }
 
 
     void setTemplate(Template template) {
-        this.template = Optional.ofNullable(template);
+        if (template != null) {
+            this.template = Optional.of(template);
+            setTermType(TermTypes.IRI);
+        }
     }
 
     void setTermType(URI uri) {
@@ -78,12 +84,15 @@ public abstract class TermMap {
         if (termType != null) this.termType = termType;
     }
 
-    void setinverseExpression(String inverseExpression) {
+    void setInverseExpression(String inverseExpression) {
         this.inverseExpression = Optional.ofNullable(inverseExpression);
     }
 
     void setReference(String reference) {
-        this.reference = Optional.ofNullable(reference);
+        if (reference != null) {
+            this.reference = Optional.of(reference);
+            setTermType(TermTypes.IRI);
+        }
     }
 
     public Optional<Template> getTemplate() {

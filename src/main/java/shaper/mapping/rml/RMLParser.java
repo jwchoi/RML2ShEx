@@ -217,6 +217,15 @@ public class RMLParser {
         return objects.size() > 0 ? objects.toArray(new String[0])[0] : null;
     }
 
+    public String getLanguageMap(String objectMap) {
+        Resource s = createResource(objectMap);
+        Property p = createRMLProperty("languageMap");
+
+        Set<String> objects = getResourceObjectsOf(s, p);
+
+        return objects.size() > 0 ? objects.toArray(new String[0])[0] : null;
+    }
+
     public Set<String> getLiteralObjects(String predicateObjectMap) {
         Resource s = createResource(predicateObjectMap);
         Property p = createRRProperty("object");
@@ -329,6 +338,15 @@ public class RMLParser {
         Property p = createRRProperty("predicateMap");
 
         return getResourceObjectsOf(s, p);
+    }
+
+    public Set<URI> getSubjects(String triplesMap) {
+        Resource s = createResource(triplesMap);
+        Property p = createRRProperty("subject");
+
+        Set<URI> objects = getIRIObjectsOf(s, p);
+
+        return objects;
     }
 
     public String getChild(String joinCondition) {
