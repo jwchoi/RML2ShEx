@@ -17,16 +17,9 @@ public class RMLModelFactory {
             rmlModel.addPrefixMap(key, prefixMap.get(key));
 
         // databases
-        Set<String> databases = parser.getDatabases();
-        for (String databaseAsResource : databases) {
-            Database database = new Database(URI.create(databaseAsResource),
-                    parser.getJdbcDSN(databaseAsResource),
-                    parser.getJdbcDriver(databaseAsResource),
-                    parser.getUsername(databaseAsResource),
-                    parser.getPassword(databaseAsResource));
-
-            rmlModel.addDatabase(database);
-        }
+        rmlModel.setDatabases(getDatabases(parser));
+        // SPARQL
+        rmlModel.setServices(getServices(parser));
 
         // triples maps
         Set<String> triplesMaps = parser.getTriplesMaps();
@@ -52,7 +45,7 @@ public class RMLModelFactory {
 
                 buildLogicalTable(parser, logicalSourceAsResource, logicalSource);
 
-                // rml:source -> string or URI
+                // rml:source -> (string or URI) in the rml file -> but must be only URI in the rml specification
                 Source source = new Source(parser.getSource(logicalSourceAsResource));
                 logicalSource.setSource(source);
 
@@ -271,7 +264,8 @@ public class RMLModelFactory {
 
         // rr:template
         String template = parser.getTemplate(termMapAsResource);
-        termMap.setTemplate(new Template(template));
+        if (template != null)
+            termMap.setTemplate(new Template(template));
 
         // rr:inverseExpression
         if (column != null || template != null)
@@ -280,5 +274,38 @@ public class RMLModelFactory {
         // rr:termType
         URI termType = parser.getTermType(termMapAsResource);
         termMap.setTermType(termType);
+    }
+
+    private static Set<Database> getDatabases(RMLParser parser) {
+        Set<Database> databases = new HashSet<>();
+
+        Set<String> databasesAsResource = parser.getDatabases();
+        for (String databaseAsResource : databasesAsResource) {
+            Database database = new Database(URI.create(databaseAsResource),
+                    parser.getJdbcDSN(databaseAsResource),
+                    parser.getJdbcDriver(databaseAsResource),
+                    parser.getUsername(databaseAsResource),
+                    parser.getPassword(databaseAsResource));
+
+            databases.add(database);
+        }
+
+        return databases;
+    }
+
+    private static Set<Service> getServices(RMLParser parser) {
+        Set<Service> services = new HashSet<>();
+
+        Set<String> servicesAsResource = parser.getServices();
+        for (String serviceAsResource : servicesAsResource) {
+            Service service = new Service(URI.create(serviceAsResource),
+                    parser.getEndpoint(serviceAsResource),
+                    parser.getSupportedLanguage(serviceAsResource),
+                    parser.getResultFormat(serviceAsResource));
+
+            services.add(service);
+        }
+
+        return services;
     }
 }

@@ -169,6 +169,42 @@ public class RMLParser {
         return objects.toArray(new String[0])[0];
     }
 
+    public Set<String> getServices() {
+        // a sd:Service
+        Property p = model.createProperty("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
+        Resource o = model.createResource("http://www.w3.org/ns/sparql-service-description#Service");
+
+        ResIterator subjects = model.listSubjectsWithProperty(p, o);
+        return subjects.mapWith(resource -> resource.toString()).toSet();
+    }
+
+    public URI getEndpoint(String service) {
+        Resource s = createResource(service);
+        Property p = createSDProperty("endpoint");
+
+        Set<URI> objects = getIRIObjectsOf(s, p);
+
+        return objects.toArray(new URI[0])[0];
+    }
+
+    public URI getSupportedLanguage(String service) {
+        Resource s = createResource(service);
+        Property p = createSDProperty("supportedLanguage");
+
+        Set<URI> objects = getIRIObjectsOf(s, p);
+
+        return objects.toArray(new URI[0])[0];
+    }
+
+    public URI getResultFormat(String service) {
+        Resource s = createResource(service);
+        Property p = createSDProperty("resultFormat");
+
+        Set<URI> objects = getIRIObjectsOf(s, p);
+
+        return objects.toArray(new URI[0])[0];
+    }
+
     public static boolean isURI(String str) {
         try { return new org.apache.jena.ext.xerces.util.URI(str) != null; }
         catch (org.apache.jena.ext.xerces.util.URI.MalformedURIException e) { return false; }
@@ -188,6 +224,10 @@ public class RMLParser {
 
     private Property createD2RQProperty(String localName) {
         return model.createProperty(model.getNsPrefixURI("d2rq"), localName);
+    }
+
+    private Property createSDProperty(String localName) {
+        return model.createProperty(model.getNsPrefixURI("sd"), localName);
     }
 
     public String getInverseExpression(String termMap) {

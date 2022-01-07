@@ -8,4 +8,12 @@ public class LanguageMap extends TermMap {
             setTermType(TermTypes.LITERAL);
         }
     }
+
+    @Override
+    void setTemplate(Template template) {
+        if (template != null) {
+            super.setTemplate(template);
+            setTermType(TermTypes.LITERAL);
+        }
+    }
 }
