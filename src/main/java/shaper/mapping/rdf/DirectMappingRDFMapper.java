@@ -6,7 +6,7 @@ import janus.database.SQLResultSet;
 import shaper.Shaper;
 import shaper.mapping.PrefixMap;
 import shaper.mapping.Symbols;
-import shaper.mapping.model.dm.DirectMappingModelFactory;
+import shaper.mapping.model.dm.DMModelFactory;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -63,7 +63,7 @@ public class DirectMappingRDFMapper extends RDFMapper {
 		Set<String> tableNames = Shaper.dbSchema.getTableNames();
 		
 		for (String tableName : tableNames) {
-			String tableIRI = directMappingModel.getMappedTableIRILocalPart(tableName);
+			String tableIRI = dmModel.getMappedTableIRILocalPart(tableName);
 			
 			String query = getQueryFor(tableName, Shaper.DBMSType);
 			SQLResultSet resultSet = Shaper.dbBridge.executeQuery(query);
@@ -96,7 +96,7 @@ public class DirectMappingRDFMapper extends RDFMapper {
                         pkFields.add(pkField);
                     }
 
-                    subject = Symbols.LT + directMappingModel.getMappedRowNode(tableName, pkFields) + Symbols.GT;
+                    subject = Symbols.LT + dmModel.getMappedRowNode(tableName, pkFields) + Symbols.GT;
                 } else {
                     List<DBField> fields = new Vector<>();
                     for (String columnName : columnNames) {
@@ -107,7 +107,7 @@ public class DirectMappingRDFMapper extends RDFMapper {
                         fields.add(field);
                     }
 
-                    subject = directMappingModel.getMappedBlankNode(tableName, fields);
+                    subject = dmModel.getMappedBlankNode(tableName, fields);
                 }
 
                 buffer.append(subject + Symbols.NEWLINE);
@@ -119,9 +119,9 @@ public class DirectMappingRDFMapper extends RDFMapper {
 					if (cellData == null) continue;
 					
 					String columnName = columnNames.get(columnIndex);
-					String literalProperty = directMappingModel.getMappedLiteralProperty(tableName, columnName);
+					String literalProperty = dmModel.getMappedLiteralProperty(tableName, columnName);
 
-					String literal = directMappingModel.getMappedLiteral(tableName, columnName, cellData);
+					String literal = dmModel.getMappedLiteral(tableName, columnName, cellData);
 
 					buffer.append(Symbols.TAB + Symbols.LT + literalProperty + Symbols.GT + Symbols.SPACE + literal + Symbols.SPACE + Symbols.SEMICOLON + Symbols.NEWLINE);
 				}
@@ -143,7 +143,7 @@ public class DirectMappingRDFMapper extends RDFMapper {
 
 			for (String refConstraint: refConstraints) {
 
-				String referenceProperty = directMappingModel.getMappedReferenceProperty(referencingTable, refConstraint);
+				String referenceProperty = dmModel.getMappedReferenceProperty(referencingTable, refConstraint);
 
 				String referencedTable = Shaper.dbSchema.getReferencedTableBy(referencingTable, refConstraint);
 				List<String> pkOfReferencedTable = Shaper.dbSchema.getPrimaryKey(referencedTable);
@@ -169,7 +169,7 @@ public class DirectMappingRDFMapper extends RDFMapper {
 						}
 
 
-						subject = Symbols.LT + directMappingModel.getMappedRowNode(referencingTable, pkFields) + Symbols.GT;
+						subject = Symbols.LT + dmModel.getMappedRowNode(referencingTable, pkFields) + Symbols.GT;
 					} else {
 						List<DBField> fields = new Vector<>();
 						for (String col : columnsOfReferencingTable) {
@@ -180,7 +180,7 @@ public class DirectMappingRDFMapper extends RDFMapper {
 							fields.add(field);
 						}
 
-						subject = directMappingModel.getMappedBlankNode(referencingTable, fields);
+						subject = dmModel.getMappedBlankNode(referencingTable, fields);
 					}
 
 					String object;
@@ -195,7 +195,7 @@ public class DirectMappingRDFMapper extends RDFMapper {
 							pkFields.add(pkField);
 						}
 
-						object = Symbols.LT + directMappingModel.getMappedRowNode(referencedTable, pkFields) + Symbols.GT;
+						object = Symbols.LT + dmModel.getMappedRowNode(referencedTable, pkFields) + Symbols.GT;
 					} else {
 						List<DBField> fields = new Vector<>();
 						for (String col : columnsOfReferencedTable) {
@@ -206,7 +206,7 @@ public class DirectMappingRDFMapper extends RDFMapper {
 							fields.add(field);
 						}
 
-						object = directMappingModel.getMappedBlankNode(referencedTable, fields);
+						object = dmModel.getMappedBlankNode(referencedTable, fields);
 					}
 
 					writer.println(subject + Symbols.SPACE + Symbols.LT + referenceProperty + Symbols.GT + Symbols.SPACE + object + Symbols.SPACE + Symbols.DOT);
@@ -216,7 +216,7 @@ public class DirectMappingRDFMapper extends RDFMapper {
 	}
 	
 	public File generateRDFFile() {
-		directMappingModel = DirectMappingModelFactory.generateMappingModel(Shaper.dbSchema);
+		dmModel = DMModelFactory.generateMappingModel(Shaper.dbSchema);
 
 		preProcess(Extension.Turtle);
 		writeDirectives(Extension.Turtle);

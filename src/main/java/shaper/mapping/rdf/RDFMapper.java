@@ -1,6 +1,6 @@
 package shaper.mapping.rdf;
 
-import shaper.mapping.model.dm.DirectMappingModel;
+import shaper.mapping.model.dm.DMModel;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -20,7 +20,7 @@ public abstract class RDFMapper {
         public String toString() { return extension; }
     }
 
-    public DirectMappingModel directMappingModel; // used only when Direct Mapping
+    public DMModel dmModel; // used only when Direct Mapping
 
     File output;
     PrintWriter writer;

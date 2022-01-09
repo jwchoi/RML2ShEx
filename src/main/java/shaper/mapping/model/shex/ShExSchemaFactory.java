@@ -7,7 +7,7 @@ import shaper.mapping.model.rml.RMLModel;
 public class ShExSchemaFactory {
     //Direct Mapping
     public static ShExSchema getShExSchemaModel(DBSchema dbSchema) {
-        return DirectMapping2ShExSchemaFactory.getShExSchemaModel(dbSchema);
+        return DM2ShExSchemaFactory.getShExSchemaModel(dbSchema);
     }
 
     // R2RML

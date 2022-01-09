@@ -34,6 +34,6 @@ public class RowNode {
 	}
 	
 	private static String getRowNodeIncludingBase(String rowNodeAfterBase) {
-		return Shaper.rdfMapper.directMappingModel.getBaseIRI() + rowNodeAfterBase;
+		return Shaper.rdfMapper.dmModel.getBaseIRI() + rowNodeAfterBase;
 	}
 }

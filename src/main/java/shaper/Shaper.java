@@ -4,10 +4,10 @@ import janus.database.*;
 import shaper.mapping.rdf.DirectMappingRDFMapper;
 import shaper.mapping.rdf.R2RMLRDFMapper;
 import shaper.mapping.rdf.RDFMapper;
-import shaper.mapping.shacl.DirectMappingShaclMapper;
+import shaper.mapping.shacl.DMShaclMapper;
 import shaper.mapping.shacl.R2RMLShaclMapper;
 import shaper.mapping.shacl.ShaclMapper;
-import shaper.mapping.shex.DirectMappingShExMapper;
+import shaper.mapping.shex.DMShExMapper;
 import shaper.mapping.shex.R2RMLShExMapper;
 import shaper.mapping.shex.RMLShExMapper;
 import shaper.mapping.shex.ShExMapper;
@@ -106,7 +106,7 @@ public class Shaper {
 		String mappingType = properties.getProperty("mapping.type");
 
 		switch (mappingType) {
-			case "dm": shaclMapper = new DirectMappingShaclMapper(); break;
+			case "dm": shaclMapper = new DMShaclMapper(); break;
 			case "r2rml": shaclMapper = new R2RMLShaclMapper(properties.getProperty("mapping.file")); break;
 		}
 
@@ -124,7 +124,7 @@ public class Shaper {
 		String mappingType = properties.getProperty("mapping.type");
 
 		switch (mappingType) {
-			case "dm": shexMapper = new DirectMappingShExMapper(); break;
+			case "dm": shexMapper = new DMShExMapper(); break;
 			case "r2rml": shexMapper = new R2RMLShExMapper(properties.getProperty("mapping.file")); break;
 			case "rml": shexMapper = new RMLShExMapper(properties.getProperty("mapping.file")); break;
 		}

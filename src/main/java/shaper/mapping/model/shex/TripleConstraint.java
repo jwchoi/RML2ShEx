@@ -86,7 +86,7 @@ public class TripleConstraint implements Comparable<TripleConstraint> {
     private String buildInverseTripleConstraintFromRefConstraint() {
         String table = mappedRefConstraint.getTableName();
         String refConstraint = mappedRefConstraint.getRefConstraintName();
-        String refProperty = Symbols.LT + Shaper.shexMapper.directMappingModel.getMappedReferenceProperty(table, refConstraint) + Symbols.GT;
+        String refProperty = Symbols.LT + Shaper.shexMapper.dmModel.getMappedReferenceProperty(table, refConstraint) + Symbols.GT;
 
         String prefix = Shaper.shexMapper.shExSchema.getPrefix();
         String referencedShape = prefix + Symbols.COLON + Shaper.shexMapper.shExSchema.getMappedShapeID(table);
@@ -99,7 +99,7 @@ public class TripleConstraint implements Comparable<TripleConstraint> {
     private String buildTripleConstraintFromRefConstraint() {
         String table = mappedRefConstraint.getTableName();
         String refConstraint = mappedRefConstraint.getRefConstraintName();
-        String refProperty = Symbols.LT + Shaper.shexMapper.directMappingModel.getMappedReferenceProperty(table, refConstraint) + Symbols.GT;
+        String refProperty = Symbols.LT + Shaper.shexMapper.dmModel.getMappedReferenceProperty(table, refConstraint) + Symbols.GT;
 
         String referencedTable = Shaper.dbSchema.getReferencedTableBy(table, refConstraint);
         String prefix = Shaper.shexMapper.shExSchema.getPrefix();
@@ -121,7 +121,7 @@ public class TripleConstraint implements Comparable<TripleConstraint> {
     private String buildTripleConstraintFromColumn() {
         String table = mappedColumn.getTableName();
         String column = mappedColumn.getColumnName();
-        String litProperty = Symbols.LT + Shaper.shexMapper.directMappingModel.getMappedLiteralProperty(table, column) + Symbols.GT;
+        String litProperty = Symbols.LT + Shaper.shexMapper.dmModel.getMappedLiteralProperty(table, column) + Symbols.GT;
 
         String prefix = Shaper.shexMapper.shExSchema.getPrefix();
         String nodeConstraint = prefix + Symbols.COLON + Shaper.shexMapper.shExSchema.getMappedNodeConstraintID(table, column);
@@ -138,7 +138,7 @@ public class TripleConstraint implements Comparable<TripleConstraint> {
     private String buildTripleConstraintFromTable() {
         String rdfType = Symbols.A;
 
-        String tableIRI = Symbols.LT + Shaper.shexMapper.directMappingModel.getMappedTableIRILocalPart(mappedTable) + Symbols.GT;
+        String tableIRI = Symbols.LT + Shaper.shexMapper.dmModel.getMappedTableIRILocalPart(mappedTable) + Symbols.GT;
 
         cardinality = "";
 
