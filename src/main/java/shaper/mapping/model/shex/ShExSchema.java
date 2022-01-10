@@ -6,6 +6,7 @@ import shaper.mapping.model.r2rml.ObjectMap;
 import java.net.URI;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.stream.Collectors;
 
 public class ShExSchema {
     private URI baseIRI;
@@ -36,19 +37,21 @@ public class ShExSchema {
     }
 
     public String getMappedShapeID(String table) {
-        for (Shape shape: shapes)
-            if (shape.getMappedTableName().equals(table))
-                return shape.getShapeID();
+        Optional<Shape> mappedShape = shapes.stream()
+                .filter(shape -> shape instanceof DMShape)
+                .filter(shape -> ((DMShape) shape).getMappedTableName().equals(table))
+                .findAny();
 
-        return null;
+        return mappedShape.isEmpty() ? null : mappedShape.get().getShapeID();
     }
 
     public String getMappedShape(String table) {
-        for (Shape shape: shapes)
-            if (shape.getMappedTableName().equals(table))
-                return shape.toString();
+        Optional<Shape> mappedShape = shapes.stream()
+                .filter(shape -> shape instanceof DMShape)
+                .filter(shape -> ((DMShape) shape).getMappedTableName().equals(table))
+                .findAny();
 
-        return null;
+        return mappedShape.isEmpty() ? null : mappedShape.get().toString();
     }
 
     public String getMappedNodeConstraintID(String table, String column) {
@@ -93,28 +96,28 @@ public class ShExSchema {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public Shape getMappedShape(URI triplesMap) {
-        for (Shape shape: shapes) {
-            Optional<URI> mappedTriplesMap = shape.getMappedTriplesMap();
-            if (mappedTriplesMap.isPresent()) {
-                if (mappedTriplesMap.get().equals(triplesMap))
-                    return shape;
-            }
-        }
+        Optional<Shape> mappedShape = shapes.stream()
+                .filter(shape -> shape instanceof R2RMLShape)
+                .filter(shape -> ((R2RMLShape) shape).getMappedTriplesMap().isPresent())
+                .filter(shape -> ((R2RMLShape) shape).getMappedTriplesMap().get().equals(triplesMap))
+                .findAny();
 
-        return null;
+        return mappedShape.isEmpty() ? null : mappedShape.get();
     }
 
     Set<Shape> getShapesToShareTheSameSubjects(Shape shape) {
-        Set<Shape> equivalentShapes = new CopyOnWriteArraySet<>();
+        if (!(shape instanceof R2RMLShape)) return Collections.EMPTY_SET;
 
-        if (!shape.getNodeKind().equals(NodeKinds.IRI))
-            return equivalentShapes;
+        R2RMLShape r2RMLShape = (R2RMLShape) shape;
 
-        for (Shape existingShape: shapes)
-            if (existingShape.getNodeKind().equals(NodeKinds.IRI) && existingShape.getRegex().equals(shape.getRegex()))
-                equivalentShapes.add(existingShape);
+        if (!r2RMLShape.getNodeKind().equals(NodeKinds.IRI))
+            return Collections.EMPTY_SET;
 
-        return equivalentShapes;
+        return shapes.stream()
+                .filter(e -> e instanceof R2RMLShape)
+                .filter(e -> ((R2RMLShape) e).getNodeKind().equals(NodeKinds.IRI)
+                        && ((R2RMLShape) e).getRegex().equals(r2RMLShape.getRegex()))
+                .collect(Collectors.toSet());
     }
 
     static Set<Set<Shape>> createSetsForDerivedShapes(Set<Shape> baseShapes) {
@@ -140,23 +143,30 @@ public class ShExSchema {
     }
 
     public Set<Shape> getDerivedShapes() {
-        Set<Shape> derivedShapes = new CopyOnWriteArraySet<>();
-
-        for (Shape shape: shapes) {
-            if (!shape.getMappedTriplesMap().isPresent())
-                derivedShapes.add(shape);
-        }
-
-        return derivedShapes;
+        return shapes.stream()
+                .filter(shape -> shape instanceof R2RMLShape)
+                .filter(shape -> ((R2RMLShape) shape).getMappedTriplesMap().isEmpty())
+                .collect(Collectors.toSet());
     }
 
     Set<Shape> getDerivedShapesFrom(Set<Shape> baseShapes) {
         Set<Shape> derivedShapes = new CopyOnWriteArraySet<>();
 
-        for (Shape baseShape: baseShapes) {
-            for (Shape shape: shapes) {
+        Set<R2RMLShape> shapes = this.shapes.stream()
+                .filter(shape -> shape instanceof R2RMLShape)
+                .map(shape -> (R2RMLShape) shape)
+                .collect(Collectors.toSet());
+
+        Set<R2RMLShape> r2rmlBaseShapes = baseShapes.stream()
+                .filter(shape -> shape instanceof R2RMLShape)
+                .map(shape -> (R2RMLShape) shape)
+                .collect(Collectors.toSet());
+
+        for (R2RMLShape baseShape: r2rmlBaseShapes) {
+            for (R2RMLShape shape: shapes) {
                 if (derivedShapes.contains(shape)) continue;
-                if (!shape.getMappedTriplesMap().isPresent()) {
+
+                if (shape.getMappedTriplesMap().isEmpty()) {
                     if (shape.containsInBaseShapes(baseShape))
                         derivedShapes.add(shape);
                 }

@@ -28,7 +28,7 @@ class DM2ShExSchemaFactory {
             //<- node constraints
 
             //-> shape
-            Shape shape = new Shape(buildShapeID(table), table);
+            Shape shape = new DMShape(buildShapeID(table), table);
 
             // Triple Constraint From Table
             TripleConstraint tcFromTable = new TripleConstraint(table);

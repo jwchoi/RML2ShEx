@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 class R2RML2ShExSchemaFactory {
     // R2RML
@@ -22,7 +23,7 @@ class R2RML2ShExSchemaFactory {
 
             // create a shape constraint
             URI uriOfTriplesMap = triplesMap.getUri();
-            Shape shape = new Shape(buildShapeID(uriOfTriplesMap), uriOfTriplesMap, subjectMap);
+            Shape shape = new R2RMLShape(buildShapeID(uriOfTriplesMap), uriOfTriplesMap, subjectMap);
 
             // create Triple Constraint From rr:class
             TripleConstraint tcFromClasses = new TripleConstraint(subjectMap.getClassIRIs());
@@ -87,12 +88,13 @@ class R2RML2ShExSchemaFactory {
                 Shape mappedShape = shExSchema.getMappedShape(uriOfTriplesMap);
                 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
                 Set<Shape> baseShapes = shExSchema.getShapesToShareTheSameSubjects(mappedShape);
-                for (Shape baseShape : baseShapes)
-                    checkedTriplesMaps.add(baseShape.getMappedTriplesMap().get());
+                baseShapes.stream()
+                        .map(baseShape -> (R2RMLShape) baseShape)
+                        .forEach(baseShape -> checkedTriplesMaps.add(baseShape.getMappedTriplesMap().get()));
 
                 Set<Set<Shape>> setsForDerivedShapes = shExSchema.createSetsForDerivedShapes(baseShapes);
                 for (Set<Shape> set: setsForDerivedShapes) {
-                    Shape derivedShape = new Shape(buildShapeID(set), set);
+                    Shape derivedShape = new R2RMLShape(buildShapeID(set), set);
 
                     // tripleConstraint
                     Set<URI> classIRIs = new TreeSet<>();
@@ -121,8 +123,11 @@ class R2RML2ShExSchemaFactory {
 
     private static String buildShapeID(Set<Shape> baseShapes) {
         StringBuffer id = new StringBuffer();
-        for (Shape baseShape: baseShapes)
-            id.append(baseShape.getMappedTriplesMap().get().getFragment());
+
+        baseShapes.stream()
+                .map(baseShape -> (R2RMLShape) baseShape)
+                .forEach(baseShape -> id.append(baseShape.getMappedTriplesMap().get().getFragment()));
+
         id.append("Shape");
 
         return id.toString();
