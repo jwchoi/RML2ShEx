@@ -1,24 +1,29 @@
 package shaper.mapping.model.shex;
 
+import shaper.mapping.Symbols;
 import shaper.mapping.model.r2rml.ObjectMap;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 public class ShExSchema {
     private URI baseIRI;
     private String prefix;
 
+    private Map<URI, String> prefixMap;
+
     private Set<Shape> shapes;
     private Set<NodeConstraint> nodeConstraints;
+
+    private Set<ShapeExpr> shapeExprs;
 
     ShExSchema(URI baseIRI, String prefix) {
         this.baseIRI = baseIRI;
         this.prefix = prefix;
+
+        prefixMap = new TreeMap<>();
+        prefixMap.put(URI.create(baseIRI + Symbols.HASH), prefix); // prefix newly created by base
 
         shapes = new CopyOnWriteArraySet<>();
         nodeConstraints = new CopyOnWriteArraySet<>();

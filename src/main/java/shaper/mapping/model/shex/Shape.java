@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-public class Shape implements Comparable<Shape> {
+public class Shape extends ShapeExpr implements Comparable<Shape> {
     private String id;
     private String shape;
 
@@ -23,9 +23,9 @@ public class Shape implements Comparable<Shape> {
 
     private Set<TripleConstraint> tripleConstraints;
 
-    Shape(String mappedTable) {
+    Shape(String id, String mappedTable) {
+        this.id = id;
         this.mappedTable = mappedTable;
-        id = buildShapeID(mappedTable);
 
         List<String> pk = Shaper.dbSchema.getPrimaryKey(mappedTable);
         nodeKind = pk.isEmpty() ? NodeKinds.BNODE : NodeKinds.IRI;
@@ -44,8 +44,6 @@ public class Shape implements Comparable<Shape> {
     public int compareTo(Shape o) {
         return id.compareTo(o.getShapeID());
     }
-
-    private String buildShapeID(String mappedTable) { return mappedTable + "Shape"; }
 
     private String getSpaces(int count) {
         StringBuffer spaces = new StringBuffer();
@@ -134,21 +132,21 @@ public class Shape implements Comparable<Shape> {
     //private String tripleExpreLabel; // IRI, this is not null when areTripleConstraintsReferenced is true.
     //<- for base shape
 
-    Shape(URI mappedTriplesMap, SubjectMap subjectMap) {
+    Shape(String id, URI mappedTriplesMap, SubjectMap subjectMap) {
+        this.id = id;
         this.mappedTriplesMap = Optional.of(mappedTriplesMap);
 
-        id = buildShapeID(mappedTriplesMap);
         nodeKind = decideNodeKind(subjectMap);
         regex = buildRegex(subjectMap);
 
         tripleConstraints = new CopyOnWriteArraySet<>();
     }
 
-    Shape(Set<Shape> baseShapes) {
+    Shape(String id, Set<Shape> baseShapes) {
+        this.id = id;
         this.baseShapes = baseShapes;
         mappedTriplesMap = Optional.empty();
 
-        id = buildShapeID(baseShapes);
         nodeKind = NodeKinds.IRI;
         regex = baseShapes.toArray(new Shape[0])[0].regex;
 
@@ -217,18 +215,7 @@ public class Shape implements Comparable<Shape> {
 //
 //    String getTripleExpreLabel() { return tripleExpreLabel; }
 
-    private String buildShapeID(URI triplesMap) { return triplesMap.getFragment() + "Shape"; }
-
 //    private String buildTripleExpreID(URI triplesMap) { return triplesMap.getFragment() + "Entity"; }
-
-    private String buildShapeID(Set<Shape> baseShapes) {
-        StringBuffer id = new StringBuffer();
-        for (Shape baseShape: baseShapes)
-            id.append(baseShape.getMappedTriplesMap().get().getFragment());
-        id.append("Shape");
-
-        return id.toString();
-    }
 
     private String buildRegex(SubjectMap subjectMap) {
         if (nodeKind.equals(NodeKinds.BNODE))

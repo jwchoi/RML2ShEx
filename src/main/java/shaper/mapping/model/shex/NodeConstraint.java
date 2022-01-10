@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public class NodeConstraint implements Comparable<NodeConstraint> {
+public class NodeConstraint extends ShapeExpr implements Comparable<NodeConstraint> {
 
     private enum XSFacets {
         MAX_LENGTH("MAXLENGTH"),

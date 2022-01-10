@@ -4,6 +4,7 @@ import janus.database.DBColumn;
 import janus.database.DBRefConstraint;
 import janus.database.DBSchema;
 import shaper.Shaper;
+import shaper.mapping.model.dm.DMModel;
 
 import java.net.URI;
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.Set;
 class DM2ShExSchemaFactory {
     //Direct Mapping
     static ShExSchema getShExSchemaModel(DBSchema dbSchema) {
-        ShExSchema schemaMD = new ShExSchema(URI.create(Shaper.shapeBaseURI), Shaper.prefixForShapeBaseURI);
+        ShExSchema shExSchema = new ShExSchema(URI.create(Shaper.shapeBaseURI), Shaper.prefixForShapeBaseURI);
 
         Set<String> tables = dbSchema.getTableNames();
 
@@ -20,24 +21,24 @@ class DM2ShExSchemaFactory {
             //-> node constraints
             List<String> columns = dbSchema.getColumns(table);
             for(String column: columns) {
-                NodeConstraint ncMD = new NodeConstraint(table, column);
+                NodeConstraint nc = new NodeConstraint(table, column);
 
-                schemaMD.addNodeConstraint(ncMD);
+                shExSchema.addNodeConstraint(nc);
             } // END COLUMN
             //<- node constraints
 
             //-> shape
-            Shape shapeMD = new Shape(table);
+            Shape shape = new Shape(buildShapeID(table), table);
 
             // Triple Constraint From Table
             TripleConstraint tcFromTable = new TripleConstraint(table);
-            shapeMD.addTripleConstraint(tcFromTable);
+            shape.addTripleConstraint(tcFromTable);
 
             // Triple Constraint From Column
             for(String column: columns) {
                 TripleConstraint tcFromColumn = new TripleConstraint(new DBColumn(table, column));
 
-                shapeMD.addTripleConstraint(tcFromColumn);
+                shape.addTripleConstraint(tcFromColumn);
             } // END COLUMN
 
             // Triple Constraint From Referential Constraint
@@ -45,7 +46,7 @@ class DM2ShExSchemaFactory {
             for(String refConstraint: refConstraints) {
                 TripleConstraint tcFromRefConstraint = new TripleConstraint(new DBRefConstraint(table, refConstraint), false);
 
-                shapeMD.addTripleConstraint(tcFromRefConstraint);
+                shape.addTripleConstraint(tcFromRefConstraint);
             } // END REFERENTIAL CONSTRAINT
 
             // Inverse Triple Constraint From Referential Constraint
@@ -53,13 +54,15 @@ class DM2ShExSchemaFactory {
             for(DBRefConstraint refConstraint: refConstraintsPointingTo) {
                 TripleConstraint tcFromRefConstraint = new TripleConstraint(refConstraint, true);
 
-                shapeMD.addTripleConstraint(tcFromRefConstraint);
+                shape.addTripleConstraint(tcFromRefConstraint);
             } // END Inverse Triple Constraint From Referential Constraint
 
-            schemaMD.addShape(shapeMD);
+            shExSchema.addShape(shape);
             //<- shape
         } // END TABLE
 
-        return schemaMD;
+        return shExSchema;
     }
+
+    private static String buildShapeID(String mappedTable) { return mappedTable + "Shape"; }
 }

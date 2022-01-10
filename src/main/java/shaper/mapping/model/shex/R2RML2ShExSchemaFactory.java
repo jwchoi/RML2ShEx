@@ -21,7 +21,8 @@ class R2RML2ShExSchemaFactory {
             SubjectMap subjectMap = triplesMap.getSubjectMap();
 
             // create a shape constraint
-            Shape shape = new Shape(triplesMap.getUri(), subjectMap);
+            URI uriOfTriplesMap = triplesMap.getUri();
+            Shape shape = new Shape(buildShapeID(uriOfTriplesMap), uriOfTriplesMap, subjectMap);
 
             // create Triple Constraint From rr:class
             TripleConstraint tcFromClasses = new TripleConstraint(subjectMap.getClassIRIs());
@@ -91,7 +92,7 @@ class R2RML2ShExSchemaFactory {
 
                 Set<Set<Shape>> setsForDerivedShapes = shExSchema.createSetsForDerivedShapes(baseShapes);
                 for (Set<Shape> set: setsForDerivedShapes) {
-                    Shape derivedShape = new Shape(set);
+                    Shape derivedShape = new Shape(buildShapeID(set), set);
 
                     // tripleConstraint
                     Set<URI> classIRIs = new TreeSet<>();
@@ -114,5 +115,16 @@ class R2RML2ShExSchemaFactory {
         }
 
         return shExSchema;
+    }
+
+    private static String buildShapeID(URI triplesMap) { return triplesMap.getFragment() + "Shape"; }
+
+    private static String buildShapeID(Set<Shape> baseShapes) {
+        StringBuffer id = new StringBuffer();
+        for (Shape baseShape: baseShapes)
+            id.append(baseShape.getMappedTriplesMap().get().getFragment());
+        id.append("Shape");
+
+        return id.toString();
     }
 }
