@@ -4,7 +4,6 @@ import janus.database.DBColumn;
 import janus.database.DBRefConstraint;
 import janus.database.DBSchema;
 import shaper.Shaper;
-import shaper.mapping.model.dm.DMModel;
 
 import java.net.URI;
 import java.util.List;
@@ -31,12 +30,12 @@ class DM2ShExSchemaFactory {
             Shape shape = new DMShape(buildShapeID(table), table);
 
             // Triple Constraint From Table
-            TripleConstraint tcFromTable = new TripleConstraint(table);
+            TripleConstraint tcFromTable = new DMTripleConstraint(table);
             shape.addTripleConstraint(tcFromTable);
 
             // Triple Constraint From Column
             for(String column: columns) {
-                TripleConstraint tcFromColumn = new TripleConstraint(new DBColumn(table, column));
+                TripleConstraint tcFromColumn = new DMTripleConstraint(new DBColumn(table, column));
 
                 shape.addTripleConstraint(tcFromColumn);
             } // END COLUMN
@@ -44,7 +43,7 @@ class DM2ShExSchemaFactory {
             // Triple Constraint From Referential Constraint
             Set<String> refConstraints = dbSchema.getRefConstraints(table);
             for(String refConstraint: refConstraints) {
-                TripleConstraint tcFromRefConstraint = new TripleConstraint(new DBRefConstraint(table, refConstraint), false);
+                TripleConstraint tcFromRefConstraint = new DMTripleConstraint(new DBRefConstraint(table, refConstraint), false);
 
                 shape.addTripleConstraint(tcFromRefConstraint);
             } // END REFERENTIAL CONSTRAINT
@@ -52,7 +51,7 @@ class DM2ShExSchemaFactory {
             // Inverse Triple Constraint From Referential Constraint
             Set<DBRefConstraint> refConstraintsPointingTo = dbSchema.getRefConstraintsPointingTo(table);
             for(DBRefConstraint refConstraint: refConstraintsPointingTo) {
-                TripleConstraint tcFromRefConstraint = new TripleConstraint(refConstraint, true);
+                TripleConstraint tcFromRefConstraint = new DMTripleConstraint(refConstraint, true);
 
                 shape.addTripleConstraint(tcFromRefConstraint);
             } // END Inverse Triple Constraint From Referential Constraint

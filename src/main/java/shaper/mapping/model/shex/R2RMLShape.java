@@ -125,7 +125,7 @@ public class R2RMLShape extends Shape {
     }
 
     private Optional<String> buildOneOfTripleExpr(TripleConstraint tripleConstraint) {
-        Optional<RefObjectMap> refObjectMap = tripleConstraint.getRefObjectMap();
+        Optional<RefObjectMap> refObjectMap = ((R2RMLTripleConstraint) tripleConstraint).getRefObjectMap();
 
         if (!refObjectMap.isPresent())
             return Optional.empty();

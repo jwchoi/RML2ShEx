@@ -26,7 +26,7 @@ class R2RML2ShExSchemaFactory {
             Shape shape = new R2RMLShape(buildShapeID(uriOfTriplesMap), uriOfTriplesMap, subjectMap);
 
             // create Triple Constraint From rr:class
-            TripleConstraint tcFromClasses = new TripleConstraint(subjectMap.getClassIRIs());
+            TripleConstraint tcFromClasses = new R2RMLTripleConstraint(subjectMap.getClassIRIs());
             shape.addTripleConstraint(tcFromClasses);
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -49,7 +49,7 @@ class R2RML2ShExSchemaFactory {
                     shExSchema.addNodeConstraint(nodeConstraint);
 
                     // create Triple Constraint From predicate-object map
-                    TripleConstraint tcFromPOMap = new TripleConstraint(predicateMap, objectMap);
+                    TripleConstraint tcFromPOMap = new R2RMLTripleConstraint(predicateMap, objectMap);
                     shape.addTripleConstraint(tcFromPOMap);
                 }
 
@@ -73,7 +73,7 @@ class R2RML2ShExSchemaFactory {
                     RefObjectMap refObjectMap = predicateObjectPair.getRefObjectMap().get();
 
                     // create Triple Constraint From referencing-object map
-                    TripleConstraint tcFromPROMap = new TripleConstraint(predicateMap, refObjectMap);
+                    TripleConstraint tcFromPROMap = new R2RMLTripleConstraint(predicateMap, refObjectMap);
                     shape.addTripleConstraint(tcFromPROMap);
                 }
             }
@@ -99,8 +99,11 @@ class R2RML2ShExSchemaFactory {
                     // tripleConstraint
                     Set<URI> classIRIs = new TreeSet<>();
                     for (Shape shape: set) {
-                        Set<TripleConstraint> tripleConstraints = shape.getTripleConstraints();
-                        for (TripleConstraint tc: tripleConstraints) {
+                        Set<R2RMLTripleConstraint> tripleConstraints = shape.getTripleConstraints().stream()
+                                .filter(tc -> tc instanceof R2RMLTripleConstraint)
+                                .map(tc -> (R2RMLTripleConstraint) tc)
+                                .collect(Collectors.toSet());
+                        for (R2RMLTripleConstraint tc: tripleConstraints) {
                             if (tc.getMappedType().equals(TripleConstraint.MappedTypes.RR_CLASSES))
                                 classIRIs.addAll(tc.getClassIRIs());
                             else
@@ -109,7 +112,7 @@ class R2RML2ShExSchemaFactory {
                     }
 
                     // RR_CLASSES tripleConstraint
-                    derivedShape.addTripleConstraint(new TripleConstraint(classIRIs));
+                    derivedShape.addTripleConstraint(new R2RMLTripleConstraint(classIRIs));
 
                     shExSchema.addShape(derivedShape);
                 }
