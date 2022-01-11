@@ -1,6 +1,7 @@
 package shaper.mapping.model.shex;
 
 import shaper.Shaper;
+import shaper.mapping.model.ID;
 import shaper.mapping.model.r2rml.*;
 
 import java.net.URI;
@@ -23,7 +24,8 @@ class R2RML2ShExSchemaFactory {
 
             // create a shape constraint
             URI uriOfTriplesMap = triplesMap.getUri();
-            Shape shape = new R2RMLShape(buildShapeID(uriOfTriplesMap), uriOfTriplesMap, subjectMap);
+            ID shapeID = buildShapeID(shExSchema.getPrefix(), shExSchema.getBaseIRI(), uriOfTriplesMap);
+            Shape shape = new R2RMLShape(shapeID, uriOfTriplesMap, subjectMap);
 
             // create Triple Constraint From rr:class
             TripleConstraint tcFromClasses = new R2RMLTripleConstraint(subjectMap.getClassIRIs());
@@ -44,7 +46,7 @@ class R2RML2ShExSchemaFactory {
                     ObjectMap objectMap = predicateObjectPair.getObjectMap().get();
 
                     // create Node Constraint From predicate-object map
-                    String nodeConstraintID = shape.getShapeID() + "_Obj" + (++postfix);
+                    ID nodeConstraintID = new ID(shExSchema.getPrefix(), shExSchema.getBaseIRI(), shape.getID().getLocalPart() + "_Obj" + (++postfix));
                     NodeConstraint nodeConstraint = new R2RMLNodeConstraint(nodeConstraintID, objectMap);
                     shExSchema.addNodeConstraint(nodeConstraint);
 
@@ -94,7 +96,8 @@ class R2RML2ShExSchemaFactory {
 
                 Set<Set<Shape>> setsForDerivedShapes = shExSchema.createSetsForDerivedShapes(baseShapes);
                 for (Set<Shape> set: setsForDerivedShapes) {
-                    Shape derivedShape = new R2RMLShape(buildShapeID(set), set);
+                    ID shapeID = buildShapeID(shExSchema.getPrefix(), shExSchema.getBaseIRI(), set);
+                    Shape derivedShape = new R2RMLShape(shapeID, set);
 
                     // tripleConstraint
                     Set<URI> classIRIs = new TreeSet<>();
@@ -122,17 +125,20 @@ class R2RML2ShExSchemaFactory {
         return shExSchema;
     }
 
-    private static String buildShapeID(URI triplesMap) { return triplesMap.getFragment() + "Shape"; }
+    private static ID buildShapeID(String prefixLabel, URI prefixIRI, URI triplesMap) {
+        String localPart = triplesMap.getFragment() + "Shape";
+        return new ID(prefixLabel, prefixIRI, localPart);
+    }
 
-    private static String buildShapeID(Set<Shape> baseShapes) {
-        StringBuffer id = new StringBuffer();
+    private static ID buildShapeID(String prefixLabel, URI prefixIRI, Set<Shape> baseShapes) {
+        StringBuffer localPart = new StringBuffer();
 
         baseShapes.stream()
                 .map(baseShape -> (R2RMLShape) baseShape)
-                .forEach(baseShape -> id.append(baseShape.getMappedTriplesMap().get().getFragment()));
+                .forEach(baseShape -> localPart.append(baseShape.getMappedTriplesMap().get().getFragment()));
 
-        id.append("Shape");
+        localPart.append("Shape");
 
-        return id.toString();
+        return new ID(prefixLabel, prefixIRI, localPart.toString());
     }
 }

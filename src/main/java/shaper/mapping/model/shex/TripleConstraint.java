@@ -1,10 +1,14 @@
 package shaper.mapping.model.shex;
 
+import shaper.mapping.model.ID;
+
 import java.util.Optional;
 
 public abstract class TripleConstraint implements Comparable<TripleConstraint> {
 
     enum MappedTypes { COLUMN, REF_CONSTRAINT, TABLE, RR_CLASSES, PREDICATE_OBJECT_MAP, REF_OBJECT_MAP }
+
+    private ID id;
 
     private String serializedTripleConstraint;
 
@@ -15,6 +19,8 @@ public abstract class TripleConstraint implements Comparable<TripleConstraint> {
     private Optional<Boolean> isInverse = Optional.empty();
 
     TripleConstraint(MappedTypes mappedType) { this.mappedType = mappedType; }
+
+    public ID getID() { return id; }
 
     protected String getSerializedTripleConstraint() { return serializedTripleConstraint; }
 

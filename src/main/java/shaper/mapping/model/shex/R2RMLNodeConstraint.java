@@ -4,6 +4,7 @@ import janus.database.SQLSelectField;
 import shaper.Shaper;
 import shaper.mapping.SqlXsdMap;
 import shaper.mapping.Symbols;
+import shaper.mapping.model.ID;
 import shaper.mapping.model.r2rml.ObjectMap;
 import shaper.mapping.model.r2rml.Template;
 import shaper.mapping.model.r2rml.TermMap;
@@ -15,7 +16,7 @@ import java.util.Optional;
 public class R2RMLNodeConstraint extends NodeConstraint {
     private ObjectMap mappedObjectMap;
 
-    R2RMLNodeConstraint(String id, ObjectMap mappedObjectMap) {
+    R2RMLNodeConstraint(ID id, ObjectMap mappedObjectMap) {
         super(id);
 
         this.mappedObjectMap = mappedObjectMap;

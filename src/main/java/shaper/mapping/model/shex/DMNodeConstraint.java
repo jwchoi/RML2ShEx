@@ -4,6 +4,7 @@ import shaper.Shaper;
 import shaper.mapping.SqlXsdMap;
 import shaper.mapping.Symbols;
 import shaper.mapping.XSDs;
+import shaper.mapping.model.ID;
 
 import java.util.Optional;
 import java.util.Set;
@@ -12,7 +13,7 @@ public class DMNodeConstraint extends NodeConstraint {
     private String mappedTable;
     private String mappedColumn;
 
-    DMNodeConstraint(String id, String mappedTable, String mappedColumn) {
+    DMNodeConstraint(ID id, String mappedTable, String mappedColumn) {
         super(id);
         this.mappedTable = mappedTable;
         this.mappedColumn = mappedColumn;

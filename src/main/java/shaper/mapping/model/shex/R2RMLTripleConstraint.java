@@ -62,8 +62,7 @@ public class R2RMLTripleConstraint extends TripleConstraint {
         String property = buildProperty(predicateMap);
 
         // shapeRef
-        String prefix = Shaper.shexMapper.shExSchema.getPrefix();
-        String shapeRef = prefix + Symbols.COLON + Shaper.shexMapper.shExSchema.getMappedShape(refObjectMap.getParentTriplesMap()).getShapeID();
+        String shapeRef = Shaper.shexMapper.shExSchema.getMappedShape(refObjectMap.getParentTriplesMap()).getID().getPrefixedName();
 
         // cardinality
         setCardinality(Symbols.ASTERISK);

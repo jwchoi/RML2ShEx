@@ -1,6 +1,7 @@
 package shaper.mapping.model.shex;
 
 import shaper.mapping.Symbols;
+import shaper.mapping.model.ID;
 import shaper.mapping.model.r2rml.ObjectMap;
 
 import java.net.URI;
@@ -36,13 +37,13 @@ public class ShExSchema {
         nodeConstraints.add(nodeConstraint);
     }
 
-    public String getMappedShapeID(String table) {
+    public ID getMappedShapeID(String table) {
         Optional<Shape> mappedShape = shapes.stream()
                 .filter(shape -> shape instanceof DMShape)
                 .filter(shape -> ((DMShape) shape).getMappedTableName().equals(table))
                 .findAny();
 
-        return mappedShape.isEmpty() ? null : mappedShape.get().getShapeID();
+        return mappedShape.isEmpty() ? null : mappedShape.get().getID();
     }
 
     public String getMappedShape(String table) {
@@ -54,14 +55,14 @@ public class ShExSchema {
         return mappedShape.isEmpty() ? null : mappedShape.get().toString();
     }
 
-    public String getMappedNodeConstraintID(String table, String column) {
+    public ID getMappedNodeConstraintID(String table, String column) {
         Optional<DMNodeConstraint> mappedNodeConstraint = nodeConstraints.stream()
                 .filter(nc -> nc instanceof DMNodeConstraint)
                 .map(nc -> (DMNodeConstraint) nc)
                 .filter(nc -> nc.getMappedTable().equals(table) && nc.getMappedColumn().equals(column))
                 .findAny();
 
-        return mappedNodeConstraint.isPresent() ? mappedNodeConstraint.get().getNodeConstraintID() : null;
+        return mappedNodeConstraint.isPresent() ? mappedNodeConstraint.get().getID() : null;
     }
 
     public String getMappedNodeConstraint(String table, String column) {
@@ -84,14 +85,14 @@ public class ShExSchema {
         return nodeConstraint.isPresent() ? nodeConstraint.get().toString() : null;
     }
 
-    public String getMappedNodeConstraintID(ObjectMap objectMap) {
+    public ID getMappedNodeConstraintID(ObjectMap objectMap) {
         Optional<R2RMLNodeConstraint> nodeConstraint = nodeConstraints.stream()
                 .filter(nc -> nc instanceof R2RMLNodeConstraint)
                 .map(nc -> (R2RMLNodeConstraint) nc)
                 .filter(nc -> nc.getMappedObjectMap().equals(objectMap))
                 .findAny();
 
-        return nodeConstraint.isPresent() ? nodeConstraint.get().getNodeConstraintID() : null;
+        return nodeConstraint.isPresent() ? nodeConstraint.get().getID() : null;
     }
 
     public URI getBaseIRI() {

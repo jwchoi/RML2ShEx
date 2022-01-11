@@ -3,6 +3,7 @@ package shaper.mapping.model.shex;
 import janus.database.SQLSelectField;
 import shaper.Shaper;
 import shaper.mapping.Symbols;
+import shaper.mapping.model.ID;
 import shaper.mapping.model.r2rml.RefObjectMap;
 import shaper.mapping.model.r2rml.SubjectMap;
 import shaper.mapping.model.r2rml.Template;
@@ -23,7 +24,7 @@ public class R2RMLShape extends Shape {
 
     private Set<Shape> baseShapes; // only for derived shape
 
-    R2RMLShape(String id, URI mappedTriplesMap, SubjectMap subjectMap) {
+    R2RMLShape(ID id, URI mappedTriplesMap, SubjectMap subjectMap) {
         super(id);
 
         this.mappedTriplesMap = Optional.of(mappedTriplesMap);
@@ -32,7 +33,7 @@ public class R2RMLShape extends Shape {
         regex = buildRegex(subjectMap);
     }
 
-    R2RMLShape(String id, Set<Shape> baseShapes) {
+    R2RMLShape(ID id, Set<Shape> baseShapes) {
         super(id);
 
         this.baseShapes = baseShapes;
@@ -90,7 +91,7 @@ public class R2RMLShape extends Shape {
     String getRegex() { return regex; }
 
     private String buildShape() {
-        String id = Shaper.shexMapper.shExSchema.getPrefix() + Symbols.COLON + getShapeID();
+        String id = getID().getPrefixedName();
 
         StringBuffer shape = new StringBuffer(id + Symbols.SPACE + nodeKind);
 
@@ -145,9 +146,8 @@ public class R2RMLShape extends Shape {
         Set<String> triplesConstraints = new CopyOnWriteArraySet<>();
         triplesConstraints.add(tcStr);
 
-        String prefix = Shaper.shexMapper.shExSchema.getPrefix();
         for (Shape derivedShape: derivedShapes) {
-            String shapeRef = prefix + Symbols.COLON + derivedShape.getShapeID();
+            String shapeRef = derivedShape.getID().getPrefixedName();
             triplesConstraints.add(property + Symbols.SPACE + Symbols.AT + shapeRef + Symbols.SPACE + cardinality);
         }
 

@@ -2,6 +2,7 @@ package shaper.mapping.shex;
 
 import shaper.Shaper;
 import shaper.mapping.Symbols;
+import shaper.mapping.model.ID;
 import shaper.mapping.model.r2rml.ObjectMap;
 import shaper.mapping.model.r2rml.PredicateObjectMap;
 import shaper.mapping.model.r2rml.R2RMLModelFactory;
@@ -50,10 +51,10 @@ public class R2RMLShExMapper extends ShExMapper {
                     Optional<ObjectMap> objectMap = predicateObjectPair.getObjectMap();
                     if (objectMap.isPresent()) {
                         if (R2RMLNodeConstraint.isPossibleToHaveXSFacet(objectMap.get())) {
-                            String nodeConstraintID = shExSchema.getMappedNodeConstraintID(objectMap.get());
+                            ID nodeConstraintID = shExSchema.getMappedNodeConstraintID(objectMap.get());
                             String nodeConstraint = shExSchema.getMappedNodeConstraint(objectMap.get());
                             if (nodeConstraintID != null && nodeConstraint != null) {
-                                String id = shExSchema.getPrefix() + Symbols.COLON + nodeConstraintID;
+                                String id = nodeConstraintID.getPrefixedName();
                                 writer.println(id + Symbols.SPACE + nodeConstraint);
                             }
                         }

@@ -1,6 +1,7 @@
 package shaper.mapping.model.shex;
 
 import shaper.mapping.Symbols;
+import shaper.mapping.model.ID;
 
 import java.util.Optional;
 
@@ -21,7 +22,6 @@ public abstract class NodeConstraint extends ShapeExpr implements Comparable<Nod
         public String toString() { return facet; }
     }
 
-    private String id;
     private String serializedNodeConstraint;
 
     private Optional<NodeKinds> nodeKind;
@@ -29,16 +29,14 @@ public abstract class NodeConstraint extends ShapeExpr implements Comparable<Nod
     private Optional<String> datatype;
     private Optional<String> xsFacet;
 
-    NodeConstraint(String id) {
-        this.id = id;
+    NodeConstraint(ID id) {
+        super(id);
 
         nodeKind = Optional.empty();
         valueSet = Optional.empty();
         datatype = Optional.empty();
         xsFacet = Optional.empty();
     }
-
-    String getNodeConstraintID() { return id; }
 
     protected String getSerializedNodeConstraint() { return serializedNodeConstraint; }
     protected void setSerializedNodeConstraint(String serializedNodeConstraint) {

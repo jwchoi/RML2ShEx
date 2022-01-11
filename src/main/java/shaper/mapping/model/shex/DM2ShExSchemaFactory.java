@@ -4,6 +4,7 @@ import janus.database.DBColumn;
 import janus.database.DBRefConstraint;
 import janus.database.DBSchema;
 import shaper.Shaper;
+import shaper.mapping.model.ID;
 
 import java.net.URI;
 import java.util.List;
@@ -20,14 +21,16 @@ class DM2ShExSchemaFactory {
             //-> node constraints
             List<String> columns = dbSchema.getColumns(table);
             for(String column: columns) {
-                NodeConstraint nc = new DMNodeConstraint(buildNodeConstraintID(table, column), table, column);
+                ID ncID = buildNodeConstraintID(shExSchema.getPrefix(), shExSchema.getBaseIRI(), table, column);
+                NodeConstraint nc = new DMNodeConstraint(ncID, table, column);
 
                 shExSchema.addNodeConstraint(nc);
             } // END COLUMN
             //<- node constraints
 
             //-> shape
-            Shape shape = new DMShape(buildShapeID(table), table);
+            ID shapeID = buildShapeID(shExSchema.getPrefix(), shExSchema.getBaseIRI(), table);
+            Shape shape = new DMShape(shapeID, table);
 
             // Triple Constraint From Table
             TripleConstraint tcFromTable = new DMTripleConstraint(table);
@@ -63,9 +66,13 @@ class DM2ShExSchemaFactory {
         return shExSchema;
     }
 
-    private static String buildShapeID(String mappedTable) { return mappedTable + "Shape"; }
+    private static ID buildShapeID(String prefixLabel, URI prefixIRI, String mappedTable) {
+        String localPart = mappedTable + "Shape";
+        return new ID(prefixLabel, prefixIRI, localPart);
+    }
 
-    private static String buildNodeConstraintID(String mappedTable, String mappedColumn) {
-        return mappedTable + Character.toUpperCase(mappedColumn.charAt(0)) + mappedColumn.substring(1);
+    private static ID buildNodeConstraintID(String prefixLabel, URI prefixIRI, String mappedTable, String mappedColumn) {
+        String localPart = mappedTable + Character.toUpperCase(mappedColumn.charAt(0)) + mappedColumn.substring(1);
+        return new ID(prefixLabel, prefixIRI, localPart);
     }
 }

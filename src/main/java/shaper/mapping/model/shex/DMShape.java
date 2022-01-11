@@ -2,6 +2,7 @@ package shaper.mapping.model.shex;
 
 import shaper.Shaper;
 import shaper.mapping.Symbols;
+import shaper.mapping.model.ID;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,7 +14,7 @@ public class DMShape extends Shape {
     private NodeKinds nodeKind;
     private String regex;
 
-    DMShape(String id, String mappedTable) {
+    DMShape(ID id, String mappedTable) {
         super(id);
 
         this.mappedTable = mappedTable;
@@ -48,7 +49,7 @@ public class DMShape extends Shape {
     }
 
     private String buildShape() {
-        String id = Shaper.shexMapper.shExSchema.getPrefix() + Symbols.COLON + getShapeID();
+        String id = getID().getPrefixedName();
 
         StringBuffer shape = new StringBuffer(id + Symbols.SPACE + nodeKind);
 

@@ -1,25 +1,24 @@
 package shaper.mapping.model.shex;
 
+import shaper.mapping.model.ID;
+
 import java.util.HashSet;
 import java.util.Set;
 
 public abstract class Shape extends ShapeExpr implements Comparable<Shape> {
-    private String id;
     private String serializedShape;
 
     private Set<TripleConstraint> tripleConstraints;
 
-    Shape(String id) {
-        this.id = id;
+    Shape(ID id) {
+        super(id);
 
         tripleConstraints = new HashSet<>();
     }
 
-    String getShapeID() { return id; }
-
     @Override
     public int compareTo(Shape o) {
-        return id.compareTo(o.getShapeID());
+        return getID().compareTo(o.getID());
     }
 
     protected String getSerializedShape() {
