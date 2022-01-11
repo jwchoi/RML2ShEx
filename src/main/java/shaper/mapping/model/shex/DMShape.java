@@ -81,10 +81,6 @@ public class DMShape extends Shape {
         return spaces.toString();
     }
 
-    NodeKinds getNodeKind() { return nodeKind; }
-
-    String getRegex() { return regex; }
-
     @Override
     public String toString() {
         String serializedShape = getSerializedShape();

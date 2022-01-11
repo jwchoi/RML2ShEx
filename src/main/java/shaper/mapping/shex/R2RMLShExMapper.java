@@ -6,7 +6,7 @@ import shaper.mapping.model.r2rml.ObjectMap;
 import shaper.mapping.model.r2rml.PredicateObjectMap;
 import shaper.mapping.model.r2rml.R2RMLModelFactory;
 import shaper.mapping.model.r2rml.TriplesMap;
-import shaper.mapping.model.shex.NodeConstraint;
+import shaper.mapping.model.shex.R2RMLNodeConstraint;
 import shaper.mapping.model.shex.ShExSchemaFactory;
 import shaper.mapping.model.shex.Shape;
 import shaper.mapping.r2rml.R2RMLParser;
@@ -49,7 +49,7 @@ public class R2RMLShExMapper extends ShExMapper {
                 for (PredicateObjectMap.PredicateObjectPair predicateObjectPair: predicateObjectPairs) {
                     Optional<ObjectMap> objectMap = predicateObjectPair.getObjectMap();
                     if (objectMap.isPresent()) {
-                        if (NodeConstraint.isPossibleToHaveXSFacet(objectMap.get())) {
+                        if (R2RMLNodeConstraint.isPossibleToHaveXSFacet(objectMap.get())) {
                             String nodeConstraintID = shExSchema.getMappedNodeConstraintID(objectMap.get());
                             String nodeConstraint = shExSchema.getMappedNodeConstraint(objectMap.get());
                             if (nodeConstraintID != null && nodeConstraint != null) {

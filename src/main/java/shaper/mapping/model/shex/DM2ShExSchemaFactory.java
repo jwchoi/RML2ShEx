@@ -21,7 +21,7 @@ class DM2ShExSchemaFactory {
             //-> node constraints
             List<String> columns = dbSchema.getColumns(table);
             for(String column: columns) {
-                NodeConstraint nc = new NodeConstraint(table, column);
+                NodeConstraint nc = new DMNodeConstraint(buildNodeConstraintID(table, column), table, column);
 
                 shExSchema.addNodeConstraint(nc);
             } // END COLUMN
@@ -65,4 +65,8 @@ class DM2ShExSchemaFactory {
     }
 
     private static String buildShapeID(String mappedTable) { return mappedTable + "Shape"; }
+
+    private static String buildNodeConstraintID(String mappedTable, String mappedColumn) {
+        return mappedTable + Character.toUpperCase(mappedColumn.charAt(0)) + mappedColumn.substring(1);
+    }
 }

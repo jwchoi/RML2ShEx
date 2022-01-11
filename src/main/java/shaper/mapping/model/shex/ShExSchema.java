@@ -55,37 +55,43 @@ public class ShExSchema {
     }
 
     public String getMappedNodeConstraintID(String table, String column) {
-        for (NodeConstraint nodeConstraint : nodeConstraints)
-            if (nodeConstraint.getMappedTable().equals(table)
-                    && nodeConstraint.getMappedColumn().equals(column))
-                return nodeConstraint.getNodeConstraintID();
+        Optional<DMNodeConstraint> mappedNodeConstraint = nodeConstraints.stream()
+                .filter(nc -> nc instanceof DMNodeConstraint)
+                .map(nc -> (DMNodeConstraint) nc)
+                .filter(nc -> nc.getMappedTable().equals(table) && nc.getMappedColumn().equals(column))
+                .findAny();
 
-        return null;
+        return mappedNodeConstraint.isPresent() ? mappedNodeConstraint.get().getNodeConstraintID() : null;
     }
 
     public String getMappedNodeConstraint(String table, String column) {
-        for (NodeConstraint nodeConstraint : nodeConstraints)
-            if (nodeConstraint.getMappedTable().equals(table)
-                    && nodeConstraint.getMappedColumn().equals(column))
-                return nodeConstraint.toString();
+        Optional<DMNodeConstraint> mappedNodeConstraint = nodeConstraints.stream()
+                .filter(nc -> nc instanceof DMNodeConstraint)
+                .map(nc -> (DMNodeConstraint) nc)
+                .filter(nc -> nc.getMappedTable().equals(table) && nc.getMappedColumn().equals(column))
+                .findAny();
 
-        return null;
+        return mappedNodeConstraint.isPresent() ? mappedNodeConstraint.get().toString() : null;
     }
 
     public String getMappedNodeConstraint(ObjectMap objectMap) {
-        for (NodeConstraint nodeConstraint : nodeConstraints)
-            if (nodeConstraint.getMappedObjectMap().equals(objectMap))
-                return nodeConstraint.toString();
+        Optional<R2RMLNodeConstraint> nodeConstraint = nodeConstraints.stream()
+                .filter(nc -> nc instanceof R2RMLNodeConstraint)
+                .map(nc -> (R2RMLNodeConstraint) nc)
+                .filter(nc -> nc.getMappedObjectMap().equals(objectMap))
+                .findAny();
 
-        return null;
+        return nodeConstraint.isPresent() ? nodeConstraint.get().toString() : null;
     }
 
     public String getMappedNodeConstraintID(ObjectMap objectMap) {
-        for (NodeConstraint nodeConstraint : nodeConstraints)
-            if (nodeConstraint.getMappedObjectMap().equals(objectMap))
-                return nodeConstraint.getNodeConstraintID();
+        Optional<R2RMLNodeConstraint> nodeConstraint = nodeConstraints.stream()
+                .filter(nc -> nc instanceof R2RMLNodeConstraint)
+                .map(nc -> (R2RMLNodeConstraint) nc)
+                .filter(nc -> nc.getMappedObjectMap().equals(objectMap))
+                .findAny();
 
-        return null;
+        return nodeConstraint.isPresent() ? nodeConstraint.get().getNodeConstraintID() : null;
     }
 
     public URI getBaseIRI() {

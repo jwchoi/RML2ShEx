@@ -45,7 +45,7 @@ class R2RML2ShExSchemaFactory {
 
                     // create Node Constraint From predicate-object map
                     String nodeConstraintID = shape.getShapeID() + "_Obj" + (++postfix);
-                    NodeConstraint nodeConstraint = new NodeConstraint(nodeConstraintID, objectMap);
+                    NodeConstraint nodeConstraint = new R2RMLNodeConstraint(nodeConstraintID, objectMap);
                     shExSchema.addNodeConstraint(nodeConstraint);
 
                     // create Triple Constraint From predicate-object map

@@ -251,7 +251,7 @@ public class TripleConstraint implements Comparable<TripleConstraint> {
             }
         }
 
-        if (NodeConstraint.isPossibleToHaveXSFacet(objectMap)) {
+        if (R2RMLNodeConstraint.isPossibleToHaveXSFacet(objectMap)) {
             String prefix = Shaper.shexMapper.shExSchema.getPrefix();
             return property + Symbols.SPACE + Symbols.AT + prefix + Symbols.COLON + Shaper.shexMapper.shExSchema.getMappedNodeConstraintID(objectMap) + Symbols.SPACE + cardinality;
         } else
