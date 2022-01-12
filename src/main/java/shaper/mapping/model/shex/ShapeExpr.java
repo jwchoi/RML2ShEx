@@ -1,11 +1,11 @@
 package shaper.mapping.model.shex;
 
-import shaper.mapping.model.ID;
-
 public abstract class ShapeExpr {
-    private ID id;
+    enum Kinds { ShapeOr, ShapeAnd, ShapeNot, NodeConstraint, Shape, ShapeExternal, shapeExprRef }
 
-    ShapeExpr(ID id) { this.id = id; }
+    private Kinds kind;
 
-    public ID getID() { return id; }
+    ShapeExpr(Kinds kind) { this.kind = kind; }
+
+    Kinds getKind() { return kind; }
 }

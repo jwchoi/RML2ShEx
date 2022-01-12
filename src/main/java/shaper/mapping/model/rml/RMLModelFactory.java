@@ -87,7 +87,7 @@ public class RMLModelFactory {
 
                 // rr:class
                 Set<URI> classes = parser.getClasses(subjectMapAsResource); // the size of classes could be zero.
-                subjectMap.setClassIRIs(classes);
+                subjectMap.setClasses(classes);
 
                 // rr:graphMap and rr:graph
                 Set<GraphMap> graphMaps = getGraphMapsAssociatedWith(subjectMapAsResource, parser);

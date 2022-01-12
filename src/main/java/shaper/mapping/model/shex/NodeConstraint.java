@@ -7,6 +7,10 @@ import java.util.Optional;
 
 public abstract class NodeConstraint extends ShapeExpr implements Comparable<NodeConstraint> {
 
+    private static int incrementer = 0;
+
+    static int getIncrementer() { return incrementer++; }
+
     protected enum XSFacets {
         MAX_LENGTH("MAXLENGTH"),
         MIN_INCLUSIVE("MININCLUSIVE"), MAX_INCLUSIVE("MAXINCLUSIVE"),
@@ -22,6 +26,8 @@ public abstract class NodeConstraint extends ShapeExpr implements Comparable<Nod
         public String toString() { return facet; }
     }
 
+    private Optional<ID> id;
+
     private String serializedNodeConstraint;
 
     private Optional<NodeKinds> nodeKind;
@@ -29,14 +35,22 @@ public abstract class NodeConstraint extends ShapeExpr implements Comparable<Nod
     private Optional<String> datatype;
     private Optional<String> xsFacet;
 
-    NodeConstraint(ID id) {
-        super(id);
+    private NodeConstraint() {
+        super(Kinds.NodeConstraint);
 
         nodeKind = Optional.empty();
         values = Optional.empty();
         datatype = Optional.empty();
         xsFacet = Optional.empty();
     }
+
+    NodeConstraint(ID id) {
+        this();
+
+        this.id = Optional.ofNullable(id);
+    }
+
+    ID getID() { return id.isPresent() ? id.get() : null; }
 
     protected String getSerializedNodeConstraint() { return serializedNodeConstraint; }
     protected void setSerializedNodeConstraint(String serializedNodeConstraint) {

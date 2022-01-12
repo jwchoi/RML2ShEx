@@ -20,7 +20,7 @@ public class ShaclDocModel {
         this.prefix = prefix;
 
         prefixMap = new TreeMap<>();
-        prefixMap.put(URI.create(baseIRI + Symbols.HASH), prefix); // prefix newly created by base
+        prefixMap.put(baseIRI, prefix); // prefix newly created by base
         prefixMap.put(PrefixMap.getURI("sh"), "sh"); // prefix for sh:
 
         shapes = new TreeSet<>();

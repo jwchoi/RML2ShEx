@@ -7,6 +7,7 @@ import shaper.mapping.model.ID;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class DMShape extends Shape {
     private String mappedTable;
@@ -58,7 +59,11 @@ public class DMShape extends Shape {
 
         shape.append(Symbols.SPACE + Symbols.OPEN_BRACE + Symbols.NEWLINE);
 
-        Set<TripleConstraint> tripleConstraints = getTripleConstraints();
+        Set<TripleConstraint> tripleConstraints = getTripleExprs().stream()
+                .filter(te -> te instanceof TripleConstraint)
+                .map(te -> (TripleConstraint) te)
+                .collect(Collectors.toSet());
+
         for (TripleConstraint tripleConstraint : tripleConstraints) {
             Optional<Boolean> isInverse = tripleConstraint.isInverse();
             if (isInverse.isPresent() && isInverse.get())

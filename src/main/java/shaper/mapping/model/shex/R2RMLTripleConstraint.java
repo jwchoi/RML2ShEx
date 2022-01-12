@@ -21,7 +21,7 @@ public class R2RMLTripleConstraint extends TripleConstraint {
     private RefObjectMap refObjectMap;
 
     R2RMLTripleConstraint(Set<URI> classIRIs) {
-        super(MappedTypes.SUBJECT_MAP);
+        super(MappedTypes.CLASS);
         this.classIRIs = classIRIs;
     }
 
@@ -32,7 +32,7 @@ public class R2RMLTripleConstraint extends TripleConstraint {
     }
 
     R2RMLTripleConstraint(PredicateMap predicateMap, RefObjectMap refObjectMap) {
-        super(MappedTypes.REF_OBJECT_MAP);
+        super(MappedTypes.PREDICATE_REF_OBJECT_MAP);
         this.predicateMap = predicateMap;
         this.refObjectMap = refObjectMap;
     }
@@ -44,13 +44,13 @@ public class R2RMLTripleConstraint extends TripleConstraint {
     private String buildTripleConstraint() {
         String tripleConstraint = null;
         switch (getMappedType()) {
-            case SUBJECT_MAP:
+            case CLASS:
                 tripleConstraint = buildTripleConstraintFromClasses();
                 break;
             case PREDICATE_OBJECT_MAP:
                 tripleConstraint = buildTripleConstraintFromPredicateObjectMap();
                 break;
-            case REF_OBJECT_MAP:
+            case PREDICATE_REF_OBJECT_MAP:
                 tripleConstraint = buildTripleConstraintFromRefObjectMap();
                 break;
         }
@@ -130,7 +130,7 @@ public class R2RMLTripleConstraint extends TripleConstraint {
         }
 
         if (R2RMLNodeConstraint.isPossibleToHaveXSFacet(objectMap)) {
-            String prefix = Shaper.shexMapper.shExSchema.getPrefix();
+            String prefix = Shaper.shexMapper.shExSchema.getBasePrefix();
             return property + Symbols.SPACE + Symbols.AT + prefix + Symbols.COLON + Shaper.shexMapper.shExSchema.getMappedNodeConstraintID(objectMap) + Symbols.SPACE + getCardinality();
         } else
             return property + Symbols.SPACE + Shaper.shexMapper.shExSchema.getMappedNodeConstraint(objectMap) + Symbols.SPACE + getCardinality();

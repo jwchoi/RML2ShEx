@@ -18,7 +18,7 @@ public class DMShExMapper extends ShExMapper {
         writer.println(Symbols.BASE + Symbols.SPACE + Symbols.LT + shExSchema.getBaseIRI() + Symbols.GT); // for an RDF Graph by direct mapping
 
         // prefix for newly created shape expressions
-        writer.println(Symbols.PREFIX + Symbols.SPACE + shExSchema.getPrefix() + Symbols.COLON + Symbols.SPACE + Symbols.LT + shExSchema.getBaseIRI() + Symbols.HASH + Symbols.GT);
+        writer.println(Symbols.PREFIX + Symbols.SPACE + shExSchema.getBasePrefix() + Symbols.COLON + Symbols.SPACE + Symbols.LT + shExSchema.getBaseIRI() + Symbols.HASH + Symbols.GT);
 
         // prefixID
         writer.println(Symbols.PREFIX + Symbols.SPACE + "rdf" + Symbols.COLON + Symbols.SPACE + Symbols.LT + PrefixMap.getURI("rdf") + Symbols.GT);
@@ -33,7 +33,7 @@ public class DMShExMapper extends ShExMapper {
         for(String table : tables) {
             List<String> columns = Shaper.dbSchema.getColumns(table);
             for (String column: columns) {
-                String id = shExSchema.getPrefix() + Symbols.COLON + shExSchema.getMappedNodeConstraintID(table, column);
+                String id = shExSchema.getBasePrefix() + Symbols.COLON + shExSchema.getMappedNodeConstraintID(table, column);
                 writer.println(id + Symbols.SPACE + shExSchema.getMappedNodeConstraint(table, column));
             }
             writer.println();

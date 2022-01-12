@@ -157,7 +157,7 @@ public class NodeShape extends Shape {
         }
 
         // sh:class
-        Set<URI> classIRIs = new TreeSet(subjectMap.getClassIRIs());
+        Set<URI> classIRIs = new TreeSet(subjectMap.getClasses());
         for (URI classIRI: classIRIs) {
             o = getShaclDocModel().getRelativeIRIOr(classIRI.toString());
 

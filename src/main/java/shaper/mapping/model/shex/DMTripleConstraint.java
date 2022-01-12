@@ -49,7 +49,7 @@ public class DMTripleConstraint extends TripleConstraint {
         String column = mappedColumn.getColumnName();
         String litProperty = Symbols.LT + Shaper.shexMapper.dmModel.getMappedLiteralProperty(table, column) + Symbols.GT;
 
-        String prefix = Shaper.shexMapper.shExSchema.getPrefix();
+        String prefix = Shaper.shexMapper.shExSchema.getBasePrefix();
         String nodeConstraint = prefix + Symbols.COLON + Shaper.shexMapper.shExSchema.getMappedNodeConstraintID(table, column);
 
         boolean nullable = false;
@@ -66,7 +66,7 @@ public class DMTripleConstraint extends TripleConstraint {
         String refConstraint = mappedRefConstraint.getRefConstraintName();
         String refProperty = Symbols.LT + Shaper.shexMapper.dmModel.getMappedReferenceProperty(table, refConstraint) + Symbols.GT;
 
-        String prefix = Shaper.shexMapper.shExSchema.getPrefix();
+        String prefix = Shaper.shexMapper.shExSchema.getBasePrefix();
         String referencedShape = prefix + Symbols.COLON + Shaper.shexMapper.shExSchema.getMappedShapeID(table);
 
         setCardinality(Symbols.ASTERISK);
@@ -80,7 +80,7 @@ public class DMTripleConstraint extends TripleConstraint {
         String refProperty = Symbols.LT + Shaper.shexMapper.dmModel.getMappedReferenceProperty(table, refConstraint) + Symbols.GT;
 
         String referencedTable = Shaper.dbSchema.getReferencedTableBy(table, refConstraint);
-        String prefix = Shaper.shexMapper.shExSchema.getPrefix();
+        String prefix = Shaper.shexMapper.shExSchema.getBasePrefix();
         String referencedShape = prefix + Symbols.COLON + Shaper.shexMapper.shExSchema.getMappedShapeID(referencedTable);
 
         List<String> columns = Shaper.dbSchema.getReferencingColumnsByOrdinalPosition(table, refConstraint);

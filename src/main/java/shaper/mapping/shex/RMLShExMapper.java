@@ -6,7 +6,6 @@ import shaper.mapping.model.rml.ObjectMap;
 import shaper.mapping.model.rml.PredicateObjectMap;
 import shaper.mapping.model.rml.RMLModelFactory;
 import shaper.mapping.model.rml.TriplesMap;
-import shaper.mapping.model.shex.NodeConstraint;
 import shaper.mapping.model.shex.ShExSchemaFactory;
 import shaper.mapping.model.shex.Shape;
 import shaper.mapping.rml.RMLParser;
@@ -30,7 +29,7 @@ public class RMLShExMapper extends ShExMapper {
         writer.println(Symbols.BASE + Symbols.SPACE + Symbols.LT + shExSchema.getBaseIRI() + Symbols.GT);
 
         // prefix for newly created shape expressions
-        writer.println(Symbols.PREFIX + Symbols.SPACE + shExSchema.getPrefix() + Symbols.COLON + Symbols.SPACE + Symbols.LT + shExSchema.getBaseIRI() + Symbols.HASH + Symbols.GT);
+        writer.println(Symbols.PREFIX + Symbols.SPACE + shExSchema.getBasePrefix() + Symbols.COLON + Symbols.SPACE + Symbols.LT + shExSchema.getBaseIRI() + Symbols.HASH + Symbols.GT);
 
         // prefixes
         Set<Map.Entry<String, String>> entrySet = rmlModel.getPrefixMap().entrySet();

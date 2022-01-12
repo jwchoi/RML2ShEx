@@ -1,6 +1,5 @@
 package shaper.mapping.model.shex;
 
-import shaper.mapping.Symbols;
 import shaper.mapping.model.ID;
 import shaper.mapping.model.r2rml.ObjectMap;
 
@@ -11,47 +10,40 @@ import java.util.stream.Collectors;
 
 public class ShExSchema {
     private URI baseIRI;
-    private String prefix;
+    private String basePrefix;
 
     private Map<URI, String> prefixMap;
 
-    private Set<Shape> shapes;
-    private Set<NodeConstraint> nodeConstraints;
+    private Set<ShapeExpr> shapes;
 
-    private Set<ShapeExpr> shapeExprs;
-
-    ShExSchema(URI baseIRI, String prefix) {
+    ShExSchema(URI baseIRI, String basePrefix) {
         this.baseIRI = baseIRI;
-        this.prefix = prefix;
+        this.basePrefix = basePrefix;
 
         prefixMap = new TreeMap<>();
-        prefixMap.put(URI.create(baseIRI + Symbols.HASH), prefix); // prefix newly created by base
+        prefixMap.put(baseIRI, basePrefix); // prefix newly created by base
 
-        shapes = new CopyOnWriteArraySet<>();
-        nodeConstraints = new CopyOnWriteArraySet<>();
+        shapes = new HashSet<>();
     }
 
     void addPrefixDecl(String prefix, String IRIString) {
         prefixMap.put(URI.create(IRIString), prefix);
     }
 
-    void addShape(Shape shape) { shapes.add(shape); }
-
-    void addNodeConstraint(NodeConstraint nodeConstraint) {
-        nodeConstraints.add(nodeConstraint);
-    }
+    void addShapeExpr(ShapeExpr shapeExpr) { shapes.add(shapeExpr); }
 
     public ID getMappedShapeID(String table) {
         Optional<Shape> mappedShape = shapes.stream()
-                .filter(shape -> shape instanceof DMShape)
-                .filter(shape -> ((DMShape) shape).getMappedTableName().equals(table))
+                .filter(se -> se instanceof DMShape)
+                .filter(se -> ((DMShape) se).getMappedTableName().equals(table))
+                .map(se -> (Shape) se)
                 .findAny();
 
         return mappedShape.isEmpty() ? null : mappedShape.get().getID();
     }
 
     public String getMappedShape(String table) {
-        Optional<Shape> mappedShape = shapes.stream()
+        Optional<ShapeExpr> mappedShape = shapes.stream()
                 .filter(shape -> shape instanceof DMShape)
                 .filter(shape -> ((DMShape) shape).getMappedTableName().equals(table))
                 .findAny();
@@ -60,7 +52,7 @@ public class ShExSchema {
     }
 
     public ID getMappedNodeConstraintID(String table, String column) {
-        Optional<DMNodeConstraint> mappedNodeConstraint = nodeConstraints.stream()
+        Optional<DMNodeConstraint> mappedNodeConstraint = shapes.stream()
                 .filter(nc -> nc instanceof DMNodeConstraint)
                 .map(nc -> (DMNodeConstraint) nc)
                 .filter(nc -> nc.getMappedTable().equals(table) && nc.getMappedColumn().equals(column))
@@ -70,7 +62,7 @@ public class ShExSchema {
     }
 
     public String getMappedNodeConstraint(String table, String column) {
-        Optional<DMNodeConstraint> mappedNodeConstraint = nodeConstraints.stream()
+        Optional<DMNodeConstraint> mappedNodeConstraint = shapes.stream()
                 .filter(nc -> nc instanceof DMNodeConstraint)
                 .map(nc -> (DMNodeConstraint) nc)
                 .filter(nc -> nc.getMappedTable().equals(table) && nc.getMappedColumn().equals(column))
@@ -80,7 +72,7 @@ public class ShExSchema {
     }
 
     public String getMappedNodeConstraint(ObjectMap objectMap) {
-        Optional<R2RMLNodeConstraint> nodeConstraint = nodeConstraints.stream()
+        Optional<R2RMLNodeConstraint> nodeConstraint = shapes.stream()
                 .filter(nc -> nc instanceof R2RMLNodeConstraint)
                 .map(nc -> (R2RMLNodeConstraint) nc)
                 .filter(nc -> nc.getMappedObjectMap().equals(objectMap))
@@ -90,7 +82,7 @@ public class ShExSchema {
     }
 
     public ID getMappedNodeConstraintID(ObjectMap objectMap) {
-        Optional<R2RMLNodeConstraint> nodeConstraint = nodeConstraints.stream()
+        Optional<R2RMLNodeConstraint> nodeConstraint = shapes.stream()
                 .filter(nc -> nc instanceof R2RMLNodeConstraint)
                 .map(nc -> (R2RMLNodeConstraint) nc)
                 .filter(nc -> nc.getMappedObjectMap().equals(objectMap))
@@ -102,15 +94,16 @@ public class ShExSchema {
     public URI getBaseIRI() {
         return baseIRI;
     }
-    public String getPrefix() { return prefix; }
+    public String getBasePrefix() { return basePrefix; }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public Shape getMappedShape(URI triplesMap) {
-        Optional<Shape> mappedShape = shapes.stream()
-                .filter(shape -> shape instanceof R2RMLShape)
-                .filter(shape -> ((R2RMLShape) shape).getMappedTriplesMap().isPresent())
-                .filter(shape -> ((R2RMLShape) shape).getMappedTriplesMap().get().equals(triplesMap))
+        Optional<R2RMLShape> mappedShape = shapes.stream()
+                .filter(se -> se instanceof R2RMLShape)
+                .map(se -> (R2RMLShape) se)
+                .filter(shape -> shape.getMappedTriplesMap().isPresent())
+                .filter(shape -> shape.getMappedTriplesMap().get().equals(triplesMap))
                 .findAny();
 
         return mappedShape.isEmpty() ? null : mappedShape.get();
@@ -128,6 +121,7 @@ public class ShExSchema {
                 .filter(e -> e instanceof R2RMLShape)
                 .filter(e -> ((R2RMLShape) e).getNodeKind().equals(NodeKinds.IRI)
                         && ((R2RMLShape) e).getRegex().equals(r2RMLShape.getRegex()))
+                .map(e -> (Shape) e)
                 .collect(Collectors.toSet());
     }
 
@@ -157,6 +151,7 @@ public class ShExSchema {
         return shapes.stream()
                 .filter(shape -> shape instanceof R2RMLShape)
                 .filter(shape -> ((R2RMLShape) shape).getMappedTriplesMap().isEmpty())
+                .map(shape -> (Shape) shape)
                 .collect(Collectors.toSet());
     }
 

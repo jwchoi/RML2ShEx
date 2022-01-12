@@ -3,18 +3,28 @@ package shaper.mapping.model.shex;
 import shaper.mapping.model.ID;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 public abstract class Shape extends ShapeExpr implements Comparable<Shape> {
+    private Optional<ID> id;
     private String serializedShape;
+    private Set<TripleExpr> tripleExprs;
 
-    private Set<TripleConstraint> tripleConstraints;
+    private Shape() {
+        super(Kinds.Shape);
+
+        id = Optional.empty();
+        tripleExprs = new HashSet<>();
+    }
 
     Shape(ID id) {
-        super(id);
-
-        tripleConstraints = new HashSet<>();
+        this();
+        this.id = Optional.ofNullable(id);
     }
+
+    ID getID() { return id.isPresent() ? id.get() : null; }
+    void setID(ID id) { this.id = Optional.ofNullable(id); }
 
     @Override
     public int compareTo(Shape o) {
@@ -29,9 +39,9 @@ public abstract class Shape extends ShapeExpr implements Comparable<Shape> {
         this.serializedShape = serializedShape;
     }
 
-    void addTripleConstraint(TripleConstraint tripleConstraint) {
-        tripleConstraints.add(tripleConstraint);
+    void addTripleExpr(TripleExpr tripleExpr) {
+        tripleExprs.add(tripleExpr);
     }
 
-    Set<TripleConstraint> getTripleConstraints() { return tripleConstraints; }
+    Set<TripleExpr> getTripleExprs() { return tripleExprs; }
 }

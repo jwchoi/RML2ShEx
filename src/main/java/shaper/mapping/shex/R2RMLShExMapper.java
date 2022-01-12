@@ -31,7 +31,7 @@ public class R2RMLShExMapper extends ShExMapper {
         writer.println(Symbols.BASE + Symbols.SPACE + Symbols.LT + shExSchema.getBaseIRI() + Symbols.GT);
 
         // prefix for newly created shape expressions
-        writer.println(Symbols.PREFIX + Symbols.SPACE + shExSchema.getPrefix() + Symbols.COLON + Symbols.SPACE + Symbols.LT + shExSchema.getBaseIRI() + Symbols.HASH + Symbols.GT);
+        writer.println(Symbols.PREFIX + Symbols.SPACE + shExSchema.getBasePrefix() + Symbols.COLON + Symbols.SPACE + Symbols.LT + shExSchema.getBaseIRI() + Symbols.HASH + Symbols.GT);
 
         // prefixes
         Set<Map.Entry<String, String>> entrySet = r2rmlModel.getPrefixMap().entrySet();

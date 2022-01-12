@@ -16,20 +16,55 @@ class RML2ShExSchemaFactory {
         addPrefixes(rmlModel, shExSchema);
 
         List<TriplesMap> triplesMaps = rmlModel.getTriplesMaps().stream().toList();
-        int sizeOfTriplesMaps = triplesMaps.size();
 
-        for (int i = 0; i < sizeOfTriplesMaps; i++) {
-            TriplesMap triplesMap = triplesMaps.get(i);
+        for (TriplesMap triplesMap : triplesMaps) {
 
             SubjectMap subjectMap = triplesMap.getSubjectMap();
 
             // create a node constraint from subjectMap
-            ID ncID = new ID(shExSchema.getPrefix(), shExSchema.getBaseIRI(), "SbjNc" + (i + 1));
-            NodeConstraint nc = new RMLNodeConstraint(ncID, subjectMap);
+            ID sm2ncID = new ID(shExSchema.getBasePrefix(), shExSchema.getBaseIRI(), "SM2NC" + NodeConstraint.getIncrementer());
+            NodeConstraint sm2nc = new RMLNodeConstraint(sm2ncID, subjectMap);
 
-            // create a triple constraint from subjectMap of rr:class
-            ID tcID = new ID(shExSchema.getPrefix(), shExSchema.getBaseIRI(), "SbjTc" + (i + 1));
-            TripleConstraint tc = new RMLTripleConstraint(tcID, subjectMap);
+            Set<TripleConstraint> tripleConstraints = new HashSet<>(); // temporarily
+
+            // create a triple constraint from rr:class of subjectMap
+            Set<URI> classes = subjectMap.getClasses();
+            if (classes.size() > 0) {
+                ID sm2tcID = new ID(shExSchema.getBasePrefix(), shExSchema.getBaseIRI(), "SM2TC" + TripleConstraint.getIncrementer());
+                TripleConstraint sm2tc = new RMLTripleConstraint(sm2tcID, classes);
+
+                tripleConstraints.add(sm2tc);
+            }
+
+            List<PredicateObjectMap> predicateObjectMaps = triplesMap.getPredicateObjectMaps();
+            for (PredicateObjectMap predicateObjectMap: predicateObjectMaps) {
+                List<PredicateObjectMap.PredicateObjectPair> predicateObjectPairs = predicateObjectMap.getPredicateObjectPairs();
+
+                for (PredicateObjectMap.PredicateObjectPair predicateObjectPair: predicateObjectPairs) {
+                    PredicateMap predicateMap = predicateObjectPair.getPredicateMap();
+
+                    if (predicateObjectPair.getRefObjectMap().isPresent()) {
+                        // when referencing object map
+                        RefObjectMap refObjectMap = predicateObjectPair.getRefObjectMap().get();
+
+                        ID pr2tcID = new ID(shExSchema.getBasePrefix(), shExSchema.getBaseIRI(), "PR2TC" + TripleConstraint.getIncrementer());
+                        TripleConstraint pr2tc = new RMLTripleConstraint(pr2tcID, predicateMap, refObjectMap);
+
+                        tripleConstraints.add(pr2tc);
+                    }
+
+                    if (predicateObjectPair.getObjectMap().isPresent()) {
+                        // when object map
+                        ObjectMap objectMap = predicateObjectPair.getObjectMap().get();
+
+                        ID po2tcID = new ID(shExSchema.getBasePrefix(), shExSchema.getBaseIRI(), "PO2TC" + TripleConstraint.getIncrementer());
+                        TripleConstraint po2tc = new RMLTripleConstraint(po2tcID, predicateMap, objectMap);
+
+                        tripleConstraints.add(po2tc);
+                    }
+                }
+
+            }
 
 
         }

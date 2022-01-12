@@ -5,10 +5,13 @@ import shaper.mapping.model.ID;
 import java.util.Optional;
 
 public abstract class TripleConstraint extends TripleExpr implements Comparable<TripleConstraint> {
+    private static int incrementer = 0;
 
-    enum MappedTypes { COLUMN, REF_CONSTRAINT, TABLE, SUBJECT_MAP, PREDICATE_OBJECT_MAP, REF_OBJECT_MAP }
+    static int getIncrementer() { return incrementer++; }
 
-    private ID id;
+    enum MappedTypes { COLUMN, REF_CONSTRAINT, TABLE, CLASS, PREDICATE_OBJECT_MAP, PREDICATE_REF_OBJECT_MAP }
+
+    private Optional<ID> id;
 
     private String serializedTripleConstraint;
 
@@ -18,14 +21,17 @@ public abstract class TripleConstraint extends TripleExpr implements Comparable<
 
     private Optional<Boolean> isInverse = Optional.empty();
 
-    TripleConstraint(MappedTypes mappedType) { this.mappedType = mappedType; }
+    TripleConstraint(MappedTypes mappedType) {
+        super(Kinds.TripleConstraint);
+        this.mappedType = mappedType;
+    }
 
     TripleConstraint(ID id, MappedTypes mappedType) {
         this(mappedType);
-        this.id = id;
+        this.id = Optional.ofNullable(id);
     }
 
-    public ID getID() { return id; }
+    public ID getID() { return id.isPresent() ? id.get() : null; }
 
     protected String getSerializedTripleConstraint() { return serializedTripleConstraint; }
 
