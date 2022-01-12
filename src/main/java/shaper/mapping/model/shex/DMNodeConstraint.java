@@ -28,8 +28,8 @@ public class DMNodeConstraint extends NodeConstraint {
     }
 
     private void buildNodeConstraint(String table, String column) {
-        setValueSet(buildValueSet(table, column));
-        if (getValueSet().isPresent())
+        setValues(buildValueSet(table, column));
+        if (getValues().isPresent())
             return;
 
         XSDs xsdType = SqlXsdMap.getMappedXSD(Shaper.dbSchema.getJDBCDataType(table, column));

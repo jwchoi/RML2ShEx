@@ -21,7 +21,7 @@ public class R2RMLTripleConstraint extends TripleConstraint {
     private RefObjectMap refObjectMap;
 
     R2RMLTripleConstraint(Set<URI> classIRIs) {
-        super(MappedTypes.RR_CLASSES);
+        super(MappedTypes.SUBJECT_MAP);
         this.classIRIs = classIRIs;
     }
 
@@ -44,7 +44,7 @@ public class R2RMLTripleConstraint extends TripleConstraint {
     private String buildTripleConstraint() {
         String tripleConstraint = null;
         switch (getMappedType()) {
-            case RR_CLASSES:
+            case SUBJECT_MAP:
                 tripleConstraint = buildTripleConstraintFromClasses();
                 break;
             case PREDICATE_OBJECT_MAP:

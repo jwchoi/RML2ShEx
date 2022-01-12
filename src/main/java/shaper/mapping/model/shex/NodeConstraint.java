@@ -25,7 +25,7 @@ public abstract class NodeConstraint extends ShapeExpr implements Comparable<Nod
     private String serializedNodeConstraint;
 
     private Optional<NodeKinds> nodeKind;
-    private Optional<String> valueSet;
+    private Optional<String> values;
     private Optional<String> datatype;
     private Optional<String> xsFacet;
 
@@ -33,7 +33,7 @@ public abstract class NodeConstraint extends ShapeExpr implements Comparable<Nod
         super(id);
 
         nodeKind = Optional.empty();
-        valueSet = Optional.empty();
+        values = Optional.empty();
         datatype = Optional.empty();
         xsFacet = Optional.empty();
     }
@@ -46,8 +46,8 @@ public abstract class NodeConstraint extends ShapeExpr implements Comparable<Nod
     protected Optional<NodeKinds> getNodeKind() { return nodeKind; }
     protected void setNodeKind(Optional<NodeKinds> nodeKind) { this.nodeKind = nodeKind; }
 
-    protected Optional<String> getValueSet() { return valueSet; }
-    protected void setValueSet(Optional<String> valueSet) { this.valueSet = valueSet; }
+    protected Optional<String> getValues() { return values; }
+    protected void setValues(Optional<String> values) { this.values = values; }
 
     protected Optional<String> getDatatype() { return datatype; }
     protected void setDatatype(Optional<String> datatype) { this.datatype = datatype; }
@@ -58,8 +58,8 @@ public abstract class NodeConstraint extends ShapeExpr implements Comparable<Nod
     protected void buildSerializedNodeConstraint() {
         StringBuffer nodeConstraint = new StringBuffer();
 
-        if (valueSet.isPresent())
-            nodeConstraint.append(valueSet.get());
+        if (values.isPresent())
+            nodeConstraint.append(values.get());
         else if (datatype.isPresent())
             nodeConstraint.append(datatype.get());
         else if (nodeKind.isPresent())

@@ -1,21 +1,39 @@
 package shaper.mapping.model.shex;
 
 import shaper.Shaper;
+import shaper.mapping.PrefixMap;
+import shaper.mapping.model.ID;
 import shaper.mapping.model.rml.*;
 
 import java.net.URI;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 class RML2ShExSchemaFactory {
     // RML
     static ShExSchema getShExSchemaModel(RMLModel rmlModel) {
         ShExSchema shExSchema = new ShExSchema(URI.create(Shaper.shapeBaseURI), Shaper.prefixForShapeBaseURI);
 
-//        Set<TriplesMap> triplesMaps = rmlModel.getTriplesMaps();
-//
+        addPrefixes(rmlModel, shExSchema);
+
+        List<TriplesMap> triplesMaps = rmlModel.getTriplesMaps().stream().toList();
+        int sizeOfTriplesMaps = triplesMaps.size();
+
+        for (int i = 0; i < sizeOfTriplesMaps; i++) {
+            TriplesMap triplesMap = triplesMaps.get(i);
+
+            SubjectMap subjectMap = triplesMap.getSubjectMap();
+
+            // create a node constraint from subjectMap
+            ID ncID = new ID(shExSchema.getPrefix(), shExSchema.getBaseIRI(), "SbjNc" + (i + 1));
+            NodeConstraint nc = new RMLNodeConstraint(ncID, subjectMap);
+
+            // create a triple constraint from subjectMap of rr:class
+            ID tcID = new ID(shExSchema.getPrefix(), shExSchema.getBaseIRI(), "SbjTc" + (i + 1));
+            TripleConstraint tc = new RMLTripleConstraint(tcID, subjectMap);
+
+
+        }
+
 //        for (TriplesMap triplesMap : triplesMaps) {
 //
 //            SubjectMap subjectMap = triplesMap.getSubjectMap();
@@ -114,5 +132,14 @@ class RML2ShExSchemaFactory {
 //        }
 
         return shExSchema;
+    }
+
+    // register namespaces in rmlModel to ShExModel
+    private static void addPrefixes(RMLModel rmlModel, ShExSchema shExSchema) {
+        Set<Map.Entry<String, String>> entrySet = rmlModel.getPrefixMap().entrySet();
+        for (Map.Entry<String, String> entry: entrySet)
+            shExSchema.addPrefixDecl(entry.getKey(), entry.getValue());
+
+        shExSchema.addPrefixDecl("rdf", PrefixMap.getURI("rdf").toString());
     }
 }

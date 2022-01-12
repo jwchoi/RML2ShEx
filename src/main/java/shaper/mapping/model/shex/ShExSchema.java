@@ -31,6 +31,10 @@ public class ShExSchema {
         nodeConstraints = new CopyOnWriteArraySet<>();
     }
 
+    void addPrefixDecl(String prefix, String IRIString) {
+        prefixMap.put(URI.create(IRIString), prefix);
+    }
+
     void addShape(Shape shape) { shapes.add(shape); }
 
     void addNodeConstraint(NodeConstraint nodeConstraint) {

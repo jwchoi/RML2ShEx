@@ -107,7 +107,7 @@ class R2RML2ShExSchemaFactory {
                                 .map(tc -> (R2RMLTripleConstraint) tc)
                                 .collect(Collectors.toSet());
                         for (R2RMLTripleConstraint tc: tripleConstraints) {
-                            if (tc.getMappedType().equals(TripleConstraint.MappedTypes.RR_CLASSES))
+                            if (tc.getMappedType().equals(TripleConstraint.MappedTypes.SUBJECT_MAP))
                                 classIRIs.addAll(tc.getClassIRIs());
                             else
                                 derivedShape.addTripleConstraint(tc); // except for RR_CLASSES tripleConstraints

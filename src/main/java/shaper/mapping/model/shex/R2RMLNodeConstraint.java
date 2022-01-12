@@ -40,7 +40,7 @@ public class R2RMLNodeConstraint extends NodeConstraint {
         Optional<String> language = objectMap.getLanguage();
         if (language.isPresent()) {
             String languageTag = Symbols.OPEN_BRACKET + Symbols.AT + language.get() + Symbols.CLOSE_BRACKET;
-            setValueSet(Optional.of(languageTag));
+            setValues(Optional.of(languageTag));
         }
 
         // datatype
