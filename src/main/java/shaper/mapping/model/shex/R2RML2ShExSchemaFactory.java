@@ -31,7 +31,7 @@ class R2RML2ShExSchemaFactory {
             Set<URI> classes = subjectMap.getClasses();
             if (classes.size() > 0) {
                 TripleConstraint tcFromClasses = new R2RMLTripleConstraint(classes);
-                shape.addTripleExpr(tcFromClasses);
+                shape.addTripleConstraint(tcFromClasses);
             }
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -55,7 +55,7 @@ class R2RML2ShExSchemaFactory {
 
                     // create Triple Constraint From predicate-object map
                     TripleConstraint tcFromPOMap = new R2RMLTripleConstraint(predicateMap, objectMap);
-                    shape.addTripleExpr(tcFromPOMap);
+                    shape.addTripleConstraint(tcFromPOMap);
                 }
 
             }
@@ -79,7 +79,7 @@ class R2RML2ShExSchemaFactory {
 
                     // create Triple Constraint From referencing-object map
                     TripleConstraint tcFromPROMap = new R2RMLTripleConstraint(predicateMap, refObjectMap);
-                    shape.addTripleExpr(tcFromPROMap);
+                    shape.addTripleConstraint(tcFromPROMap);
                 }
             }
         }
@@ -105,7 +105,7 @@ class R2RML2ShExSchemaFactory {
                     // tripleConstraint
                     Set<URI> classIRIs = new TreeSet<>();
                     for (Shape shape: set) {
-                        Set<R2RMLTripleConstraint> tripleConstraints = shape.getTripleExprs().stream()
+                        Set<R2RMLTripleConstraint> tripleConstraints = shape.getTripleConstraints().stream()
                                 .filter(tc -> tc instanceof R2RMLTripleConstraint)
                                 .map(tc -> (R2RMLTripleConstraint) tc)
                                 .collect(Collectors.toSet());
@@ -113,12 +113,12 @@ class R2RML2ShExSchemaFactory {
                             if (tc.getMappedType().equals(TripleConstraint.MappedTypes.CLASS))
                                 classIRIs.addAll(tc.getClassIRIs());
                             else
-                                derivedShape.addTripleExpr(tc); // except for RR_CLASSES tripleConstraints
+                                derivedShape.addTripleConstraint(tc); // except for RR_CLASSES tripleConstraints
                         }
                     }
 
                     // RR_CLASSES tripleConstraint
-                    derivedShape.addTripleExpr(new R2RMLTripleConstraint(classIRIs));
+                    derivedShape.addTripleConstraint(new R2RMLTripleConstraint(classIRIs));
 
                     shExSchema.addShapeExpr(derivedShape);
                 }

@@ -66,7 +66,33 @@ class RML2ShExSchemaFactory {
 
             }
 
+            int sizeOfTCs = tripleConstraints.size();
 
+            if (sizeOfTCs == 0) {
+                // only NodeConstrain from SubjectMap
+                shExSchema.addShapeExpr(sm2nc);
+            }
+            else {
+                ID tm2shID = new ID(shExSchema.getBasePrefix(), shExSchema.getBaseIRI(), "TM2Sh" + Shape.getIncrementer());
+                Shape tm2sh;
+
+                if (sizeOfTCs == 1) {
+                    tm2sh = new RMLShape(tm2shID, tripleConstraints.stream().findAny().get()); // one triple constraint
+                } else {
+                    ID tm2eoID = new ID(shExSchema.getBasePrefix(), shExSchema.getBaseIRI(), "TM2EO" + EachOf.getIncrementer());
+                    List<TripleConstraint> list = tripleConstraints.stream().limit(2).toList();
+                    EachOf tm2eo = new EachOf(tm2eoID, list.get(0), list.get(1));
+                    tripleConstraints.removeAll(list);
+                    tripleConstraints.stream().forEach(tc -> tm2eo.addTripleExpr(tc));
+
+                    tm2sh = new RMLShape(tm2shID, tm2eo); // EachOf as expression
+                }
+
+                ID tm2saID = new ID(shExSchema.getBasePrefix(), shExSchema.getBaseIRI(), "TM2SA" + ShapeAnd.getIncrementer());
+                ShapeAnd tm2sa = new ShapeAnd(tm2saID, sm2nc, tm2sh); // node constraint + triple constraint
+
+                shExSchema.addShapeExpr(tm2sa);
+            }
         }
 
 //        for (TriplesMap triplesMap : triplesMaps) {

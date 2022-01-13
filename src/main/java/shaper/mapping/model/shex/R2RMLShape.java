@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.stream.Collectors;
 
 public class R2RMLShape extends Shape {
     private Optional<URI> mappedTriplesMap; // mapped rr:TriplesMap for generating id
@@ -101,10 +100,7 @@ public class R2RMLShape extends Shape {
 
         shape.append(Symbols.SPACE + Symbols.OPEN_BRACE + Symbols.NEWLINE);
 
-        Set<TripleConstraint> tripleConstraints = getTripleExprs().stream()
-                .filter(te -> te instanceof TripleConstraint)
-                .map(te -> (TripleConstraint) te)
-                .collect(Collectors.toSet());
+        Set<TripleConstraint> tripleConstraints = getTripleConstraints();
 
         for (TripleConstraint tripleConstraint : tripleConstraints) {
 

@@ -34,13 +34,13 @@ class DM2ShExSchemaFactory {
 
             // Triple Constraint From Table
             TripleConstraint tcFromTable = new DMTripleConstraint(table);
-            shape.addTripleExpr(tcFromTable);
+            shape.addTripleConstraint(tcFromTable);
 
             // Triple Constraint From Column
             for(String column: columns) {
                 TripleConstraint tcFromColumn = new DMTripleConstraint(new DBColumn(table, column));
 
-                shape.addTripleExpr(tcFromColumn);
+                shape.addTripleConstraint(tcFromColumn);
             } // END COLUMN
 
             // Triple Constraint From Referential Constraint
@@ -48,7 +48,7 @@ class DM2ShExSchemaFactory {
             for(String refConstraint: refConstraints) {
                 TripleConstraint tcFromRefConstraint = new DMTripleConstraint(new DBRefConstraint(table, refConstraint), false);
 
-                shape.addTripleExpr(tcFromRefConstraint);
+                shape.addTripleConstraint(tcFromRefConstraint);
             } // END REFERENTIAL CONSTRAINT
 
             // Inverse Triple Constraint From Referential Constraint
@@ -56,7 +56,7 @@ class DM2ShExSchemaFactory {
             for(DBRefConstraint refConstraint: refConstraintsPointingTo) {
                 TripleConstraint tcFromRefConstraint = new DMTripleConstraint(refConstraint, true);
 
-                shape.addTripleExpr(tcFromRefConstraint);
+                shape.addTripleConstraint(tcFromRefConstraint);
             } // END Inverse Triple Constraint From Referential Constraint
 
             shExSchema.addShapeExpr(shape);

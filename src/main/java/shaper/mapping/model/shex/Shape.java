@@ -7,15 +7,21 @@ import java.util.Optional;
 import java.util.Set;
 
 public abstract class Shape extends ShapeExpr implements Comparable<Shape> {
+
+    private static int incrementer = 0;
+    static int getIncrementer() { return incrementer++; }
+
     private Optional<ID> id;
     private String serializedShape;
-    private Set<TripleExpr> tripleExprs;
+    private Set<TripleConstraint> tripleConstraints;
+
+    private Optional<TripleExpr> expression;
 
     private Shape() {
         super(Kinds.Shape);
 
         id = Optional.empty();
-        tripleExprs = new HashSet<>();
+        tripleConstraints = new HashSet<>();
     }
 
     Shape(ID id) {
@@ -23,8 +29,13 @@ public abstract class Shape extends ShapeExpr implements Comparable<Shape> {
         this.id = Optional.ofNullable(id);
     }
 
+    Shape(ID id, TripleExpr tripleExpr) {
+        this(id);
+
+        expression = Optional.ofNullable(tripleExpr);
+    }
+
     ID getID() { return id.isPresent() ? id.get() : null; }
-    void setID(ID id) { this.id = Optional.ofNullable(id); }
 
     @Override
     public int compareTo(Shape o) {
@@ -39,9 +50,9 @@ public abstract class Shape extends ShapeExpr implements Comparable<Shape> {
         this.serializedShape = serializedShape;
     }
 
-    void addTripleExpr(TripleExpr tripleExpr) {
-        tripleExprs.add(tripleExpr);
+    void addTripleConstraint(TripleConstraint tripleConstraint) {
+        this.tripleConstraints.add(tripleConstraint);
     }
 
-    Set<TripleExpr> getTripleExprs() { return tripleExprs; }
+    Set<TripleConstraint> getTripleConstraints() { return tripleConstraints; }
 }
