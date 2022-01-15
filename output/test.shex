@@ -1,0 +1,10 @@
+BASE <http://my.example/ns#>
+PREFIX http://example.com/: <ex>
+PREFIX http://example.com/dept#: <dept>
+PREFIX http://my.example/ns#: <my>
+PREFIX http://www.w3.org/1999/02/22-rdf-syntax-ns#: <rdf>
+PREFIX http://www.w3.org/2000/01/rdf-schema#: <rdfs>
+PREFIX http://www.w3.org/2001/XMLSchema#: <xsd>
+PREFIX http://www.w3.org/ns/r2rml#: <rr>
+PREFIX http://xmlns.com/foaf/0.1/: <foaf>
+

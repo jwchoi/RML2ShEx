@@ -1,0 +1,101 @@
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ex: <http://example.com/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dept: <http://example.com/dept#> .
+@base <http://example.com/base/> .
+
+
+<TriplesMap1>
+    a rr:TriplesMap;
+      
+	rr:logicalTable [  rr:sqlQuery """
+						SELECT `Code`, `Name`, `Lan`
+						FROM `Country`
+						WHERE `Lan` = 'EN';
+                       """ ] ;
+	
+    rr:subjectMap [ rr:template "http://example.com/{\"Code\"}" ]; 
+	
+    rr:predicateObjectMap
+    [ 
+      rr:predicate	rdfs:label;
+      rr:objectMap	[ rr:column "\"Name\""; rr:language "en" ]
+    ]
+    .
+	
+<TriplesMap2>
+    a rr:TriplesMap;
+      
+	rr:logicalTable [  rr:sqlQuery """
+                       SELECT `Code`, `Name`, `Lan`
+                       FROM `Country`
+					   WHERE `Lan` = 'ES';
+                       """ ] ;
+	
+    rr:subjectMap [ rr:template "http://example.com/{\"Code\"}" ]; 
+	
+    rr:predicateObjectMap
+    [ 
+      rr:predicate rdfs:label;
+      rr:objectMap    [ rr:column "\"Name\""; rr:language "es" ]
+    ]
+    .
+
+<TriplesMap3>
+    a rr:TriplesMap;
+    rr:logicalTable [ rr:sqlQuery """
+
+        SELECT `EMP`.*, (CASE `job`
+            WHEN 'CLERK' THEN 'general-office'
+            WHEN 'NIGHTGUARD' THEN 'security'
+            WHEN 'ENGINEER' THEN 'engineering'
+        END) AS ROLE FROM `EMP`
+
+        """ ];
+    rr:subjectMap [
+          rr:template "http://data.example.com/employee/{\"empno\"}";
+      ];
+    rr:predicateObjectMap [
+          rr:predicate ex:role;
+          rr:objectMap [ rr:template "http://data.example.com/roles/{ROLE}" ];
+      ].
+
+<TriplesMap4>
+    a rr:TriplesMap;
+    rr:logicalTable [ rr:sqlQuery """
+       Select CONCAT('Department' , `deptno`) AS deptId
+            , `deptno`
+            , `dname`
+            , `loc`
+         from `DEPT`
+       """ ];
+
+    rr:subjectMap [ rr:column "deptId"; rr:termType rr:BlankNode;
+                    rr:inverseExpression "{\"deptno\"} = substr({deptId},length('Department')+1)"];
+
+    rr:predicateObjectMap
+            [
+          rr:predicate		dept:deptno ;
+          rr:objectMap    [ rr:column "\"deptno\""; rr:datatype xsd:positiveInteger ]
+      ];
+
+    rr:predicateObjectMap
+            [
+          rr:predicate		dept:name ;
+          rr:objectMap    [ rr:column "\"dname\"" ]
+      ];
+
+    rr:predicateObjectMap
+            [
+          rr:predicate		dept:location ;
+          rr:objectMap    [ rr:column "\"loc\"" ]
+      ];
+
+    rr:predicateObjectMap
+            [
+          rr:predicate		dept:COMPANY ;
+          rr:objectMap		[ rr:constant "EXAMPLE Corporation"; ]
+      ]
+.
