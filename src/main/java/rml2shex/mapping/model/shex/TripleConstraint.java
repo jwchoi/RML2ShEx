@@ -1,6 +1,6 @@
 package rml2shex.mapping.model.shex;
 
-import rml2shex.util.ID;
+import rml2shex.util.Id;
 import rml2shex.mapping.model.rml.ObjectMap;
 import rml2shex.mapping.model.rml.PredicateMap;
 import rml2shex.mapping.model.rml.RefObjectMap;
@@ -10,13 +10,19 @@ import java.util.Optional;
 import java.util.Set;
 
 public class TripleConstraint extends TripleExpr implements Comparable<TripleConstraint> {
-    private static int incrementer = 0;
 
-    static int getIncrementer() { return incrementer++; }
+    static class IdGenerator {
+        private static int incrementer = 0;
+        private static int getPostfix() { return incrementer++; }
+
+        static Id generateId(String prefixLabel, URI prefixIRI, String localPartPrefix) {
+            return new Id(prefixLabel, prefixIRI, localPartPrefix + getPostfix());
+        }
+    }
 
     enum MappedTypes { CLASS, PREDICATE_OBJECT_MAP, PREDICATE_REF_OBJECT_MAP }
 
-    private Optional<ID> id;
+    private Optional<Id> id;
 
     private String serializedTripleConstraint;
 
@@ -31,24 +37,24 @@ public class TripleConstraint extends TripleExpr implements Comparable<TripleCon
         this.mappedType = mappedType;
     }
 
-    private TripleConstraint(ID id, MappedTypes mappedType) {
+    private TripleConstraint(Id id, MappedTypes mappedType) {
         this(mappedType);
         this.id = Optional.ofNullable(id);
     }
 
-    TripleConstraint(ID id, Set<URI> classes) {
+    TripleConstraint(Id id, Set<URI> classes) {
         this(id, MappedTypes.CLASS);
     }
 
-    TripleConstraint(ID id, PredicateMap predicateMap, ObjectMap objectMap) {
+    TripleConstraint(Id id, PredicateMap predicateMap, ObjectMap objectMap) {
         this(id, MappedTypes.PREDICATE_OBJECT_MAP);
     }
 
-    TripleConstraint(ID id, PredicateMap predicateMap, RefObjectMap refObjectMap) {
+    TripleConstraint(Id id, PredicateMap predicateMap, RefObjectMap refObjectMap) {
         this(id, MappedTypes.PREDICATE_REF_OBJECT_MAP);
     }
 
-    public ID getID() { return id.isPresent() ? id.get() : null; }
+    public Id getID() { return id.isPresent() ? id.get() : null; }
 
     protected String getSerializedTripleConstraint() { return serializedTripleConstraint; }
 

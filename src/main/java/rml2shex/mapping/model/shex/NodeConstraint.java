@@ -1,20 +1,26 @@
 package rml2shex.mapping.model.shex;
 
 import rml2shex.util.Symbols;
-import rml2shex.util.ID;
+import rml2shex.util.Id;
 import rml2shex.mapping.model.rml.SubjectMap;
 import rml2shex.mapping.model.rml.Template;
 import rml2shex.mapping.model.rml.TermMap;
 
+import java.net.URI;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
 public class NodeConstraint extends ShapeExpr implements Comparable<NodeConstraint> {
 
-    private static int incrementer = 0;
+    static class IdGenerator {
+        private static int incrementer = 0;
+        private static int getPostfix() { return incrementer++; }
 
-    static int getIncrementer() { return incrementer++; }
+        static Id generateId(String prefixLabel, URI prefixIRI, String localPartPrefix) {
+            return new Id(prefixLabel, prefixIRI, localPartPrefix + getPostfix());
+        }
+    }
 
     protected enum XSFacets {
         MAX_LENGTH("MAXLENGTH"),
@@ -31,7 +37,7 @@ public class NodeConstraint extends ShapeExpr implements Comparable<NodeConstrai
         public String toString() { return facet; }
     }
 
-    private Optional<ID> id;
+    private Optional<Id> id;
 
     private String serializedNodeConstraint;
 
@@ -49,7 +55,7 @@ public class NodeConstraint extends ShapeExpr implements Comparable<NodeConstrai
         xsFacets = new HashSet<>();
     }
 
-    NodeConstraint(ID id, SubjectMap subjectMap) {
+    NodeConstraint(Id id, SubjectMap subjectMap) {
         this();
 
         this.id = Optional.of(id);
@@ -84,7 +90,7 @@ public class NodeConstraint extends ShapeExpr implements Comparable<NodeConstrai
         addXsFacet(stringFacet);
     }
 
-    ID getID() { return id.isPresent() ? id.get() : null; }
+    Id getID() { return id.isPresent() ? id.get() : null; }
 
     private String getSerializedNodeConstraint() { return serializedNodeConstraint; }
     private void setSerializedNodeConstraint(String serializedNodeConstraint) {

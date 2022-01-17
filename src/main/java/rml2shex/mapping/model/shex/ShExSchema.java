@@ -1,12 +1,8 @@
 package rml2shex.mapping.model.shex;
 
-import rml2shex.util.ID;
-import rml2shex.mapping.model.rml.ObjectMap;
-
 import java.net.URI;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.stream.Collectors;
 
 public class ShExSchema {
     private URI baseIRI;
