@@ -50,7 +50,7 @@ public class TripleConstraint extends TripleExpr implements Comparable<TripleCon
         this(id, MappedTypes.PREDICATE_OBJECT_MAP);
     }
 
-    TripleConstraint(Id id, PredicateMap predicateMap, RefObjectMap refObjectMap) {
+    TripleConstraint(Id id, PredicateMap predicateMap, Id shapeExprIdAsObject) {
         this(id, MappedTypes.PREDICATE_REF_OBJECT_MAP);
     }
 

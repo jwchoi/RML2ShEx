@@ -2,13 +2,20 @@ package rml2shex.mapping.model.shex;
 
 import rml2shex.util.Id;
 
+import java.net.URI;
 import java.util.Optional;
 import java.util.Set;
 
 public class Shape extends ShapeExpr implements Comparable<Shape> {
 
-    private static int incrementer = 0;
-    static int getIncrementer() { return incrementer++; }
+    static class IdGenerator {
+        private static int incrementer = 0;
+        private static int getPostfix() { return incrementer++; }
+
+        static Id generateId(String prefixLabel, URI prefixIRI, String localPartPrefix) {
+            return new Id(prefixLabel, prefixIRI, localPartPrefix + getPostfix());
+        }
+    }
 
     private Optional<Id> id;
     private String serializedShape;
