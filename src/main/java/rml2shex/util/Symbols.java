@@ -3,6 +3,7 @@ package rml2shex.util;
 public class Symbols {
     public static final String A = "a";
     public static final String AMPERSAND = "&";
+    public static final String AND = "AND";
     public static final String ASTERISK = "*";
     public static final String AT = "@";
     public static final String BACKSLASH = "\\";
@@ -17,6 +18,7 @@ public class Symbols {
     public static final String DOLLAR = "$";
     public static final String DOT = ".";
     public static final String DOUBLE_QUOTATION_MARK = "\"";
+    public static final String EMPTY = "";
     public static final String EQUAL = "=";
     public static final String GRAVE_ACCENT = "`";
     public static final String GT = ">";
@@ -28,7 +30,8 @@ public class Symbols {
     public static final String OPEN_BRACE = "{";
     public static final String OPEN_BRACKET = "[";
     public static final String OPEN_PARENTHESIS = "(";
-    public static final String OR = "|";
+    public static final String OR = "OR";
+    public static final String PIPE = "|";
     public static final String PLUS = "+";
     public static final String PREFIX = "PREFIX";
     public static final String QUESTION_MARK = "?";

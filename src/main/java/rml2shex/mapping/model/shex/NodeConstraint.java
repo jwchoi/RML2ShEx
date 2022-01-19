@@ -39,8 +39,6 @@ public class NodeConstraint extends ShapeExpr implements Comparable<NodeConstrai
 
     private Optional<Id> id;
 
-    private String serializedNodeConstraint;
-
     private Optional<NodeKinds> nodeKind;
     private Optional<String> values;
     private Optional<String> datatype;
@@ -92,11 +90,6 @@ public class NodeConstraint extends ShapeExpr implements Comparable<NodeConstrai
 
     Id getID() { return id.isPresent() ? id.get() : null; }
 
-    private String getSerializedNodeConstraint() { return serializedNodeConstraint; }
-    private void setSerializedNodeConstraint(String serializedNodeConstraint) {
-        this.serializedNodeConstraint = serializedNodeConstraint;
-    }
-
     private void setNodeKind(NodeKinds nodeKind) { if (nodeKind != null) this.nodeKind = Optional.of(nodeKind); }
 
     private Optional<String> getValues() { return values; }
@@ -107,24 +100,9 @@ public class NodeConstraint extends ShapeExpr implements Comparable<NodeConstrai
 
     private void addXsFacet(XSFacet xsFacet) { xsFacets.add(xsFacet); }
 
-    private void buildSerializedNodeConstraint() {
-        StringBuffer nodeConstraint = new StringBuffer();
-
-        if (values.isPresent())
-            nodeConstraint.append(values.get());
-        else if (datatype.isPresent())
-            nodeConstraint.append(datatype.get());
-        else if (nodeKind.isPresent())
-            nodeConstraint.append(nodeKind.get());
-
-        xsFacets.stream().forEach(xsFacet -> nodeConstraint.append(Symbols.SPACE + xsFacet));
-
-        setSerializedNodeConstraint(nodeConstraint.toString());
-    }
-
     @Override
     public int compareTo(NodeConstraint o) {
-        return serializedNodeConstraint.compareTo(o.toString());
+        return getSerializedShapeExpr().compareTo(o.getSerializedShapeExpr());
     }
 
     private boolean isEquivalentXSFacet(Set<XSFacet> other) {
@@ -148,5 +126,31 @@ public class NodeConstraint extends ShapeExpr implements Comparable<NodeConstrai
         if (!isEquivalentXSFacet(other.xsFacets)) return false;
 
         return true;
+    }
+
+    @Override
+    public String getSerializedShapeExpr() {
+        String serializedShapeExpr = super.getSerializedShapeExpr();
+        if (serializedShapeExpr != null) return serializedShapeExpr;
+
+        StringBuffer sb = new StringBuffer();
+
+        String id = this.id.isPresent() ? this.id.get().getPrefixedName() : Symbols.EMPTY;
+        sb.append(id);
+
+        sb.append(Symbols.SPACE);
+
+        if (values.isPresent())
+            sb.append(values.get());
+        else if (datatype.isPresent())
+            sb.append(datatype.get());
+        else if (nodeKind.isPresent())
+            sb.append(nodeKind.get());
+
+        xsFacets.stream().forEach(xsFacet -> sb.append(Symbols.SPACE + xsFacet));
+
+        serializedShapeExpr = sb.toString();
+        setSerializedShapeExpr(serializedShapeExpr);
+        return serializedShapeExpr;
     }
 }

@@ -3,7 +3,6 @@ package rml2shex.mapping.model.shex;
 import rml2shex.util.Id;
 import rml2shex.mapping.model.rml.ObjectMap;
 import rml2shex.mapping.model.rml.PredicateMap;
-import rml2shex.mapping.model.rml.RefObjectMap;
 
 import java.net.URI;
 import java.util.Optional;

@@ -1,5 +1,6 @@
 package rml2shex.mapping.model.shex;
 
+import com.google.common.collect.Sets;
 import rml2shex.util.PrefixMap;
 import rml2shex.util.Id;
 import rml2shex.mapping.model.rml.*;
@@ -35,7 +36,11 @@ public class ShExSchemaFactory {
 
         convertTriplesMap2ShapeExpr(shexBasePrefix, shexBaseIRI, tmcrMap.values().stream().collect(Collectors.toSet()));
 
-        inferShapeExprFromTriplesMapGroup(triplesMapGroup);
+        Set<ShapeExpr> inferredShapeExprs = getInferredShapeExprs(shexBasePrefix, shexBaseIRI, triplesMapGroup, tmcrMap);
+
+        inferredShapeExprs.stream().forEach(inferredShapeExpr -> shExSchema.addShapeExpr(inferredShapeExpr));
+
+        inferredShapeExprs.stream().forEach(System.out::println);
 
         return shExSchema;
     }
@@ -212,7 +217,8 @@ public class ShExSchemaFactory {
             int countOfTripleConstraint = tripleConstraints.size();
 
             if (countOfTripleConstraint == 0) {
-                conversionResult.shapeExpr = nodeConstraint;
+                conversionResult.convertedShapeExprId = nodeConstraint.getID();
+                conversionResult.convertedShapeExpr = nodeConstraint;
             } else {
                 Id tm2ShId = Shape.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "TM2Sh");
                 Shape tm2sh;
@@ -221,10 +227,9 @@ public class ShExSchemaFactory {
                     tm2sh = new Shape(tm2ShId, tripleConstraints.stream().findAny().get()); // one triple constraint
                 } else {
                     Id tm2EoId = EachOf.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "TM2EO");
-                    List<TripleConstraint> list = tripleConstraints.stream().limit(2).toList();
-                    EachOf tm2eo = new EachOf(tm2EoId, list.get(0), list.get(1));
-                    tripleConstraints.removeAll(list);
-                    tripleConstraints.stream().forEach(tc -> tm2eo.addTripleExpr(tc));
+                    List<TripleConstraint> list = tripleConstraints.stream().collect(Collectors.toList());
+                    EachOf tm2eo = new EachOf(tm2EoId, list.remove(0), list.remove(0));
+                    list.stream().forEach(tc -> tm2eo.addTripleExpr(tc));
 
                     tm2sh = new Shape(tm2ShId, tm2eo); // EachOf as expression
                 }
@@ -232,18 +237,65 @@ public class ShExSchemaFactory {
                 Id tm2SaId = ShapeAnd.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "TM2SA");
                 ShapeAnd tm2sa = new ShapeAnd(tm2SaId, nodeConstraint, tm2sh); // node constraint + (EachOf)triple constraints
 
-                conversionResult.shapeExpr = tm2sa;
+                conversionResult.convertedShapeExprId = tm2SaId;
+                conversionResult.convertedShapeExpr = tm2sa;
             }
         }
     }
 
-    private static void inferShapeExprFromTriplesMapGroup(Set<Set<TriplesMap>> triplesMapGroup) {}
+    private static Set<ShapeExpr> getInferredShapeExprs(String shexBasePrefix, URI shexBaseIRI, Set<Set<TriplesMap>> triplesMapGroup, Map<TriplesMap, ConversionResult> tmcrMap) {
+        Set<ShapeExpr> inferredShapeExprs = new HashSet<>();
+
+        for (Set<TriplesMap> triplesMapSubgroup: triplesMapGroup) {
+            Set<ConversionResult> conversionResultSubgroup = triplesMapSubgroup.stream()
+                    .map(triplesMap -> tmcrMap.get(triplesMap))
+                    .collect(Collectors.toSet());
+
+            int n = conversionResultSubgroup.size();
+
+            if (n == 1) {
+                inferredShapeExprs.add(conversionResultSubgroup.stream().findAny().get().convertedShapeExpr); // converted shapeExpr
+                continue;
+            }
+
+            Set<Id> inferredShapeExprIdsOfSubgroup = new HashSet<>();
+
+            for (int r = 1; r <= n; r++) {
+                Set<Set<ConversionResult>> combinations = Sets.combinations(conversionResultSubgroup, r);
+
+                for (Set<ConversionResult> combination: combinations) {
+                    if (r == 1) {
+                        ConversionResult conversionResult = combination.stream().findAny().get();
+                        inferredShapeExprIdsOfSubgroup.add(conversionResult.convertedShapeExprId);
+                        inferredShapeExprs.add(conversionResult.convertedShapeExpr); // converted shapeExpr
+                    } else {
+                        Id id = ShapeAnd.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "InSA");
+                        List<ConversionResult> list = combination.stream().collect(Collectors.toList());
+                        ShapeAnd shapeAnd = new ShapeAnd(id, new ShapeExprRef(list.remove(0).convertedShapeExprId), new ShapeExprRef(list.remove(0).convertedShapeExprId));
+                        list.stream().forEach(conversionResult -> shapeAnd.addShapeExpr(new ShapeExprRef(conversionResult.convertedShapeExprId)));
+                        inferredShapeExprIdsOfSubgroup.add(id);
+                        inferredShapeExprs.add(shapeAnd);
+                    }
+                }
+            }
+
+            Id groupId = conversionResultSubgroup.stream().findAny().get().referenceId;
+            List<Id> ids = inferredShapeExprIdsOfSubgroup.stream().collect(Collectors.toList());
+            ShapeOr shapeOr = new ShapeOr(groupId, new ShapeExprRef(ids.remove(0)), new ShapeExprRef(ids.remove(0)));
+            ids.stream().forEach(id -> shapeOr.addShapeExpr(new ShapeExprRef(id)));
+
+            inferredShapeExprs.add(shapeOr);
+        }
+
+        return inferredShapeExprs;
+    }
 
     private static class ConversionResult {
         private NodeConstraint nodeConstraint; // from the subject map
         private Set<TripleConstraint> tripleConstraints = new HashSet<>(); // from rr:class, predicate object maps, predicate ref object maps
 
-        private ShapeExpr shapeExpr; // nodeConstraint + triplesConstraints
-        private Id referenceId; // groupId
+        private Id convertedShapeExprId;
+        private ShapeExpr convertedShapeExpr; // (nodeConstraint + triplesConstraints) or nodeConstraint
+        private Id referenceId; // if (groupSize > 1) groupId or if (groupSize == 1) convertedShapeExprId
     }
 }

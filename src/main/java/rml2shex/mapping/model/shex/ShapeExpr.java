@@ -5,7 +5,19 @@ public abstract class ShapeExpr {
 
     private Kinds kind;
 
+    private String serializedShapeExpr;
+
     ShapeExpr(Kinds kind) { this.kind = kind; }
 
     Kinds getKind() { return kind; }
+
+    public String getSerializedShapeExpr() { return serializedShapeExpr; }
+    void setSerializedShapeExpr(String serializedShapeExpr) { this.serializedShapeExpr = serializedShapeExpr; }
+
+    @Override
+    public String toString() {
+        if (serializedShapeExpr == null) serializedShapeExpr = getSerializedShapeExpr();
+
+        return serializedShapeExpr;
+    }
 }
