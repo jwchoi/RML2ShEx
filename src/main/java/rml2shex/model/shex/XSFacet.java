@@ -1,0 +1,13 @@
+package rml2shex.model.shex;
+
+public abstract class XSFacet {
+    enum Kinds { stringFacet, numericalFacet }
+
+    private Kinds kind;
+
+    XSFacet(Kinds kind) { this.kind = kind; }
+
+    Kinds getKind() { return kind; }
+
+    boolean isEquivalent(XSFacet other) { return kind.equals(other.kind); }
+}

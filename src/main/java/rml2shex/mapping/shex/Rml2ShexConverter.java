@@ -1,9 +1,10 @@
 package rml2shex.mapping.shex;
 
+import rml2shex.model.shex.DeclarableShapeExpr;
 import rml2shex.util.Symbols;
-import rml2shex.mapping.model.rml.*;
-import rml2shex.mapping.model.shex.ShExSchema;
-import rml2shex.mapping.model.shex.ShExSchemaFactory;
+import rml2shex.model.rml.*;
+import rml2shex.model.shex.ShExDocModel;
+import rml2shex.model.shex.ShExDocModelFactory;
 import rml2shex.mapping.rml.RMLParser;
 
 import java.io.File;
@@ -18,7 +19,7 @@ public class Rml2ShexConverter {
     private String shexBasePrefix;
     private URI shexBaseIRI;
 
-    private ShExSchema shExSchema;
+    private ShExDocModel shExDocModel;
 
     private File output;
     private PrintWriter writer;
@@ -34,17 +35,22 @@ public class Rml2ShexConverter {
 
     private void writeDirectives() {
         // base
-        writer.println(Symbols.BASE + Symbols.SPACE + Symbols.LT + shExSchema.getBaseIRI() + Symbols.GT);
+        writer.println(Symbols.BASE + Symbols.SPACE + Symbols.LT + shExDocModel.getBaseIRI() + Symbols.GT);
 
         // prefixes
-        Set<Map.Entry<URI, String>> entrySet = shExSchema.getPrefixMap().entrySet();
+        Set<Map.Entry<URI, String>> entrySet = shExDocModel.getPrefixMap().entrySet();
         for (Map.Entry<URI, String> entry: entrySet)
             writer.println(Symbols.PREFIX + Symbols.SPACE + entry.getKey() + Symbols.COLON + Symbols.SPACE + Symbols.LT + entry.getValue() + Symbols.GT);
 
         writer.println();
     }
 
-    private void writeShEx() {}
+    private void writeShEx() {
+        Set<DeclarableShapeExpr> declarableShapeExprs = shExDocModel.getDeclarableShapeExprs();
+
+        declarableShapeExprs.stream().forEach(declarableShapeExpr -> writer.println(declarableShapeExpr.getShapeExprDecl()));
+        declarableShapeExprs.stream().forEach(declarableShapeExpr -> System.out.println(declarableShapeExpr.getShapeExprDecl()));
+    }
 
     private void preProcess() {
         output = new File(shexPathname);
@@ -66,7 +72,7 @@ public class Rml2ShexConverter {
 
     public File generateShExFile() {
         RMLModel rmlModel = RMLModelFactory.getRMLModel(getRMLParser());
-        shExSchema = ShExSchemaFactory.getShExSchema(rmlModel, shexBasePrefix, shexBaseIRI);
+        shExDocModel = ShExDocModelFactory.getShExDocModel(rmlModel, shexBasePrefix, shexBaseIRI);
 
         preProcess();
         writeDirectives();

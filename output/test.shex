@@ -8,3 +8,9 @@ PREFIX http://www.w3.org/2001/XMLSchema#: <xsd>
 PREFIX http://www.w3.org/ns/r2rml#: <rr>
 PREFIX http://xmlns.com/foaf/0.1/: <foaf>
 
+my:InSA6 @my:TM2SA4 AND @my:TM2SA3
+my:TM2SA2 BNODE null
+my:TM2SA4 IRI /^http:\/\/example\.com\/(.*)$/ null
+my:TM2SA5 IRI /^http:\/\/data\.example\.com\/employee\/(.*)$/ null
+my:TM2SA3 IRI /^http:\/\/example\.com\/(.*)$/ null
+my:TG2SO0 @my:InSA6 OR @my:TM2SA4 OR @my:TM2SA3
