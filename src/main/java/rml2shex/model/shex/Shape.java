@@ -1,10 +1,10 @@
 package rml2shex.model.shex;
 
 import rml2shex.util.Id;
+import rml2shex.util.Symbols;
 
 import java.net.URI;
 import java.util.Optional;
-import java.util.Set;
 
 public class Shape extends DeclarableShapeExpr {
 
@@ -16,8 +16,6 @@ public class Shape extends DeclarableShapeExpr {
             return new Id(prefixLabel, prefixIRI, localPartPrefix + getPostfix());
         }
     }
-
-    private String serializedShape;
 
     private Optional<TripleExpr> expression;
 
@@ -32,19 +30,21 @@ public class Shape extends DeclarableShapeExpr {
         expression = Optional.ofNullable(tripleExpr);
     }
 
-    Shape(Id id, Set<TripleConstraint> tripleConstraints) {
-        this(id);
-    }
+    @Override
+    public String getSerializedShapeExpr() {
+        String serializedShapeExpr = super.getSerializedShapeExpr();
+        if (serializedShapeExpr != null) return serializedShapeExpr;
 
-    private void setExpression(Set<TripleConstraint> tripleConstraints) {
+        if (expression.isEmpty()) return Symbols.EMPTY;
 
-    }
+        StringBuffer sb = new StringBuffer();
 
-    protected String getSerializedShape() {
-        return serializedShape;
-    }
+        sb.append(Symbols.OPEN_BRACE + Symbols.NEWLINE);
+        sb.append(Symbols.SPACE + Symbols.SPACE + expression.get().getSerializedTripleExpr() + Symbols.NEWLINE);
+        sb.append(Symbols.CLOSE_BRACE);
 
-    protected void setSerializedShape(String serializedShape) {
-        this.serializedShape = serializedShape;
+        serializedShapeExpr = sb.toString();
+        setSerializedShapeExpr(serializedShapeExpr);
+        return serializedShapeExpr;
     }
 }
