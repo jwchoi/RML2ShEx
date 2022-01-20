@@ -210,9 +210,9 @@ public class ShExDocModelFactory {
     private static void convertTriplesMap2ShapeExpr(String shexBasePrefix, URI shexBaseIRI, Set<ConversionResult> conversionResults) {
         for (ConversionResult conversionResult: conversionResults) {
             NodeConstraint nodeConstraint = conversionResult.nodeConstraint; // for subject in RDF graph
-            Set<TripleConstraint> tripleConstraints = conversionResult.tripleConstraints; // for predicate & object in RDF graph
+            Set<TripleConstraint> tripleConstraintSet = conversionResult.tripleConstraints; // for predicate & object in RDF graph
 
-            int countOfTripleConstraint = tripleConstraints.size();
+            int countOfTripleConstraint = tripleConstraintSet.size();
 
             if (countOfTripleConstraint == 0) {
                 conversionResult.convertedShapeExprId = nodeConstraint.getId();
@@ -222,12 +222,12 @@ public class ShExDocModelFactory {
                 Shape tm2sh;
 
                 if (countOfTripleConstraint == 1) {
-                    tm2sh = new Shape(tm2ShId, tripleConstraints.stream().findAny().get()); // one triple constraint
+                    tm2sh = new Shape(tm2ShId, tripleConstraintSet.stream().findAny().get()); // one triple constraint
                 } else {
                     Id tm2EoId = EachOf.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "TM2EO");
-                    List<TripleConstraint> list = tripleConstraints.stream().collect(Collectors.toList());
-                    EachOf tm2eo = new EachOf(tm2EoId, list.remove(0), list.remove(0));
-                    list.stream().forEach(tc -> tm2eo.addTripleExpr(tc));
+                    List<TripleConstraint> tripleConstraintList = tripleConstraintSet.stream().collect(Collectors.toList());
+                    EachOf tm2eo = new EachOf(tm2EoId, tripleConstraintList.remove(0), tripleConstraintList.remove(0));
+                    tripleConstraintList.stream().forEach(tc -> tm2eo.addTripleExpr(tc));
 
                     tm2sh = new Shape(tm2ShId, tm2eo); // EachOf as expression
                 }
@@ -268,9 +268,9 @@ public class ShExDocModelFactory {
                         inferredShapeExprs.add(conversionResult.convertedShapeExpr); // converted shapeExpr
                     } else {
                         Id id = ShapeAnd.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "InSA");
-                        List<ConversionResult> list = combination.stream().collect(Collectors.toList());
-                        ShapeAnd shapeAnd = new ShapeAnd(id, new ShapeExprRef(list.remove(0).convertedShapeExprId), new ShapeExprRef(list.remove(0).convertedShapeExprId));
-                        list.stream().forEach(conversionResult -> shapeAnd.addShapeExpr(new ShapeExprRef(conversionResult.convertedShapeExprId)));
+                        List<ConversionResult> listFromCombination = combination.stream().collect(Collectors.toList());
+                        ShapeAnd shapeAnd = new ShapeAnd(id, new ShapeExprRef(listFromCombination.remove(0).convertedShapeExprId), new ShapeExprRef(listFromCombination.remove(0).convertedShapeExprId));
+                        listFromCombination.stream().forEach(conversionResult -> shapeAnd.addShapeExpr(new ShapeExprRef(conversionResult.convertedShapeExprId)));
                         inferredShapeExprIdsOfSubgroup.add(id);
                         inferredShapeExprs.add(shapeAnd);
                     }

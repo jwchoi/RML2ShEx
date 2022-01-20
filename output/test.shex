@@ -8,17 +8,20 @@ PREFIX http://www.w3.org/2001/XMLSchema#: <xsd>
 PREFIX http://www.w3.org/ns/r2rml#: <rr>
 PREFIX http://xmlns.com/foaf/0.1/: <foaf>
 
-my:InSA6 @my:TM2SA4 AND @my:TM2SA2
 my:TM2SA4 IRI /^http:\/\/example\.com\/(.*)$/ {
-  null
+  dummy
 }
-my:TM2SA5 IRI /^http:\/\/data\.example\.com\/employee\/(.*)$/ {
-  null
+my:TG2SO0 @my:TM2SA5 OR @my:TM2SA4 OR @my:InSA6
+my:TM2SA5 IRI /^http:\/\/example\.com\/(.*)$/ {
+  dummy
 }
 my:TM2SA3 BNODE {
-  null
+  dummy;
+  dummy;
+  dummy;
+  dummy
 }
-my:TM2SA2 IRI /^http:\/\/example\.com\/(.*)$/ {
-  null
+my:TM2SA2 IRI /^http:\/\/data\.example\.com\/employee\/(.*)$/ {
+  dummy
 }
-my:TG2SO0 @my:TM2SA2 OR @my:InSA6 OR @my:TM2SA4
+my:InSA6 @my:TM2SA5 AND @my:TM2SA4

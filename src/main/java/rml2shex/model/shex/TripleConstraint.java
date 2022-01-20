@@ -8,7 +8,7 @@ import java.net.URI;
 import java.util.Optional;
 import java.util.Set;
 
-public class TripleConstraint extends TripleExpr implements Comparable<TripleConstraint> {
+public class TripleConstraint extends DeclarableTripleExpr {
 
     static class IdGenerator {
         private static int incrementer = 0;
@@ -21,24 +21,15 @@ public class TripleConstraint extends TripleExpr implements Comparable<TripleCon
 
     enum MappedTypes { CLASS, PREDICATE_OBJECT_MAP, PREDICATE_REF_OBJECT_MAP }
 
-    private Optional<Id> id;
-
-    private String serializedTripleConstraint;
-
     private MappedTypes mappedType;
 
     private String cardinality;
 
     private Optional<Boolean> isInverse = Optional.empty();
 
-    private TripleConstraint(MappedTypes mappedType) {
-        super(Kinds.TripleConstraint);
-        this.mappedType = mappedType;
-    }
-
     private TripleConstraint(Id id, MappedTypes mappedType) {
-        this(mappedType);
-        this.id = Optional.ofNullable(id);
+        super(Kinds.TripleConstraint, id);
+        this.mappedType = mappedType;
     }
 
     TripleConstraint(Id id, Set<URI> classes) {
@@ -53,14 +44,6 @@ public class TripleConstraint extends TripleExpr implements Comparable<TripleCon
         this(id, MappedTypes.PREDICATE_REF_OBJECT_MAP);
     }
 
-    public Id getID() { return id.isPresent() ? id.get() : null; }
-
-    protected String getSerializedTripleConstraint() { return serializedTripleConstraint; }
-
-    protected void setSerializedTripleConstraint(String serializedTripleConstraint) {
-        this.serializedTripleConstraint = serializedTripleConstraint;
-    }
-
     protected String getCardinality() { return cardinality; }
     protected void setCardinality(String cardinality) { this.cardinality = cardinality; }
 
@@ -70,7 +53,7 @@ public class TripleConstraint extends TripleExpr implements Comparable<TripleCon
     MappedTypes getMappedType() { return mappedType; }
 
     @Override
-    public int compareTo(TripleConstraint o) {
-        return toString().compareTo(o.toString());
+    String getSerializedTripleExpr() {
+        return "dummy";
     }
 }

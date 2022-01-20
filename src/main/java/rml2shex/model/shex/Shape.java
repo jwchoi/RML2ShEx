@@ -40,7 +40,7 @@ public class Shape extends DeclarableShapeExpr {
         StringBuffer sb = new StringBuffer();
 
         sb.append(Symbols.OPEN_BRACE + Symbols.NEWLINE);
-        sb.append(Symbols.SPACE + Symbols.SPACE + expression.get().getSerializedTripleExpr() + Symbols.NEWLINE);
+        sb.append(expression.get().getSerializedTripleExpr().indent(2));
         sb.append(Symbols.CLOSE_BRACE);
 
         serializedShapeExpr = sb.toString();
