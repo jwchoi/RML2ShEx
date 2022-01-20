@@ -50,10 +50,10 @@ public class NodeConstraint extends DeclarableShapeExpr {
         datatype = Optional.empty();
         xsFacets = new HashSet<>();
 
-        map(subjectMap);
+        convert(subjectMap);
     }
 
-    private void map(SubjectMap subjectMap) {
+    private void convert(SubjectMap subjectMap) {
         setNodeKind(subjectMap);
         addXsFacet(subjectMap);
     }

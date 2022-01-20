@@ -38,6 +38,7 @@ public class TripleConstraint extends DeclarableTripleExpr {
 
     TripleConstraint(Id id, PredicateMap predicateMap, ObjectMap objectMap) {
         this(id, MappedTypes.PREDICATE_OBJECT_MAP);
+
     }
 
     TripleConstraint(Id id, PredicateMap predicateMap, Id shapeExprIdAsObject) {
@@ -51,6 +52,10 @@ public class TripleConstraint extends DeclarableTripleExpr {
     protected void setIsInverse(boolean isInverse) { this.isInverse = Optional.of(isInverse); }
 
     MappedTypes getMappedType() { return mappedType; }
+
+    private void convert(PredicateMap predicateMap, ObjectMap objectMap) {
+
+    }
 
     @Override
     String getSerializedTripleExpr() {
