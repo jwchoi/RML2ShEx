@@ -1,12 +1,11 @@
 package rml2shex.model.shex;
 
-import rml2shex.util.Id;
+import rml2shex.util.IRI;
 import rml2shex.util.Symbols;
 
 import java.net.URI;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -16,14 +15,14 @@ public class EachOf extends DeclarableTripleExpr {
         private static int incrementer = 0;
         private static int getPostfix() { return incrementer++; }
 
-        static Id generateId(String prefixLabel, URI prefixIRI, String localPartPrefix) {
-            return new Id(prefixLabel, prefixIRI, localPartPrefix + getPostfix());
+        static IRI generateId(String prefixLabel, URI prefixIRI, String localPartPrefix) {
+            return new IRI(prefixLabel, prefixIRI, localPartPrefix + getPostfix());
         }
     }
 
     private Set<TripleExpr> expressions;
 
-    EachOf(Id id, TripleExpr tripleExpr1, TripleExpr tripleExpr2) {
+    EachOf(IRI id, TripleExpr tripleExpr1, TripleExpr tripleExpr2) {
         super(Kinds.EachOf, id);
 
         expressions = new HashSet<>();

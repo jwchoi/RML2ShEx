@@ -1,10 +1,11 @@
 package rml2shex.model.shex;
 
-import rml2shex.util.Id;
+import rml2shex.util.IRI;
 import rml2shex.model.rml.ObjectMap;
 import rml2shex.model.rml.PredicateMap;
 
 import java.net.URI;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -14,8 +15,8 @@ public class TripleConstraint extends DeclarableTripleExpr {
         private static int incrementer = 0;
         private static int getPostfix() { return incrementer++; }
 
-        static Id generateId(String prefixLabel, URI prefixIRI, String localPartPrefix) {
-            return new Id(prefixLabel, prefixIRI, localPartPrefix + getPostfix());
+        static IRI generateId(String prefixLabel, URI prefixIRI, String localPartPrefix) {
+            return new IRI(prefixLabel, prefixIRI, localPartPrefix + getPostfix());
         }
     }
 
@@ -27,21 +28,21 @@ public class TripleConstraint extends DeclarableTripleExpr {
 
     private Optional<Boolean> isInverse = Optional.empty();
 
-    private TripleConstraint(Id id, MappedTypes mappedType) {
+    private TripleConstraint(IRI id, MappedTypes mappedType) {
         super(Kinds.TripleConstraint, id);
         this.mappedType = mappedType;
     }
 
-    TripleConstraint(Id id, Set<URI> classes) {
+    TripleConstraint(IRI id, Set<URI> classes) {
         this(id, MappedTypes.CLASS);
     }
 
-    TripleConstraint(Id id, PredicateMap predicateMap, ObjectMap objectMap) {
+    TripleConstraint(IRI id, PredicateMap predicateMap, ObjectMap objectMap) {
         this(id, MappedTypes.PREDICATE_OBJECT_MAP);
 
     }
 
-    TripleConstraint(Id id, PredicateMap predicateMap, Id shapeExprIdAsObject) {
+    TripleConstraint(IRI id, PredicateMap predicateMap, IRI shapeExprIdAsObject) {
         this(id, MappedTypes.PREDICATE_REF_OBJECT_MAP);
     }
 

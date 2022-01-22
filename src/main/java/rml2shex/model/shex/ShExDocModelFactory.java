@@ -1,8 +1,7 @@
 package rml2shex.model.shex;
 
 import com.google.common.collect.Sets;
-import rml2shex.util.PrefixMap;
-import rml2shex.util.Id;
+import rml2shex.util.IRI;
 import rml2shex.model.rml.*;
 
 import java.net.URI;
@@ -49,13 +48,13 @@ public class ShExDocModelFactory {
         for (Map.Entry<String, String> entry : entrySet)
             shExDocModel.addPrefixDecl(entry.getKey(), entry.getValue());
 
-        shExDocModel.addPrefixDecl("rdf", PrefixMap.getURI("rdf").toString());
+        shExDocModel.addPrefixDecl("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
     }
 
     // subject map -> node constraint
     private static void convertSubjectMap2NodeConstraint(String shexBasePrefix, URI shexBaseIRI, TriplesMap triplesMap, ConversionResult conversionResult) {
         SubjectMap subjectMap = triplesMap.getSubjectMap();
-        Id sm2ncId = NodeConstraint.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "SM2NC");
+        IRI sm2ncId = NodeConstraint.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "SM2NC");
         NodeConstraint sm2nc = new NodeConstraint(sm2ncId, subjectMap);
         conversionResult.nodeConstraint = sm2nc;
     }
@@ -104,11 +103,11 @@ public class ShExDocModelFactory {
                 if (countOfTripleConstraints == 0) {
                     conversionResult.referenceId = conversionResult.nodeConstraint.getId();
                 } else {
-                    Id tm2saId = ShapeAnd.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "TM2SA");
+                    IRI tm2saId = ShapeAnd.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "TM2SA");
                     conversionResult.referenceId = tm2saId; // node constraint + triple constraint
                 }
             } else {
-                Id tg2soId = ShapeOr.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "TG2SO");
+                IRI tg2soId = ShapeOr.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "TG2SO");
                 for (TriplesMap triplesMap : subgroup) {
                     ConversionResult conversionResult = tmcrMap.get(triplesMap);
                     conversionResult.referenceId = tg2soId; // group id
@@ -141,7 +140,7 @@ public class ShExDocModelFactory {
         SubjectMap subjectMap = triplesMap.getSubjectMap();
         Set<URI> classes = subjectMap.getClasses();
         if (classes.size() > 0) {
-            Id sm2TcId = TripleConstraint.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "SM2TC");
+            IRI sm2TcId = TripleConstraint.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "SM2TC");
             TripleConstraint sm2tc = new TripleConstraint(sm2TcId, classes);
             conversionResult.tripleConstraints.add(sm2tc);
         }
@@ -160,7 +159,7 @@ public class ShExDocModelFactory {
                 if (predicateObjectPair.getObjectMap().isPresent()) {
                     ObjectMap objectMap = predicateObjectPair.getObjectMap().get();
 
-                    Id po2tcId = TripleConstraint.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "PO2TC");
+                    IRI po2tcId = TripleConstraint.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "PO2TC");
                     TripleConstraint po2tc = new TripleConstraint(po2tcId, predicateMap, objectMap);
 
                     conversionResult.tripleConstraints.add(po2tc);
@@ -182,9 +181,9 @@ public class ShExDocModelFactory {
                 if (predicateObjectPair.getRefObjectMap().isPresent()) {
                     RefObjectMap refObjectMap = predicateObjectPair.getRefObjectMap().get();
                     URI parentTriplesMap = refObjectMap.getParentTriplesMap();
-                    Id referenceIdFromParentTriplesMap = getReferenceIdFromParentTriplesMap(parentTriplesMap, tmcrMap);
+                    IRI referenceIdFromParentTriplesMap = getReferenceIdFromParentTriplesMap(parentTriplesMap, tmcrMap);
 
-                    Id pr2TcId = TripleConstraint.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "PR2TC");
+                    IRI pr2TcId = TripleConstraint.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "PR2TC");
                     TripleConstraint pr2tc = new TripleConstraint(pr2TcId, predicateMap, referenceIdFromParentTriplesMap);
 
                     ConversionResult conversionResult = tmcrMap.get(triplesMap);
@@ -194,7 +193,7 @@ public class ShExDocModelFactory {
         }
     }
 
-    private static Id getReferenceIdFromParentTriplesMap(URI uriOfParentTriplesMap, Map<TriplesMap, ConversionResult> tmcrMap) {
+    private static IRI getReferenceIdFromParentTriplesMap(URI uriOfParentTriplesMap, Map<TriplesMap, ConversionResult> tmcrMap) {
         Set<TriplesMap> triplesMaps = tmcrMap.keySet();
 
         TriplesMap parentTriplesMap = triplesMaps.stream()
@@ -218,13 +217,13 @@ public class ShExDocModelFactory {
                 conversionResult.convertedShapeExprId = nodeConstraint.getId();
                 conversionResult.convertedShapeExpr = nodeConstraint;
             } else {
-                Id tm2ShId = Shape.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "TM2Sh");
+                IRI tm2ShId = Shape.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "TM2Sh");
                 Shape tm2sh;
 
                 if (countOfTripleConstraint == 1) {
                     tm2sh = new Shape(tm2ShId, tripleConstraintSet.stream().findAny().get()); // one triple constraint
                 } else {
-                    Id tm2EoId = EachOf.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "TM2EO");
+                    IRI tm2EoId = EachOf.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "TM2EO");
                     List<TripleConstraint> tripleConstraintList = tripleConstraintSet.stream().collect(Collectors.toList());
                     EachOf tm2eo = new EachOf(tm2EoId, tripleConstraintList.remove(0), tripleConstraintList.remove(0));
                     tripleConstraintList.stream().forEach(tc -> tm2eo.addTripleExpr(tc));
@@ -232,7 +231,7 @@ public class ShExDocModelFactory {
                     tm2sh = new Shape(tm2ShId, tm2eo); // EachOf as expression
                 }
 
-                Id tm2SaId = ShapeAnd.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "TM2SA");
+                IRI tm2SaId = ShapeAnd.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "TM2SA");
                 ShapeAnd tm2sa = new ShapeAnd(tm2SaId, nodeConstraint, tm2sh); // node constraint + (EachOf)triple constraints
 
                 conversionResult.convertedShapeExprId = tm2SaId;
@@ -256,7 +255,7 @@ public class ShExDocModelFactory {
                 continue;
             }
 
-            Set<Id> inferredShapeExprIdsOfSubgroup = new HashSet<>();
+            Set<IRI> inferredShapeExprIdsOfSubgroup = new HashSet<>();
 
             for (int r = 1; r <= n; r++) {
                 Set<Set<ConversionResult>> combinations = Sets.combinations(conversionResultSubgroup, r);
@@ -267,7 +266,7 @@ public class ShExDocModelFactory {
                         inferredShapeExprIdsOfSubgroup.add(conversionResult.convertedShapeExprId);
                         inferredShapeExprs.add(conversionResult.convertedShapeExpr); // converted shapeExpr
                     } else {
-                        Id id = ShapeAnd.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "InSA");
+                        IRI id = ShapeAnd.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "InSA");
                         List<ConversionResult> listFromCombination = combination.stream().collect(Collectors.toList());
                         ShapeAnd shapeAnd = new ShapeAnd(id, new ShapeExprRef(listFromCombination.remove(0).convertedShapeExprId), new ShapeExprRef(listFromCombination.remove(0).convertedShapeExprId));
                         listFromCombination.stream().forEach(conversionResult -> shapeAnd.addShapeExpr(new ShapeExprRef(conversionResult.convertedShapeExprId)));
@@ -277,8 +276,8 @@ public class ShExDocModelFactory {
                 }
             }
 
-            Id groupId = conversionResultSubgroup.stream().findAny().get().referenceId;
-            List<Id> ids = inferredShapeExprIdsOfSubgroup.stream().collect(Collectors.toList());
+            IRI groupId = conversionResultSubgroup.stream().findAny().get().referenceId;
+            List<IRI> ids = inferredShapeExprIdsOfSubgroup.stream().collect(Collectors.toList());
             ShapeOr shapeOr = new ShapeOr(groupId, new ShapeExprRef(ids.remove(0)), new ShapeExprRef(ids.remove(0)));
             ids.stream().forEach(id -> shapeOr.addShapeExpr(new ShapeExprRef(id)));
 
@@ -292,8 +291,8 @@ public class ShExDocModelFactory {
         private NodeConstraint nodeConstraint; // from the subject map
         private Set<TripleConstraint> tripleConstraints = new HashSet<>(); // from rr:class, predicate object maps, predicate ref object maps
 
-        private Id convertedShapeExprId;
+        private IRI convertedShapeExprId;
         private DeclarableShapeExpr convertedShapeExpr; // (nodeConstraint + triplesConstraints) or nodeConstraint
-        private Id referenceId; // if (groupSize > 1) groupId or if (groupSize == 1) convertedShapeExprId
+        private IRI referenceId; // if (groupSize > 1) groupId or if (groupSize == 1) convertedShapeExprId
     }
 }

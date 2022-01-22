@@ -1,12 +1,12 @@
 package rml2shex.model.shex;
 
-import rml2shex.util.Id;
+import rml2shex.util.IRI;
 import rml2shex.util.Symbols;
 
 public class TripleExprRef extends TripleExpr {
-    private Id tripleExprLabel;
+    private IRI tripleExprLabel;
 
-    TripleExprRef(Id tripleExprLabel) {
+    TripleExprRef(IRI tripleExprLabel) {
         super(Kinds.tripleExprRef);
         this.tripleExprLabel = tripleExprLabel;
     }

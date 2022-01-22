@@ -1,12 +1,12 @@
 package rml2shex.model.shex;
 
-import rml2shex.util.Id;
+import rml2shex.util.IRI;
 import rml2shex.util.Symbols;
 
 public class ShapeExprRef extends ShapeExpr {
-    private Id shapeExprLabel;
+    private IRI shapeExprLabel;
 
-    ShapeExprRef(Id shapeExprLabel) {
+    ShapeExprRef(IRI shapeExprLabel) {
         super(Kinds.shapeExprRef);
         this.shapeExprLabel = shapeExprLabel;
     }

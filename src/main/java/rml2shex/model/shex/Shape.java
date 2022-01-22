@@ -1,6 +1,6 @@
 package rml2shex.model.shex;
 
-import rml2shex.util.Id;
+import rml2shex.util.IRI;
 import rml2shex.util.Symbols;
 
 import java.net.URI;
@@ -12,19 +12,19 @@ public class Shape extends DeclarableShapeExpr {
         private static int incrementer = 0;
         private static int getPostfix() { return incrementer++; }
 
-        static Id generateId(String prefixLabel, URI prefixIRI, String localPartPrefix) {
-            return new Id(prefixLabel, prefixIRI, localPartPrefix + getPostfix());
+        static IRI generateId(String prefixLabel, URI prefixIRI, String localPartPrefix) {
+            return new IRI(prefixLabel, prefixIRI, localPartPrefix + getPostfix());
         }
     }
 
     private Optional<TripleExpr> expression;
 
-    Shape(Id id) {
+    Shape(IRI id) {
         super(Kinds.Shape, id);
         expression = Optional.empty();
     }
 
-    Shape(Id id, TripleExpr tripleExpr) {
+    Shape(IRI id, TripleExpr tripleExpr) {
         this(id);
 
         expression = Optional.ofNullable(tripleExpr);

@@ -1,5 +1,7 @@
 package rml2shex.model.rml;
 
+import rml2shex.util.IRI;
+
 import java.net.URI;
 import java.util.Optional;
 
@@ -21,7 +23,8 @@ public abstract class TermMap {
         }
     }
 
-    private Optional<String> constant; // rr:constant -> IRI(in subject map, predicate map, object map or graph map) or literal(in object map)
+    private Optional<String> literalConstant; // rr:constant -> IRI or literal(in object map)
+    private Optional<IRI> iriConstant; // rr:constant -> IRI(in subject map, predicate map, object map or graph map)
     private Optional<String> column; // rr:column
     private Optional<Template> template; // rr:template
     private Optional<TermTypes> termType; // rr:termType
@@ -30,7 +33,8 @@ public abstract class TermMap {
     private Optional<String> reference; // rml:reference overrides rr:column
 
     TermMap() {
-        constant = Optional.empty();
+        literalConstant = Optional.empty();
+        iriConstant = Optional.empty();
         column = Optional.empty();
         template = Optional.empty();
         inverseExpression = Optional.empty();
@@ -40,14 +44,14 @@ public abstract class TermMap {
 
     void setConstant(String constant) {
         if (constant != null) {
-            this.constant = Optional.of(constant);
+            literalConstant = Optional.of(constant);
             setTermType(TermTypes.LITERAL);
         }
     }
 
-    void setConstant(URI constant) {
+    void setConstant(IRI constant) {
         if (constant != null) {
-            this.constant = Optional.of(constant.toString());
+            iriConstant = Optional.of(constant);
             setTermType(TermTypes.IRI);
         }
     }
@@ -101,10 +105,12 @@ public abstract class TermMap {
         return termType;
     }
 
-    public Optional<String> getConstant() {
-        return constant;
+    public Optional<String> getLiteralConstant() {
+        return literalConstant;
+    }
+    public Optional<IRI> getIRIConstant() {
+        return iriConstant;
     }
 
-//    public Optional<SQLSelectField> getColumn() { return column; }
     public Optional<String> getColumn() { return column; }
 }

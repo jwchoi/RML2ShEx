@@ -1,6 +1,7 @@
 package rml2shex.model.rml;
 
 import rml2shex.mapping.rml.RMLParser;
+import rml2shex.util.IRI;
 
 import java.net.URI;
 import java.util.*;
@@ -73,7 +74,7 @@ public class RMLModelFactory {
             // ?x rr:subject ?y
             for (URI subject: subjects) {
                 SubjectMap subjectMap = new SubjectMap();
-                subjectMap.setConstant(subject);
+                subjectMap.setConstant(IRI.createIRI(subject, prefixMap));
 
                 triplesMap.setSubjectMap(subjectMap);
             }
@@ -90,7 +91,7 @@ public class RMLModelFactory {
                 subjectMap.setClasses(classes);
 
                 // rr:graphMap and rr:graph
-                Set<GraphMap> graphMaps = getGraphMapsAssociatedWith(subjectMapAsResource, parser);
+                Set<GraphMap> graphMaps = getGraphMapsAssociatedWith(subjectMapAsResource, parser, prefixMap);
                 subjectMap.setGraphMaps(graphMaps);
 
                 triplesMap.setSubjectMap(subjectMap);
@@ -107,7 +108,7 @@ public class RMLModelFactory {
                 Set<URI> predicates = parser.getPredicates(predicateObjectMapAsResource);
                 for (URI predicate : predicates) {
                     PredicateMap predicateMap = new PredicateMap();
-                    predicateMap.setConstant(predicate);
+                    predicateMap.setConstant(IRI.createIRI(predicate, prefixMap));
 
                     predicateObjectMap.addPredicateMap(predicateMap);
                 }
@@ -127,7 +128,7 @@ public class RMLModelFactory {
                 Set<URI> IRIObjects = parser.getIRIObjects(predicateObjectMapAsResource);
                 for (URI IRIObject : IRIObjects) {
                     ObjectMap objectMap = new ObjectMap();
-                    objectMap.setConstant(IRIObject);
+                    objectMap.setConstant(IRI.createIRI(IRIObject, prefixMap));
 
                     predicateObjectMap.addObjectMap(objectMap);
                 }
@@ -194,7 +195,7 @@ public class RMLModelFactory {
                 }
 
                 // rr:graphMap and rr:graph
-                Set<GraphMap> graphMaps = getGraphMapsAssociatedWith(predicateObjectMapAsResource, parser);
+                Set<GraphMap> graphMaps = getGraphMapsAssociatedWith(predicateObjectMapAsResource, parser, prefixMap);
                 predicateObjectMap.setGraphMaps(graphMaps);
 
                 triplesMap.addPredicateObjectMap(predicateObjectMap);
@@ -219,7 +220,7 @@ public class RMLModelFactory {
         logicalTable.setSqlQuery(parser.getSQLQuery(logicalTableAsResource));
     }
 
-    private static Set<GraphMap> getGraphMapsAssociatedWith(String subjectMapOrPredicateObjectMapAsResource, RMLParser parser) {
+    private static Set<GraphMap> getGraphMapsAssociatedWith(String subjectMapOrPredicateObjectMapAsResource, RMLParser parser, Map<String, String> prefixMap) {
         Set<GraphMap> graphMaps = new HashSet<>();
 
         // rr:graphMap
@@ -237,7 +238,7 @@ public class RMLModelFactory {
         for (URI graph : graphs) {
             GraphMap graphMap = new GraphMap();
 
-            graphMap.setConstant(graph);
+            graphMap.setConstant(IRI.createIRI(graph, prefixMap));
 
             graphMaps.add(graphMap);
         }
@@ -248,7 +249,7 @@ public class RMLModelFactory {
     private static void buildTermMap(RMLParser parser, String termMapAsResource, TermMap termMap) {
         // rr:constant -> IRI
         URI IRIConstant = parser.getIRIConstant(termMapAsResource);
-        termMap.setConstant(IRIConstant);
+        termMap.setConstant(IRI.createIRI(IRIConstant, parser.getPrefixes()));
 
         // rr:constant -> Literal
         String literalConstant = parser.getLiteralConstant(termMapAsResource);

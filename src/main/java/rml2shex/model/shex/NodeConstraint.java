@@ -1,7 +1,7 @@
 package rml2shex.model.shex;
 
 import rml2shex.util.Symbols;
-import rml2shex.util.Id;
+import rml2shex.util.IRI;
 import rml2shex.model.rml.SubjectMap;
 import rml2shex.model.rml.Template;
 import rml2shex.model.rml.TermMap;
@@ -17,8 +17,8 @@ public class NodeConstraint extends DeclarableShapeExpr {
         private static int incrementer = 0;
         private static int getPostfix() { return incrementer++; }
 
-        static Id generateId(String prefixLabel, URI prefixIRI, String localPartPrefix) {
-            return new Id(prefixLabel, prefixIRI, localPartPrefix + getPostfix());
+        static IRI generateId(String prefixLabel, URI prefixIRI, String localPartPrefix) {
+            return new IRI(prefixLabel, prefixIRI, localPartPrefix + getPostfix());
         }
     }
 
@@ -42,7 +42,7 @@ public class NodeConstraint extends DeclarableShapeExpr {
     private Optional<String> datatype;
     private Set<XSFacet> xsFacets;
 
-    NodeConstraint(Id id, SubjectMap subjectMap) {
+    NodeConstraint(IRI id, SubjectMap subjectMap) {
         super(Kinds.NodeConstraint, id);
 
         nodeKind = Optional.empty();
