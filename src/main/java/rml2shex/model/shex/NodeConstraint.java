@@ -38,24 +38,38 @@ public class NodeConstraint extends DeclarableShapeExpr {
     }
 
     private Optional<NodeKinds> nodeKind;
-    private Optional<String> values;
-    private Optional<String> datatype;
+    private Set<ValueSetValue> values;
+    private Optional<IRI> datatype;
     private Set<XSFacet> xsFacets;
 
-    NodeConstraint(IRI id, SubjectMap subjectMap) {
+    private NodeConstraint(IRI id) {
         super(Kinds.NodeConstraint, id);
 
         nodeKind = Optional.empty();
-        values = Optional.empty();
         datatype = Optional.empty();
         xsFacets = new HashSet<>();
+        values = new HashSet<>();
+    }
+
+    NodeConstraint(IRI id, SubjectMap subjectMap) {
+        this(id);
 
         convert(subjectMap);
+    }
+
+    NodeConstraint(IRI id, Set<IRI> classes) {
+        this(id);
+
+        convert(classes);
     }
 
     private void convert(SubjectMap subjectMap) {
         setNodeKind(subjectMap);
         addXsFacet(subjectMap);
+    }
+
+    private void convert(Set<IRI> classes) {
+
     }
 
     private void setNodeKind(SubjectMap subjectMap) {
@@ -82,11 +96,11 @@ public class NodeConstraint extends DeclarableShapeExpr {
 
     private void setNodeKind(NodeKinds nodeKind) { if (nodeKind != null) this.nodeKind = Optional.of(nodeKind); }
 
-    private Optional<String> getValues() { return values; }
-    private void setValues(Optional<String> values) { this.values = values; }
+    private Set<ValueSetValue> getValues() { return values; }
+    private void setValues(Set<ValueSetValue> values) { this.values = values; }
 
-    private Optional<String> getDatatype() { return datatype; }
-    private void setDatatype(Optional<String> datatype) { this.datatype = datatype; }
+    private Optional<IRI> getDatatype() { return datatype; }
+    private void setDatatype(Optional<IRI> datatype) { this.datatype = datatype; }
 
     private void addXsFacet(XSFacet xsFacet) { xsFacets.add(xsFacet); }
 
@@ -120,10 +134,10 @@ public class NodeConstraint extends DeclarableShapeExpr {
 
         StringBuffer sb = new StringBuffer();
 
-        if (values.isPresent())
-            sb.append(values.get());
+        if (values.size() > 0)
+            sb.append(values);
         else if (datatype.isPresent())
-            sb.append(datatype.get());
+            sb.append(datatype.get().getPrefixedName());
         else if (nodeKind.isPresent())
             sb.append(nodeKind.get());
 

@@ -8,20 +8,27 @@ PREFIX http://www.w3.org/2001/XMLSchema#: <xsd>
 PREFIX http://www.w3.org/ns/r2rml#: <rr>
 PREFIX http://xmlns.com/foaf/0.1/: <foaf>
 
-my:TM2SA5 IRI /^http:\/\/example\.com\/(.*)$/ {
-  dummy
+my:SA3 BNODE {
+  dept:COMPANY .;
+  dept:deptno .;
+  dept:location .;
+  dept:name .
 }
-my:TM2SA2 IRI /^http:\/\/example\.com\/(.*)$/ {
-  dummy
+my:InSA8 @my:SA4 AND @my:SA6
+my:SA6 IRI /^http:\/\/example\.com\/(.*)$/ {
+  a  {2};
+  foaf:name .
 }
-my:TG2SO0 @my:TM2SA5 OR @my:TM2SA2 OR @my:InSA6
-my:TM2SA3 IRI /^http:\/\/data\.example\.com\/employee\/(.*)$/ {
-  dummy
+my:SA4 IRI /^http:\/\/example\.com\/(.*)$/ {
+  rdfs:label .
 }
-my:TM2SA4 BNODE {
-  dummy;
-  dummy;
-  dummy;
-  dummy
+my:InSA9 @my:SA6 AND @my:SA5
+my:InSA10 @my:SA4 AND @my:SA6 AND @my:SA5
+my:SA2 IRI /^http:\/\/data\.example\.com\/employee\/(.*)$/ {
+  ex:role .
 }
-my:InSA6 @my:TM2SA5 AND @my:TM2SA2
+my:SO0 @my:SA5 OR @my:SA4 OR @my:InSA7 OR @my:InSA8 OR @my:InSA10 OR @my:SA6 OR @my:InSA9
+my:InSA7 @my:SA4 AND @my:SA5
+my:SA5 IRI /^http:\/\/example\.com\/(.*)$/ {
+  rdfs:label .
+}

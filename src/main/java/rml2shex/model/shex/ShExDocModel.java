@@ -27,7 +27,7 @@ public class ShExDocModel {
         prefixMap.put(URI.create(IRIString), prefix);
     }
 
-    void addDeclarableShapeExpr(DeclarableShapeExpr shapeExpr) { declarableShapeExprs.add(shapeExpr); }
+    void addDeclarableShapeExpr(DeclarableShapeExpr declarableShapeExpr) { declarableShapeExprs.add(declarableShapeExpr); }
 
     public URI getBaseIRI() {
         return baseIRI;

@@ -1,10 +1,12 @@
 package rml2shex.model.rml;
 
+import rml2shex.util.IRI;
+
 import java.net.URI;
 import java.util.Optional;
 
 public class ObjectMap extends TermMap {
-    private Optional<URI> datatype; // rr:datatype
+    private Optional<IRI> datatype; // rr:datatype
 
     private Optional<LanguageMap> languageMap; // rml:languageMap -> the shortest form is rr:language
 
@@ -20,7 +22,7 @@ public class ObjectMap extends TermMap {
         }
     }
 
-    void setDatatype(URI datatype) {
+    void setDatatype(IRI datatype) {
         if (datatype != null) {
             this.datatype = Optional.of(datatype);
             setTermType(TermTypes.LITERAL);
@@ -31,7 +33,7 @@ public class ObjectMap extends TermMap {
         return languageMap;
     }
 
-    public Optional<URI> getDatatype() {
+    public Optional<IRI> getDatatype() {
         return datatype;
     }
 

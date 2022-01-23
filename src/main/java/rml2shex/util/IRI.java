@@ -20,7 +20,7 @@ public class IRI implements Comparable<IRI> {
 
         Optional<String> prefixLabel = prefixes.stream()
                 .filter(prefix -> uri.toASCIIString().startsWith(prefixMap.get(prefix)))
-                .findAny();
+                .max((prefix1, prefix2) -> prefixMap.get(prefix1).compareTo(prefixMap.get(prefix2)));
 
         if (prefixLabel.isPresent()) {
             URI prefixIRI = URI.create(prefixMap.get(prefixLabel.get()));
@@ -43,6 +43,9 @@ public class IRI implements Comparable<IRI> {
         this.prefixIRI = prefixIRI;
         this.localPart = localPart;
     }
+
+    public String getPrefixLabel() { return prefixLabel; }
+    public URI getPrefixIRI() { return prefixIRI; }
 
     public String getPrefixedName() { return prefixLabel != null ? prefixLabel + Symbols.COLON + localPart : null; }
     public String getAbsoluteIRI() { return "<" + iri.toASCIIString() + ">"; }

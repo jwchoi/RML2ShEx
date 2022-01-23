@@ -5,6 +5,7 @@ import rml2shex.util.IRI;
 
 import java.net.URI;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class RMLModelFactory {
 
@@ -88,7 +89,7 @@ public class RMLModelFactory {
 
                 // rr:class
                 Set<URI> classes = parser.getClasses(subjectMapAsResource); // the size of classes could be zero.
-                subjectMap.setClasses(classes);
+                subjectMap.setClasses(classes.stream().map(cls -> IRI.createIRI(cls, prefixMap)).collect(Collectors.toSet()));
 
                 // rr:graphMap and rr:graph
                 Set<GraphMap> graphMaps = getGraphMapsAssociatedWith(subjectMapAsResource, parser, prefixMap);
@@ -188,7 +189,7 @@ public class RMLModelFactory {
 
                         // rr:datatype
                         URI datatype = parser.getDatatype(objectMapAsResource);
-                        objectMap.setDatatype(datatype);
+                        objectMap.setDatatype(IRI.createIRI(datatype, prefixMap));
 
                         predicateObjectMap.addObjectMap(objectMap);
                     }

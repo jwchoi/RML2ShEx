@@ -99,3 +99,19 @@
           rr:objectMap		[ rr:constant "EXAMPLE Corporation"; ]
       ]
 .
+
+<TriplesMap5>
+    a rr:TriplesMap;
+
+    rr:logicalTable [ rr:tableName  "\"Student_Sport\"" ];
+
+    rr:subjectMap [ rr:template "http://example.com/{\"Student\"}";
+                    rr:class ex:Student;
+                    rr:class ex:Site; ];
+
+    rr:predicateObjectMap
+            [
+          rr:predicate		foaf:name ;
+          rr:objectMap		[ rr:column "\"Student\"" ]
+      ]
+.

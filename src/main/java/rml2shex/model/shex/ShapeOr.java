@@ -43,7 +43,7 @@ public class ShapeOr extends DeclarableShapeExpr {
 
         sb.append(shapeExprs.remove(0).getSerializedShapeExpr());
 
-        for (ShapeExpr shapeExpr: shapeExprs) {
+        for (ShapeExpr shapeExpr : shapeExprs) {
             sb.append(Symbols.SPACE + Symbols.OR + Symbols.SPACE);
             sb.append(shapeExpr.getSerializedShapeExpr());
         }
