@@ -37,18 +37,11 @@ public class EachOf extends DeclarableTripleExpr {
         String serializedTripleExpr = super.getSerializedTripleExpr();
         if (serializedTripleExpr != null) return serializedTripleExpr;
 
-        if (expressions.size() == 0) return Symbols.EMPTY;
+        serializedTripleExpr = expressions.stream()
+                .map(TripleExpr::getSerializedTripleExpr)
+                .sorted()
+                .collect(Collectors.joining(Symbols.SEMICOLON + Symbols.NEWLINE));
 
-        StringBuffer sb = new StringBuffer();
-
-        List<String> expressions = this.expressions.stream().map(TripleExpr::getSerializedTripleExpr).sorted().collect(Collectors.toList());
-        String theFirstTripleExpr = expressions.remove(0);
-        List<String> theRestTripleExprs = expressions;
-
-        sb.append(theFirstTripleExpr);
-        theRestTripleExprs.stream().forEach(tripleExpr -> sb.append(Symbols.SEMICOLON + Symbols.NEWLINE + tripleExpr));
-
-        serializedTripleExpr = sb.toString();
         setSerializedTripleExpr(serializedTripleExpr);
         return serializedTripleExpr;
     }

@@ -42,32 +42,26 @@ public class ShapeAnd extends DeclarableShapeExpr {
         String serializedShapeExpr = super.getSerializedShapeExpr();
         if (serializedShapeExpr != null) return serializedShapeExpr;
 
-        StringBuffer sb = new StringBuffer();
+        // To omit "AND"
+        if (shapeExprs.size() == 2) {
+            List<ShapeExpr> shapeExprList = shapeExprs.stream().sorted().collect(Collectors.toList());
+            if (shapeExprList.get(0).getKind().equals(Kinds.NodeConstraint) && shapeExprList.get(1).getKind().equals(Kinds.Shape)) {
+                serializedShapeExpr = shapeExprs.stream()
+                        .map(ShapeExpr::getSerializedShapeExpr)
+                        .sorted()
+                        .collect(Collectors.joining(Symbols.SPACE));
 
-        List<ShapeExpr> shapeExprs = this.shapeExprs.stream().sorted().collect(Collectors.toList());
-
-        ShapeExpr theFirstShapeExpr = shapeExprs.remove(0);
-
-        sb.append(theFirstShapeExpr.getSerializedShapeExpr());
-
-        List<ShapeExpr> theRestShapeExprs = shapeExprs;
-
-        for (ShapeExpr shapeExpr : theRestShapeExprs) {
-            sb.append(Symbols.SPACE + Symbols.AND + Symbols.SPACE);
-            sb.append(shapeExpr.getSerializedShapeExpr());
-        }
-
-        // To omit the last "AND"
-        if (theRestShapeExprs.size() == 1) {
-            if (theFirstShapeExpr.getKind().equals(Kinds.NodeConstraint) && theRestShapeExprs.get(0).getKind().equals(Kinds.Shape)) {
-                String omission = Symbols.AND + Symbols.SPACE;
-                int start = sb.lastIndexOf(omission);
-                int end = start + omission.length();
-                sb.delete(start, end);
+                setSerializedShapeExpr(serializedShapeExpr);
+                return serializedShapeExpr;
             }
         }
 
-        serializedShapeExpr = sb.toString();
+        // general case
+        serializedShapeExpr = shapeExprs.stream()
+                .map(ShapeExpr::getSerializedShapeExpr)
+                .sorted()
+                .collect(Collectors.joining(Symbols.SPACE + Symbols.AND + Symbols.SPACE));
+
         setSerializedShapeExpr(serializedShapeExpr);
         return serializedShapeExpr;
     }

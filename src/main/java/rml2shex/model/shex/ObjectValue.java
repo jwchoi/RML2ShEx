@@ -1,6 +1,7 @@
 package rml2shex.model.shex;
 
 import rml2shex.util.IRI;
+import rml2shex.util.Symbols;
 
 import java.util.Optional;
 
@@ -8,28 +9,34 @@ public class ObjectValue extends ValueSetValue {
 
     enum Kinds { IRIREF, ObjectLiteral }
 
-    private class IRIREF extends ObjectValue {
+    static class IRIREF extends ObjectValue {
         private Optional<IRI> IRIREF;
-        private IRIREF(IRI IRIREF) { this.IRIREF = Optional.ofNullable(IRIREF); }
+
+        IRIREF(IRI IRIREF) {
+            super(ObjectValue.Kinds.IRIREF);
+            this.IRIREF = Optional.ofNullable(IRIREF);
+        }
+
+        @Override
+        String getSerializedValueSetValue() {
+            String serializedValueSetValue = super.getSerializedValueSetValue();
+            if (serializedValueSetValue != null) return serializedValueSetValue;
+
+            serializedValueSetValue = IRIREF.isPresent() ? IRIREF.get().getPrefixedNameOrElseAbsoluteIRI() : Symbols.EMPTY;
+
+            setSerializedValueSetValue(serializedValueSetValue);
+            return serializedValueSetValue;
+        }
     }
-    private class ObjectLiteral extends ObjectValue {}
+
+    static class ObjectLiteral extends ObjectValue {
+        ObjectLiteral() { super(ObjectValue.Kinds.ObjectLiteral); }
+    }
 
     private Kinds kind;
 
-    Optional<IRIREF> IRIREF;
-
-    private ObjectValue() {
+    ObjectValue(Kinds kind) {
         super(ValueSetValue.Kinds.objectValue);
-        IRIREF = Optional.empty();
-    }
-
-    private ObjectValue(Kinds kind) {
-        this();
         this.kind = kind;
-    }
-
-    ObjectValue(IRI IRIREF) {
-        this(Kinds.IRIREF);
-        this.IRIREF = Optional.of(new IRIREF(IRIREF));
     }
 }

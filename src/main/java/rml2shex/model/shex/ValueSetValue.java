@@ -5,7 +5,19 @@ public abstract class ValueSetValue {
 
     private Kinds kind;
 
+    private String serializedValueSetValue;
+
     ValueSetValue(Kinds kind) { this.kind = kind; }
 
     Kinds getKind() { return kind; }
+
+    String getSerializedValueSetValue() { return serializedValueSetValue; }
+    void setSerializedValueSetValue(String serializedValueSetValue) { this.serializedValueSetValue = serializedValueSetValue; }
+
+    @Override
+    public String toString() {
+        if (serializedValueSetValue == null) serializedValueSetValue = getSerializedValueSetValue();
+
+        return serializedValueSetValue;
+    }
 }

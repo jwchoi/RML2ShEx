@@ -10,12 +10,16 @@ import java.net.URI;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class NodeConstraint extends DeclarableShapeExpr {
 
     static class IdGenerator {
         private static int incrementer = 0;
-        private static int getPostfix() { return incrementer++; }
+
+        private static int getPostfix() {
+            return incrementer++;
+        }
 
         static IRI generateId(String prefixLabel, URI prefixIRI, String localPartPrefix) {
             return new IRI(prefixLabel, prefixIRI, localPartPrefix + getPostfix());
@@ -34,7 +38,9 @@ public class NodeConstraint extends DeclarableShapeExpr {
         }
 
         @Override
-        public String toString() { return facet; }
+        public String toString() {
+            return facet;
+        }
     }
 
     private Optional<NodeKinds> nodeKind;
@@ -69,7 +75,7 @@ public class NodeConstraint extends DeclarableShapeExpr {
     }
 
     private void convert(Set<IRI> classes) {
-
+        classes.stream().forEach(cls -> values.add(new ObjectValue.IRIREF(cls)));
     }
 
     private void setNodeKind(SubjectMap subjectMap) {
@@ -94,20 +100,34 @@ public class NodeConstraint extends DeclarableShapeExpr {
         addXsFacet(stringFacet);
     }
 
-    private void setNodeKind(NodeKinds nodeKind) { if (nodeKind != null) this.nodeKind = Optional.of(nodeKind); }
+    private void setNodeKind(NodeKinds nodeKind) {
+        if (nodeKind != null) this.nodeKind = Optional.of(nodeKind);
+    }
 
-    private Set<ValueSetValue> getValues() { return values; }
-    private void setValues(Set<ValueSetValue> values) { this.values = values; }
+    private Set<ValueSetValue> getValues() {
+        return values;
+    }
 
-    private Optional<IRI> getDatatype() { return datatype; }
-    private void setDatatype(Optional<IRI> datatype) { this.datatype = datatype; }
+    private void setValues(Set<ValueSetValue> values) {
+        this.values = values;
+    }
 
-    private void addXsFacet(XSFacet xsFacet) { xsFacets.add(xsFacet); }
+    private Optional<IRI> getDatatype() {
+        return datatype;
+    }
+
+    private void setDatatype(Optional<IRI> datatype) {
+        this.datatype = datatype;
+    }
+
+    private void addXsFacet(XSFacet xsFacet) {
+        xsFacets.add(xsFacet);
+    }
 
     private boolean isEquivalentXSFacet(Set<XSFacet> other) {
-        for (XSFacet f1: xsFacets) {
+        for (XSFacet f1 : xsFacets) {
             boolean contains = false;
-            for (XSFacet f2: other) {
+            for (XSFacet f2 : other) {
                 if (f1.isEquivalent(f2)) {
                     contains = true;
                     break;
@@ -134,9 +154,14 @@ public class NodeConstraint extends DeclarableShapeExpr {
 
         StringBuffer sb = new StringBuffer();
 
-        if (values.size() > 0)
-            sb.append(values);
-        else if (datatype.isPresent())
+        if (values.size() > 0) {
+            String valueSet = values.stream()
+                    .map(ValueSetValue::getSerializedValueSetValue)
+                    .sorted()
+                    .collect(Collectors.joining(Symbols.SPACE, Symbols.OPEN_BRACKET, Symbols.CLOSE_BRACKET));
+
+            sb.append(valueSet);
+        } else if (datatype.isPresent())
             sb.append(datatype.get().getPrefixedName());
         else if (nodeKind.isPresent())
             sb.append(nodeKind.get());
