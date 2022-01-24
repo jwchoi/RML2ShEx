@@ -5,7 +5,6 @@ import rml2shex.util.Symbols;
 
 import java.net.URI;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -37,18 +36,11 @@ public class ShapeOr extends DeclarableShapeExpr {
         String serializedShapeExpr = super.getSerializedShapeExpr();
         if (serializedShapeExpr != null) return serializedShapeExpr;
 
-        StringBuffer sb = new StringBuffer();
+        serializedShapeExpr = shapeExprs.stream()
+                .map(ShapeExpr::getSerializedShapeExpr)
+                .sorted()
+                .collect(Collectors.joining(Symbols.SPACE + Symbols.OR + Symbols.SPACE));
 
-        List<ShapeExpr> shapeExprs = this.shapeExprs.stream().collect(Collectors.toList());
-
-        sb.append(shapeExprs.remove(0).getSerializedShapeExpr());
-
-        for (ShapeExpr shapeExpr : shapeExprs) {
-            sb.append(Symbols.SPACE + Symbols.OR + Symbols.SPACE);
-            sb.append(shapeExpr.getSerializedShapeExpr());
-        }
-
-        serializedShapeExpr = sb.toString();
         setSerializedShapeExpr(serializedShapeExpr);
         return serializedShapeExpr;
     }

@@ -27,7 +27,7 @@ my:SA4 BNODE {
   dept:location .;
   dept:name .
 }
-my:SO0 @my:InSA9 OR @my:InSA7 OR @my:SA2 OR @my:InSA10 OR @my:SA5 OR @my:InSA8 OR @my:SA3
+my:SO0 @my:InSA10 OR @my:InSA7 OR @my:InSA8 OR @my:InSA9 OR @my:SA2 OR @my:SA3 OR @my:SA5
 my:InSA8 @my:SA2 AND @my:SA5
 my:SA3 IRI /^http:\/\/example\.com\/(.*)$/ {
   rdfs:label .
