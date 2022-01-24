@@ -50,13 +50,11 @@ public class TripleConstraint extends DeclarableTripleExpr {
 
     TripleConstraint(IRI id, PredicateMap predicateMap, ObjectMap objectMap) {
         this(id, MappedTypes.PREDICATE_OBJECT_MAP);
-
-        setPredicate(predicateMap);
+        convert(predicateMap, objectMap);
     }
 
     TripleConstraint(IRI id, PredicateMap predicateMap, IRI shapeExprIdAsObjectNode) {
         this(id, MappedTypes.PREDICATE_REF_OBJECT_MAP);
-
         convert(predicateMap, shapeExprIdAsObjectNode);
     }
 
@@ -77,6 +75,17 @@ public class TripleConstraint extends DeclarableTripleExpr {
 
         ShapeExpr sER = new ShapeExprRef(shapeExprIdAsObjectNode);
         setValueExpr(sER);
+
+        setMin(0); // temporarily
+        setMax(1); // temporarily
+    }
+
+    private void convert(PredicateMap predicateMap, ObjectMap objectMap) {
+        setPredicate(predicateMap);
+
+        IRI ncId = NodeConstraint.IdGenerator.generateId(getId().getPrefixLabel(), getId().getPrefixIRI(), "NC");
+        ShapeExpr nc = new NodeConstraint(ncId, objectMap);
+        setValueExpr(nc);
 
         setMin(0); // temporarily
         setMax(1); // temporarily

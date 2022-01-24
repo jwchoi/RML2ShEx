@@ -1,5 +1,6 @@
 package rml2shex.model.shex;
 
+import rml2shex.model.rml.ObjectMap;
 import rml2shex.util.Symbols;
 import rml2shex.util.IRI;
 import rml2shex.model.rml.SubjectMap;
@@ -59,14 +60,17 @@ public class NodeConstraint extends DeclarableShapeExpr {
 
     NodeConstraint(IRI id, SubjectMap subjectMap) {
         this(id);
-
         convert(subjectMap);
     }
 
     NodeConstraint(IRI id, Set<IRI> classes) {
         this(id);
-
         convert(classes);
+    }
+
+    NodeConstraint(IRI id, ObjectMap objectMap) {
+        this(id);
+        convert(objectMap);
     }
 
     private void convert(SubjectMap subjectMap) {
@@ -75,7 +79,13 @@ public class NodeConstraint extends DeclarableShapeExpr {
     }
 
     private void convert(Set<IRI> classes) {
-        classes.stream().forEach(cls -> values.add(new ObjectValue.IRIREF(cls)));
+        setValues(classes);
+    }
+
+    private void convert(ObjectMap objectMap) {
+        setNodeKind(objectMap);
+        setValues(objectMap);
+        //addXsFacet(objectMap);
     }
 
     private void setNodeKind(SubjectMap subjectMap) {
@@ -91,6 +101,38 @@ public class NodeConstraint extends DeclarableShapeExpr {
         setNodeKind(NodeKinds.IRI);
     }
 
+    private void setNodeKind(ObjectMap objectMap) {
+        Optional<TermMap.TermTypes> termType = objectMap.getTermType();
+
+        if (termType.isPresent()) {
+            if (termType.get().equals(TermMap.TermTypes.BLANKNODE)) {
+                setNodeKind(NodeKinds.BNODE);
+                return;
+            }
+            if (termType.get().equals(TermMap.TermTypes.IRI)) {
+                setNodeKind(NodeKinds.IRI);
+                return;
+            }
+            if (termType.get().equals(TermMap.TermTypes.LITERAL)) {
+                setNodeKind(NodeKinds.LITERAL);
+                return;
+            }
+        }
+    }
+
+    private void setNodeKind(NodeKinds nodeKind) {
+        if (nodeKind != null) this.nodeKind = Optional.of(nodeKind);
+    }
+
+    private void setValues(Set<IRI> classes) { classes.stream().forEach(cls -> values.add(new ValueSetValue.ObjectValue.IRIREF(cls))); }
+
+    private void setValues(ObjectMap objectMap) {
+        if (objectMap.getLanguageMap().isPresent()) {
+            Optional<String> languageTag = objectMap.getLanguageMap().get().getLiteralConstant();
+            if (languageTag.isPresent()) values.add(new ValueSetValue.Language(languageTag.get()));
+        }
+    }
+
     private void addXsFacet(SubjectMap subjectMap) {
         Optional<Template> template = subjectMap.getTemplate();
         if (template.isEmpty()) return;
@@ -98,18 +140,6 @@ public class NodeConstraint extends DeclarableShapeExpr {
         StringFacet stringFacet = new StringFacet(template.get());
 
         addXsFacet(stringFacet);
-    }
-
-    private void setNodeKind(NodeKinds nodeKind) {
-        if (nodeKind != null) this.nodeKind = Optional.of(nodeKind);
-    }
-
-    private Set<ValueSetValue> getValues() {
-        return values;
-    }
-
-    private void setValues(Set<ValueSetValue> values) {
-        this.values = values;
     }
 
     private Optional<IRI> getDatatype() {

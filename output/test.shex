@@ -11,38 +11,38 @@ PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 BASE <http://my.example/ns#>
 
 my:SA0 IRI /^http:\/\/example\.com\/resource\/sport_(.*)$/ {
-  rdfs:label .
+  rdfs:label LITERAL ?
 }
 
 my:SA10 @my:SA4 AND @my:SA5 AND @my:SA6
 
-my:SA1 IRI /^http:\/\/example\.com\/resource\/student_(.*)$/ {
-  <http://example.com/ontology/practises> @my:SA0 ?;
-  foaf:name .
+my:SA1 IRI /^http:\/\/data\.example\.com\/employee\/(.*)$/ {
+  ex:role IRI ?
 }
 
-my:SA2 IRI /^http:\/\/data\.example\.com\/employee\/(.*)$/ {
-  ex:role .
+my:SA2 IRI /^http:\/\/example\.com\/resource\/student_(.*)$/ {
+  <http://example.com/ontology/practises> @my:SA0 ?;
+  foaf:name LITERAL ?
 }
 
 my:SA3 BNODE {
-  dept:COMPANY .;
-  dept:deptno .;
-  dept:location .;
-  dept:name .
+  dept:COMPANY LITERAL ?;
+  dept:deptno LITERAL ?;
+  dept:location LITERAL ?;
+  dept:name LITERAL ?
 }
 
 my:SA4 IRI /^http:\/\/example\.com\/(.*)$/ {
-  rdfs:label .
+  rdfs:label [@es] ?
 }
 
 my:SA5 IRI /^http:\/\/example\.com\/(.*)$/ {
   a [ex:Site ex:Student] {2};
-  foaf:name .
+  foaf:name LITERAL ?
 }
 
 my:SA6 IRI /^http:\/\/example\.com\/(.*)$/ {
-  rdfs:label .
+  rdfs:label [@en] ?
 }
 
 my:SA7 @my:SA4 AND @my:SA5
