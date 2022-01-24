@@ -54,10 +54,10 @@ public class TripleConstraint extends DeclarableTripleExpr {
         setPredicate(predicateMap);
     }
 
-    TripleConstraint(IRI id, PredicateMap predicateMap, IRI shapeExprIdAsObject) {
+    TripleConstraint(IRI id, PredicateMap predicateMap, IRI shapeExprIdAsObjectNode) {
         this(id, MappedTypes.PREDICATE_REF_OBJECT_MAP);
 
-        setPredicate(predicateMap);
+        convert(predicateMap, shapeExprIdAsObjectNode);
     }
 
     private void convert(IRI predicate, Set<IRI> classes) {
@@ -70,6 +70,16 @@ public class TripleConstraint extends DeclarableTripleExpr {
         int size = classes.size();
         setMin(size);
         setMax(size);
+    }
+
+    private void convert(PredicateMap predicateMap, IRI shapeExprIdAsObjectNode) {
+        setPredicate(predicateMap);
+
+        ShapeExpr sER = new ShapeExprRef(shapeExprIdAsObjectNode);
+        setValueExpr(sER);
+
+        setMin(0); // temporarily
+        setMax(1); // temporarily
     }
 
     private void setMin(int min) { if (min != 1) this.min = Optional.of(min); }

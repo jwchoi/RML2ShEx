@@ -34,13 +34,13 @@ public class Rml2ShexConverter {
     private RMLParser getRMLParser() { return new RMLParser(rmlPathname, RMLParser.Lang.TTL); }
 
     private void writeDirectives() {
-        // base
-        writer.println(Symbols.BASE + Symbols.SPACE + Symbols.LT + shExDocModel.getBaseIRI() + Symbols.GT);
-
         // prefixes
         Set<Map.Entry<URI, String>> entrySet = shExDocModel.getPrefixMap().entrySet();
         for (Map.Entry<URI, String> entry: entrySet)
-            writer.println(Symbols.PREFIX + Symbols.SPACE + entry.getKey() + Symbols.COLON + Symbols.SPACE + Symbols.LT + entry.getValue() + Symbols.GT);
+            writer.println(Symbols.PREFIX + Symbols.SPACE + entry.getValue() + Symbols.COLON + Symbols.SPACE + Symbols.LT + entry.getKey() + Symbols.GT);
+
+        // base
+        writer.println(Symbols.BASE + Symbols.SPACE + Symbols.LT + shExDocModel.getBaseIRI() + Symbols.GT);
 
         writer.println();
     }
@@ -48,8 +48,8 @@ public class Rml2ShexConverter {
     private void writeShEx() {
         Set<DeclarableShapeExpr> declarableShapeExprs = shExDocModel.getDeclarableShapeExprs();
 
-        declarableShapeExprs.stream().forEach(declarableShapeExpr -> writer.println(declarableShapeExpr.getShapeExprDecl()));
-        declarableShapeExprs.stream().forEach(declarableShapeExpr -> System.out.println(declarableShapeExpr.getShapeExprDecl()));
+        declarableShapeExprs.stream().sorted().forEach(declarableShapeExpr -> writer.println(declarableShapeExpr.getShapeExprDecl() + Symbols.NEWLINE));
+        declarableShapeExprs.stream().sorted().forEach(declarableShapeExpr -> System.out.println(declarableShapeExpr.getShapeExprDecl() + Symbols.NEWLINE));
     }
 
     private void preProcess() {

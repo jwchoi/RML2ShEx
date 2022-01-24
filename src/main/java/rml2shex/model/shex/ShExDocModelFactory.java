@@ -106,6 +106,7 @@ public class ShExDocModelFactory {
                     IRI tm2saId = ShapeAnd.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "SA");
                     conversionResult.referenceId = tm2saId; // node constraint + triple constraint
                 }
+                conversionResult.convertedShapeExprId = conversionResult.referenceId;
             } else {
                 IRI tg2soId = ShapeOr.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "SO");
                 for (TriplesMap triplesMap : subgroup) {
@@ -231,8 +232,7 @@ public class ShExDocModelFactory {
 
                     tm2sh = new Shape(tm2ShId, tm2eo); // EachOf as expression
                 }
-
-                IRI tm2SaId = ShapeAnd.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "SA");
+                IRI tm2SaId = conversionResult.convertedShapeExprId != null ? conversionResult.convertedShapeExprId : ShapeAnd.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "SA");
                 ShapeAnd tm2sa = new ShapeAnd(tm2SaId, nodeConstraint, tm2sh); // node constraint + (EachOf)triple constraints
 
                 conversionResult.convertedShapeExprId = tm2SaId;
@@ -267,7 +267,7 @@ public class ShExDocModelFactory {
                         inferredShapeExprIdsOfSubgroup.add(conversionResult.convertedShapeExprId);
                         inferredDeclarableShapeExprs.add(conversionResult.convertedDeclarableShapeExpr); // converted shapeExpr
                     } else {
-                        IRI id = ShapeAnd.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "InSA");
+                        IRI id = ShapeAnd.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "SA");
                         List<ConversionResult> listFromCombination = combination.stream().collect(Collectors.toList());
                         ShapeAnd shapeAnd = new ShapeAnd(id, new ShapeExprRef(listFromCombination.remove(0).convertedShapeExprId), new ShapeExprRef(listFromCombination.remove(0).convertedShapeExprId));
                         listFromCombination.stream().forEach(conversionResult -> shapeAnd.addShapeExpr(new ShapeExprRef(conversionResult.convertedShapeExprId)));

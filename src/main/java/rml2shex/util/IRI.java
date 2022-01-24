@@ -26,10 +26,15 @@ public class IRI implements Comparable<IRI> {
             URI prefixIRI = URI.create(prefixMap.get(prefixLabel.get()));
             String localPart = uri.toASCIIString().replace(prefixIRI.toASCIIString(), Symbols.EMPTY);
 
-            return new IRI(prefixLabel.get(), prefixIRI, localPart);
+            if (isLocalPartValid(localPart)) return new IRI(prefixLabel.get(), prefixIRI, localPart);
         }
 
         return new IRI(uri);
+    }
+
+    // temporary implementation
+    private static boolean isLocalPartValid(String localPart) {
+        return localPart.indexOf(Symbols.SLASH) == -1;
     }
 
     private IRI(URI uri) { iri = uri; }
