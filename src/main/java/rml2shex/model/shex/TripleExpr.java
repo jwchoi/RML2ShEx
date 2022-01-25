@@ -5,10 +5,7 @@ public abstract class TripleExpr {
 
     private Kinds kind;
 
-    private String serializedTripleExpr;
-
     TripleExpr(Kinds kind) { this.kind = kind; }
 
-    String getSerializedTripleExpr() { return serializedTripleExpr; }
-    void setSerializedTripleExpr(String serializedTripleExpr) { this.serializedTripleExpr = serializedTripleExpr; }
+    abstract String getSerializedTripleExpr();
 }

@@ -33,17 +33,17 @@ my:SA3 BNODE {
 }
 
 my:SA4 IRI /^http:\/\/example\.com\/(.*)$/ {
+  ^<http://example.com/ontology/practises> @my:SA2 ?;
+  rdfs:label [@en] ?
+}
+
+my:SA5 IRI /^http:\/\/example\.com\/(.*)$/ {
   a [ex:Site ex:Student] {2};
   foaf:name LITERAL ?
 }
 
-my:SA5 IRI /^http:\/\/example\.com\/(.*)$/ {
-  rdfs:label [@es] ?
-}
-
 my:SA6 IRI /^http:\/\/example\.com\/(.*)$/ {
-  ^<http://example.com/ontology/practises> @my:SA2 ?;
-  rdfs:label [@en] ?
+  rdfs:label [@es] ?
 }
 
 my:SA7 @my:SA4 AND @my:SA5
@@ -52,9 +52,9 @@ my:SA8 @my:SA4 AND @my:SA6
 
 my:SA9 @my:SA5 AND @my:SA6
 
-my:SO0 @my:SA10 OR @my:SA5 OR @my:SA7 OR @my:SA9
+my:SO0 @my:SA10 OR @my:SA6 OR @my:SA8 OR @my:SA9
 
-my:SO1 @my:SA10 OR @my:SA6 OR @my:SA8 OR @my:SA9
+my:SO1 @my:SA10 OR @my:SA4 OR @my:SA7 OR @my:SA8
 
-my:SO2 @my:SA10 OR @my:SA4 OR @my:SA7 OR @my:SA8
+my:SO2 @my:SA10 OR @my:SA5 OR @my:SA7 OR @my:SA9
 

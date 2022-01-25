@@ -5,7 +5,7 @@ import rml2shex.util.Symbols;
 
 import java.util.Optional;
 
-public class DeclarableTripleExpr extends TripleExpr {
+public abstract class DeclarableTripleExpr extends TripleExpr {
     private Optional<IRI> id;
 
     DeclarableTripleExpr(Kinds kind, IRI id) {

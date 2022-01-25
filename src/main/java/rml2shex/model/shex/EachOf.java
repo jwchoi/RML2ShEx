@@ -33,15 +33,9 @@ public class EachOf extends DeclarableTripleExpr {
 
     @Override
     String getSerializedTripleExpr() {
-        String serializedTripleExpr = super.getSerializedTripleExpr();
-        if (serializedTripleExpr != null) return serializedTripleExpr;
-
-        serializedTripleExpr = expressions.stream()
+        return expressions.stream()
                 .map(TripleExpr::getSerializedTripleExpr)
                 .sorted()
                 .collect(Collectors.joining(Symbols.SEMICOLON + Symbols.NEWLINE));
-
-        setSerializedTripleExpr(serializedTripleExpr);
-        return serializedTripleExpr;
     }
 }
