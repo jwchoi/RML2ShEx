@@ -75,7 +75,7 @@ public class NodeConstraint extends DeclarableShapeExpr {
 
     private void convert(SubjectMap subjectMap) {
         setNodeKind(subjectMap);
-        addXsFacet(subjectMap);
+        setXsFacet(subjectMap);
     }
 
     private void convert(Set<IRI> classes) {
@@ -85,7 +85,8 @@ public class NodeConstraint extends DeclarableShapeExpr {
     private void convert(ObjectMap objectMap) {
         setNodeKind(objectMap);
         setValues(objectMap);
-        //addXsFacet(objectMap);
+        setDatatype(objectMap);
+        setXsFacet(objectMap);
     }
 
     private void setNodeKind(SubjectMap subjectMap) {
@@ -133,25 +134,15 @@ public class NodeConstraint extends DeclarableShapeExpr {
         }
     }
 
-    private void addXsFacet(SubjectMap subjectMap) {
-        Optional<Template> template = subjectMap.getTemplate();
+    private void setDatatype(ObjectMap objectMap) { datatype = objectMap.getDatatype(); }
+
+    private void setXsFacet(TermMap termMap) {
+        Optional<Template> template = termMap.getTemplate();
         if (template.isEmpty()) return;
 
         StringFacet stringFacet = new StringFacet(template.get());
 
-        addXsFacet(stringFacet);
-    }
-
-    private Optional<IRI> getDatatype() {
-        return datatype;
-    }
-
-    private void setDatatype(Optional<IRI> datatype) {
-        this.datatype = datatype;
-    }
-
-    private void addXsFacet(XSFacet xsFacet) {
-        xsFacets.add(xsFacet);
+        xsFacets.add(stringFacet);
     }
 
     private boolean isEquivalentXSFacet(Set<XSFacet> other) {
