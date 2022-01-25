@@ -170,9 +170,6 @@ public class NodeConstraint extends DeclarableShapeExpr {
 
     @Override
     public String getSerializedShapeExpr() {
-        String serializedShapeExpr = super.getSerializedShapeExpr();
-        if (serializedShapeExpr != null) return serializedShapeExpr;
-
         StringBuffer sb = new StringBuffer();
 
         if (values.size() > 0) {
@@ -189,8 +186,6 @@ public class NodeConstraint extends DeclarableShapeExpr {
 
         xsFacets.stream().forEach(xsFacet -> sb.append(Symbols.SPACE + xsFacet));
 
-        serializedShapeExpr = sb.toString();
-        setSerializedShapeExpr(serializedShapeExpr);
-        return serializedShapeExpr;
+        return sb.toString();
     }
 }

@@ -12,13 +12,5 @@ public class ShapeExprRef extends ShapeExpr {
     }
 
     @Override
-    public String getSerializedShapeExpr() {
-        String serializedShapeExpr = super.getSerializedShapeExpr();
-        if (serializedShapeExpr != null) return serializedShapeExpr;
-
-        serializedShapeExpr = Symbols.AT + shapeExprLabel.getPrefixedName();
-
-        setSerializedShapeExpr(serializedShapeExpr);
-        return serializedShapeExpr;
-    }
+    public String getSerializedShapeExpr() { return Symbols.AT + shapeExprLabel.getPrefixedName(); }
 }

@@ -5,21 +5,15 @@ public abstract class ShapeExpr implements Comparable<ShapeExpr> {
 
     private Kinds kind;
 
-    private String serializedShapeExpr;
-
     ShapeExpr(Kinds kind) { this.kind = kind; }
 
     Kinds getKind() { return kind; }
 
-    String getSerializedShapeExpr() { return serializedShapeExpr; }
-    void setSerializedShapeExpr(String serializedShapeExpr) { this.serializedShapeExpr = serializedShapeExpr; }
+
+    abstract String getSerializedShapeExpr();
 
     @Override
-    public String toString() {
-        if (serializedShapeExpr == null) serializedShapeExpr = getSerializedShapeExpr();
-
-        return serializedShapeExpr;
-    }
+    public String toString() { return getSerializedShapeExpr(); }
 
     @Override
     public int compareTo(ShapeExpr o) {

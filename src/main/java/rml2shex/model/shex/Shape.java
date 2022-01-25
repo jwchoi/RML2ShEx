@@ -32,9 +32,6 @@ public class Shape extends DeclarableShapeExpr {
 
     @Override
     public String getSerializedShapeExpr() {
-        String serializedShapeExpr = super.getSerializedShapeExpr();
-        if (serializedShapeExpr != null) return serializedShapeExpr;
-
         if (expression.isEmpty()) return Symbols.EMPTY;
 
         StringBuffer sb = new StringBuffer();
@@ -43,8 +40,6 @@ public class Shape extends DeclarableShapeExpr {
         sb.append(expression.get().getSerializedTripleExpr().indent(2));
         sb.append(Symbols.CLOSE_BRACE);
 
-        serializedShapeExpr = sb.toString();
-        setSerializedShapeExpr(serializedShapeExpr);
-        return serializedShapeExpr;
+        return sb.toString();
     }
 }

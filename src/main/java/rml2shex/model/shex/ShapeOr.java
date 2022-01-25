@@ -33,15 +33,9 @@ public class ShapeOr extends DeclarableShapeExpr {
 
     @Override
     public String getSerializedShapeExpr() {
-        String serializedShapeExpr = super.getSerializedShapeExpr();
-        if (serializedShapeExpr != null) return serializedShapeExpr;
-
-        serializedShapeExpr = shapeExprs.stream()
+        return shapeExprs.stream()
                 .map(ShapeExpr::getSerializedShapeExpr)
                 .sorted()
                 .collect(Collectors.joining(Symbols.SPACE + Symbols.OR + Symbols.SPACE));
-
-        setSerializedShapeExpr(serializedShapeExpr);
-        return serializedShapeExpr;
     }
 }

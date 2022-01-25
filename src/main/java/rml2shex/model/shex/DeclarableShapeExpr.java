@@ -5,7 +5,7 @@ import rml2shex.util.Symbols;
 
 import java.util.Optional;
 
-public class DeclarableShapeExpr extends ShapeExpr {
+public abstract class DeclarableShapeExpr extends ShapeExpr {
     private Optional<IRI> id;
 
     DeclarableShapeExpr(Kinds kind, IRI id) {

@@ -39,30 +39,21 @@ public class ShapeAnd extends DeclarableShapeExpr {
 
     @Override
     public String getSerializedShapeExpr() {
-        String serializedShapeExpr = super.getSerializedShapeExpr();
-        if (serializedShapeExpr != null) return serializedShapeExpr;
-
         // To omit "AND"
         if (shapeExprs.size() == 2) {
             List<ShapeExpr> shapeExprList = shapeExprs.stream().sorted().collect(Collectors.toList());
             if (shapeExprList.get(0).getKind().equals(Kinds.NodeConstraint) && shapeExprList.get(1).getKind().equals(Kinds.Shape)) {
-                serializedShapeExpr = shapeExprs.stream()
+                return shapeExprs.stream()
                         .map(ShapeExpr::getSerializedShapeExpr)
                         .sorted()
                         .collect(Collectors.joining(Symbols.SPACE));
-
-                setSerializedShapeExpr(serializedShapeExpr);
-                return serializedShapeExpr;
             }
         }
 
         // general case
-        serializedShapeExpr = shapeExprs.stream()
+        return shapeExprs.stream()
                 .map(ShapeExpr::getSerializedShapeExpr)
                 .sorted()
                 .collect(Collectors.joining(Symbols.SPACE + Symbols.AND + Symbols.SPACE));
-
-        setSerializedShapeExpr(serializedShapeExpr);
-        return serializedShapeExpr;
     }
 }
