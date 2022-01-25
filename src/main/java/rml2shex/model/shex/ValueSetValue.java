@@ -10,21 +10,14 @@ public abstract class ValueSetValue {
 
     private Kinds kind;
 
-    private String serializedValueSetValue;
-
     ValueSetValue(Kinds kind) { this.kind = kind; }
 
     Kinds getKind() { return kind; }
 
-    String getSerializedValueSetValue() { return serializedValueSetValue; }
-    void setSerializedValueSetValue(String serializedValueSetValue) { this.serializedValueSetValue = serializedValueSetValue; }
+    abstract String getSerializedValueSetValue();
 
     @Override
-    public String toString() {
-        if (serializedValueSetValue == null) serializedValueSetValue = getSerializedValueSetValue();
-
-        return serializedValueSetValue;
-    }
+    public String toString() { return getSerializedValueSetValue(); }
 
     public static abstract class ObjectValue extends ValueSetValue {
 
@@ -40,17 +33,11 @@ public abstract class ValueSetValue {
 
             @Override
             String getSerializedValueSetValue() {
-                String serializedValueSetValue = super.getSerializedValueSetValue();
-                if (serializedValueSetValue != null) return serializedValueSetValue;
-
-                serializedValueSetValue = IRIREF.isPresent() ? IRIREF.get().getPrefixedNameOrElseAbsoluteIRI() : Symbols.EMPTY;
-
-                setSerializedValueSetValue(serializedValueSetValue);
-                return serializedValueSetValue;
+                return IRIREF.isPresent() ? IRIREF.get().getPrefixedNameOrElseAbsoluteIRI() : Symbols.EMPTY;
             }
         }
 
-        static class ObjectLiteral extends ObjectValue {
+        static abstract class ObjectLiteral extends ObjectValue {
             ObjectLiteral() { super(ObjectValue.Kinds.ObjectLiteral); }
         }
 
@@ -67,18 +54,10 @@ public abstract class ValueSetValue {
 
         Language(String LANGTAG) {
             super(Kinds.Language);
-            lanaguageTag = Symbols.AT + LANGTAG;
+            lanaguageTag = LANGTAG;
         }
 
         @Override
-        String getSerializedValueSetValue() {
-            String serializedValueSetValue = super.getSerializedValueSetValue();
-            if (serializedValueSetValue != null) return serializedValueSetValue;
-
-            serializedValueSetValue = lanaguageTag;
-
-            setSerializedValueSetValue(serializedValueSetValue);
-            return serializedValueSetValue;
-        }
+        String getSerializedValueSetValue() { return Symbols.AT + lanaguageTag; }
     }
 }
