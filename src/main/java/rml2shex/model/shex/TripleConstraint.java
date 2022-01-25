@@ -53,12 +53,14 @@ public class TripleConstraint extends DeclarableTripleExpr {
         convert(predicateMap, objectMap);
     }
 
-    TripleConstraint(IRI id, PredicateMap predicateMap, IRI shapeExprIdAsObjectNode) {
+    TripleConstraint(IRI id, PredicateMap predicateMap, IRI referenceIdFromRefObjectMap, boolean inverse) {
         this(id, MappedTypes.PREDICATE_REF_OBJECT_MAP);
-        convert(predicateMap, shapeExprIdAsObjectNode);
+        convert(predicateMap, referenceIdFromRefObjectMap, inverse);
     }
 
     private void convert(IRI predicate, Set<IRI> classes) {
+        setInverse(false);
+
         setPredicate(predicate);
 
         IRI ncId = NodeConstraint.IdGenerator.generateId(getId().getPrefixLabel(), getId().getPrefixIRI(), "NC");
@@ -70,10 +72,12 @@ public class TripleConstraint extends DeclarableTripleExpr {
         setMax(size);
     }
 
-    private void convert(PredicateMap predicateMap, IRI shapeExprIdAsObjectNode) {
+    private void convert(PredicateMap predicateMap, IRI referenceIdFromRefObjectMap, boolean inverse) {
+        setInverse(inverse);
+
         setPredicate(predicateMap);
 
-        ShapeExpr sER = new ShapeExprRef(shapeExprIdAsObjectNode);
+        ShapeExpr sER = new ShapeExprRef(referenceIdFromRefObjectMap);
         setValueExpr(sER);
 
         setMin(0); // temporarily
@@ -81,6 +85,8 @@ public class TripleConstraint extends DeclarableTripleExpr {
     }
 
     private void convert(PredicateMap predicateMap, ObjectMap objectMap) {
+        setInverse(false);
+
         setPredicate(predicateMap);
 
         IRI ncId = NodeConstraint.IdGenerator.generateId(getId().getPrefixLabel(), getId().getPrefixIRI(), "NC");
@@ -90,6 +96,8 @@ public class TripleConstraint extends DeclarableTripleExpr {
         setMin(0); // temporarily
         setMax(1); // temporarily
     }
+
+    private void setInverse(boolean inverse) { this.inverse = Optional.of(inverse); }
 
     private void setMin(int min) { if (min != 1) this.min = Optional.of(min); }
     private void setMax(int max) { if (max != 1) this.max = Optional.of(max); }
@@ -105,7 +113,7 @@ public class TripleConstraint extends DeclarableTripleExpr {
         StringBuffer sb = new StringBuffer();
 
         // senseFlags?
-        String senseFlags = inverse.isPresent() && inverse.get() ? Symbols.CARET + Symbols.SPACE : Symbols.EMPTY;
+        String senseFlags = inverse.isPresent() && inverse.get() ? Symbols.CARET : Symbols.EMPTY;
         sb.append(senseFlags);
 
         // predicate

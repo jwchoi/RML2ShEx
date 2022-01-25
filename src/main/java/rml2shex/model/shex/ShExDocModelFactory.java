@@ -29,9 +29,7 @@ public class ShExDocModelFactory {
         Set<Set<TriplesMap>> triplesMapGroup = groupTriplesMapWithSameSubject(tmcrMap);
         assignReferenceId(shexBasePrefix, shexBaseIRI, triplesMapGroup, tmcrMap);
 
-        for (TriplesMap triplesMap : triplesMaps) {
-            convertPredicateRefObjectMaps2TripleConstraints(shexBasePrefix, shexBaseIRI, triplesMap, tmcrMap); // predicate-referencing-object map -> triple constraints
-        }
+        convertPredicateRefObjectMaps2TripleConstraints(shexBasePrefix, shexBaseIRI, tmcrMap); // predicate-referencing-object map -> triple constraints
 
         convertTriplesMap2ShapeExpr(shexBasePrefix, shexBaseIRI, tmcrMap.values().stream().collect(Collectors.toSet()));
 
@@ -171,41 +169,58 @@ public class ShExDocModelFactory {
     }
 
     // predicate referencing object map -> triple constraints
-    private static void convertPredicateRefObjectMaps2TripleConstraints(String shexBasePrefix, URI shexBaseIRI, TriplesMap triplesMap, Map<TriplesMap, ConversionResult> tmcrMap) {
-        List<PredicateObjectMap> predicateObjectMaps = triplesMap.getPredicateObjectMaps();
-        for (PredicateObjectMap predicateObjectMap : predicateObjectMaps) {
-            List<PredicateObjectMap.PredicateObjectPair> predicateObjectPairs = predicateObjectMap.getPredicateObjectPairs();
+    private static void convertPredicateRefObjectMaps2TripleConstraints(String shexBasePrefix, URI shexBaseIRI, Map<TriplesMap, ConversionResult> tmcrMap) {
+        Set<TriplesMap> triplesMaps = tmcrMap.keySet();
 
-            for (PredicateObjectMap.PredicateObjectPair predicateObjectPair : predicateObjectPairs) {
-                PredicateMap predicateMap = predicateObjectPair.getPredicateMap();
+        for (TriplesMap triplesMap: triplesMaps) {
 
-                // when referencing object map
-                if (predicateObjectPair.getRefObjectMap().isPresent()) {
-                    RefObjectMap refObjectMap = predicateObjectPair.getRefObjectMap().get();
-                    URI parentTriplesMap = refObjectMap.getParentTriplesMap();
-                    IRI referenceIdFromParentTriplesMap = getReferenceIdFromParentTriplesMap(parentTriplesMap, tmcrMap);
+            List<PredicateObjectMap> predicateObjectMaps = triplesMap.getPredicateObjectMaps();
+            for (PredicateObjectMap predicateObjectMap : predicateObjectMaps) {
+                List<PredicateObjectMap.PredicateObjectPair> predicateObjectPairs = predicateObjectMap.getPredicateObjectPairs();
 
-                    IRI pr2TcId = TripleConstraint.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "TC");
-                    TripleConstraint pr2tc = new TripleConstraint(pr2TcId, predicateMap, referenceIdFromParentTriplesMap);
+                for (PredicateObjectMap.PredicateObjectPair predicateObjectPair : predicateObjectPairs) {
+                    PredicateMap predicateMap = predicateObjectPair.getPredicateMap();
 
-                    ConversionResult conversionResult = tmcrMap.get(triplesMap);
-                    conversionResult.tripleConstraints.add(pr2tc);
+                    // when referencing object map
+                    if (predicateObjectPair.getRefObjectMap().isPresent()) {
+                        RefObjectMap refObjectMap = predicateObjectPair.getRefObjectMap().get();
+                        URI uriOfParentTriplesMap = refObjectMap.getParentTriplesMap();
+                        IRI referenceIdFromParentTriplesMap = getReferenceIdFromTriplesMap(uriOfParentTriplesMap, tmcrMap);
+
+                        IRI pr2TcId = TripleConstraint.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "TC");
+                        TripleConstraint pr2tc = new TripleConstraint(pr2TcId, predicateMap, referenceIdFromParentTriplesMap, false);
+
+                        ConversionResult conversionResult = tmcrMap.get(triplesMap);
+                        conversionResult.tripleConstraints.add(pr2tc);
+
+                        // for inverse
+                        URI uriOfChildTriplesMap = triplesMap.getUri();
+                        IRI referenceIdFromChildTriplesMap = getReferenceIdFromTriplesMap(uriOfChildTriplesMap, tmcrMap);
+
+                        IRI pr2InverseTcId = TripleConstraint.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "TC");
+                        TripleConstraint pr2InverseTc = new TripleConstraint(pr2InverseTcId, predicateMap, referenceIdFromChildTriplesMap, true);
+
+                        TriplesMap parentTriplesMap = triplesMaps.stream().filter(tm -> tm.getUri().equals(uriOfParentTriplesMap)).findAny().get();
+                        ConversionResult conversionResultCorrespondingToParentTriplesMap = tmcrMap.get(parentTriplesMap);
+                        conversionResultCorrespondingToParentTriplesMap.tripleConstraints.add(pr2InverseTc);
+                    }
                 }
             }
+
         }
     }
 
-    private static IRI getReferenceIdFromParentTriplesMap(URI uriOfParentTriplesMap, Map<TriplesMap, ConversionResult> tmcrMap) {
+    private static IRI getReferenceIdFromTriplesMap(URI uriOfTriplesMap, Map<TriplesMap, ConversionResult> tmcrMap) {
         Set<TriplesMap> triplesMaps = tmcrMap.keySet();
 
-        TriplesMap parentTriplesMap = triplesMaps.stream()
-                .filter(triplesMap -> triplesMap.getUri().equals(uriOfParentTriplesMap))
+        TriplesMap foundTriplesMap = triplesMaps.stream()
+                .filter(triplesMap -> triplesMap.getUri().equals(uriOfTriplesMap))
                 .findFirst()
                 .get();
 
-        ConversionResult conversionResultCorrespondingToParentTriplesMap = tmcrMap.get(parentTriplesMap);
+        ConversionResult conversionResult = tmcrMap.get(foundTriplesMap);
 
-        return conversionResultCorrespondingToParentTriplesMap.referenceId;
+        return conversionResult.referenceId;
     }
 
     private static void convertTriplesMap2ShapeExpr(String shexBasePrefix, URI shexBaseIRI, Set<ConversionResult> conversionResults) {
