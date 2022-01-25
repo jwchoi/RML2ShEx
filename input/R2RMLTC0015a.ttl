@@ -137,7 +137,7 @@
           rr:predicate <http://example.com/ontology/practises> ;
           rr:objectMap [
                            a rr:RefObjectMap ;
-                           rr:parentTriplesMap <TriplesMap7>;
+                           rr:parentTriplesMap <TriplesMap1>;
                            rr:joinCondition [
                                  rr:child "Sport" ;
                                  rr:parent "ID" ;

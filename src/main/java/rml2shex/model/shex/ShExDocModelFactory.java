@@ -27,7 +27,7 @@ public class ShExDocModelFactory {
         }
 
         Set<Set<TriplesMap>> triplesMapGroup = groupTriplesMapWithSameSubject(tmcrMap);
-        assignReferenceIdPerGroup(shexBasePrefix, shexBaseIRI, triplesMapGroup, tmcrMap);
+        assignReferenceId(shexBasePrefix, shexBaseIRI, triplesMapGroup, tmcrMap);
 
         for (TriplesMap triplesMap : triplesMaps) {
             convertPredicateRefObjectMaps2TripleConstraints(shexBasePrefix, shexBaseIRI, triplesMap, tmcrMap); // predicate-referencing-object map -> triple constraints
@@ -91,7 +91,7 @@ public class ShExDocModelFactory {
         return tmGroup;
     }
 
-    private static void assignReferenceIdPerGroup(String shexBasePrefix, URI shexBaseIRI, Set<Set<TriplesMap>> tmGroup, Map<TriplesMap, ConversionResult> tmcrMap) {
+    private static void assignReferenceId(String shexBasePrefix, URI shexBaseIRI, Set<Set<TriplesMap>> tmGroup, Map<TriplesMap, ConversionResult> tmcrMap) {
         for (Set<TriplesMap> subgroup : tmGroup) {
             int sizeOfSubgroup = subgroup.size();
 
@@ -108,10 +108,10 @@ public class ShExDocModelFactory {
                 }
                 conversionResult.convertedShapeExprId = conversionResult.referenceId;
             } else {
-                IRI tg2soId = ShapeOr.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "SO");
                 for (TriplesMap triplesMap : subgroup) {
+                    IRI tg2soId = ShapeOr.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "SO");
                     ConversionResult conversionResult = tmcrMap.get(triplesMap);
-                    conversionResult.referenceId = tg2soId; // group id
+                    conversionResult.referenceId = tg2soId; // ShapeOr
                 }
             }
         }
@@ -256,7 +256,8 @@ public class ShExDocModelFactory {
                 continue;
             }
 
-            Set<IRI> inferredShapeExprIdsOfSubgroup = new HashSet<>();
+            Map<ConversionResult, Set<IRI>> shapeExprIdsInferredFromConversionResult = new HashMap<>();
+            conversionResultSubgroup.stream().forEach(conversionResult -> shapeExprIdsInferredFromConversionResult.put(conversionResult, new HashSet<>()));
 
             for (int r = 1; r <= n; r++) {
                 Set<Set<ConversionResult>> combinations = Sets.combinations(conversionResultSubgroup, r);
@@ -264,25 +265,27 @@ public class ShExDocModelFactory {
                 for (Set<ConversionResult> combination: combinations) {
                     if (r == 1) {
                         ConversionResult conversionResult = combination.stream().findAny().get();
-                        inferredShapeExprIdsOfSubgroup.add(conversionResult.convertedShapeExprId);
+                        shapeExprIdsInferredFromConversionResult.get(conversionResult).add(conversionResult.convertedShapeExprId);
                         inferredDeclarableShapeExprs.add(conversionResult.convertedDeclarableShapeExpr); // converted shapeExpr
                     } else {
                         IRI id = ShapeAnd.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "SA");
                         List<ConversionResult> listFromCombination = combination.stream().collect(Collectors.toList());
                         ShapeAnd shapeAnd = new ShapeAnd(id, new ShapeExprRef(listFromCombination.remove(0).convertedShapeExprId), new ShapeExprRef(listFromCombination.remove(0).convertedShapeExprId));
                         listFromCombination.stream().forEach(conversionResult -> shapeAnd.addShapeExpr(new ShapeExprRef(conversionResult.convertedShapeExprId)));
-                        inferredShapeExprIdsOfSubgroup.add(id);
+                        combination.stream().forEach(conversionResult -> shapeExprIdsInferredFromConversionResult.get(conversionResult).add(id));
                         inferredDeclarableShapeExprs.add(shapeAnd);
                     }
                 }
             }
 
-            IRI groupId = conversionResultSubgroup.stream().findAny().get().referenceId;
-            List<IRI> ids = inferredShapeExprIdsOfSubgroup.stream().collect(Collectors.toList());
-            ShapeOr shapeOr = new ShapeOr(groupId, new ShapeExprRef(ids.remove(0)), new ShapeExprRef(ids.remove(0)));
-            ids.stream().forEach(id -> shapeOr.addShapeExpr(new ShapeExprRef(id)));
+            for (ConversionResult conversionResult: conversionResultSubgroup) {
+                IRI referenceId = conversionResult.referenceId;
+                List<IRI> ids = shapeExprIdsInferredFromConversionResult.get(conversionResult).stream().collect(Collectors.toList());
+                ShapeOr shapeOr = new ShapeOr(referenceId, new ShapeExprRef(ids.remove(0)), new ShapeExprRef(ids.remove(0)));
+                ids.stream().forEach(id -> shapeOr.addShapeExpr(new ShapeExprRef(id)));
 
-            inferredDeclarableShapeExprs.add(shapeOr);
+                inferredDeclarableShapeExprs.add(shapeOr);
+            }
         }
 
         return inferredDeclarableShapeExprs;
@@ -294,6 +297,6 @@ public class ShExDocModelFactory {
 
         private IRI convertedShapeExprId;
         private DeclarableShapeExpr convertedDeclarableShapeExpr; // (nodeConstraint + triplesConstraints) or nodeConstraint
-        private IRI referenceId; // if (groupSize > 1) groupId or if (groupSize == 1) convertedShapeExprId
+        private IRI referenceId; // if (groupSize > 1) id of ShapeOr or if (groupSize == 1) convertedShapeExprId
     }
 }
