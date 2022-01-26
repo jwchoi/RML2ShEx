@@ -3,21 +3,11 @@ package rml2shex.model.shex;
 import rml2shex.util.IRI;
 import rml2shex.util.Symbols;
 
-import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class EachOf extends DeclarableTripleExpr {
-
-    static class IdGenerator {
-        private static int incrementer = 0;
-        private static int getPostfix() { return incrementer++; }
-
-        static IRI generateId(String prefixLabel, URI prefixIRI, String localPartPrefix) {
-            return new IRI(prefixLabel, prefixIRI, localPartPrefix + getPostfix());
-        }
-    }
 
     private Set<TripleExpr> expressions;
 
@@ -29,13 +19,24 @@ public class EachOf extends DeclarableTripleExpr {
         expressions.add(tripleExpr2);
     }
 
+    EachOf(TripleExpr tripleExpr1, TripleExpr tripleExpr2) { this(null, tripleExpr1, tripleExpr2); }
+
     void addTripleExpr(TripleExpr tripleExpr) { expressions.add(tripleExpr); }
 
     @Override
     String getSerializedTripleExpr() {
-        return expressions.stream()
+        String multiElementGroup = expressions.stream()
                 .map(TripleExpr::getSerializedTripleExpr)
                 .sorted()
                 .collect(Collectors.joining(Symbols.SEMICOLON + Symbols.NEWLINE));
+
+        if (getId() == null) return multiElementGroup;
+
+        StringBuffer sb = new StringBuffer(super.getSerializedTripleExpr());
+        sb.append(Symbols.OPEN_PARENTHESIS + Symbols.NEWLINE);
+        sb.append(multiElementGroup.indent(2));
+        sb.append(Symbols.CLOSE_PARENTHESIS);
+
+        return sb.toString();
     }
 }

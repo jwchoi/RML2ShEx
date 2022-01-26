@@ -11,18 +11,6 @@ import java.util.Set;
 
 public class TripleConstraint extends DeclarableTripleExpr {
 
-    static class IdGenerator {
-        private static int incrementer = 0;
-
-        private static int getPostfix() {
-            return incrementer++;
-        }
-
-        static IRI generateId(String prefixLabel, URI prefixIRI, String localPartPrefix) {
-            return new IRI(prefixLabel, prefixIRI, localPartPrefix + getPostfix());
-        }
-    }
-
     enum MappedTypes {CLASS, PREDICATE_OBJECT_MAP, PREDICATE_REF_OBJECT_MAP}
 
     private final MappedTypes mappedType;
@@ -33,7 +21,7 @@ public class TripleConstraint extends DeclarableTripleExpr {
     private Optional<Integer> min; // if empty, 1
     private Optional<Integer> max; // if empty, 1. && -1 is treated as unbounded
 
-    private TripleConstraint(IRI id, MappedTypes mappedType) {
+    private TripleConstraint(MappedTypes mappedType, IRI id) {
         super(Kinds.TripleConstraint, id);
         this.mappedType = mappedType;
 
@@ -43,18 +31,23 @@ public class TripleConstraint extends DeclarableTripleExpr {
         max = Optional.empty();
     }
 
+    TripleConstraint(IRI predicate, Set<IRI> classes) { this(null, predicate, classes); }
+    TripleConstraint(PredicateMap predicateMap, ObjectMap objectMap) { this(null, predicateMap, objectMap); }
+    TripleConstraint(PredicateMap predicateMap, IRI referenceIdFromRefObjectMap, boolean inverse) { this(null, predicateMap, referenceIdFromRefObjectMap, inverse); }
+
+
     TripleConstraint(IRI id, IRI predicate, Set<IRI> classes) {
-        this(id, MappedTypes.CLASS);
+        this(MappedTypes.CLASS, id);
         convert(predicate, classes);
     }
 
     TripleConstraint(IRI id, PredicateMap predicateMap, ObjectMap objectMap) {
-        this(id, MappedTypes.PREDICATE_OBJECT_MAP);
+        this(MappedTypes.PREDICATE_OBJECT_MAP, id);
         convert(predicateMap, objectMap);
     }
 
     TripleConstraint(IRI id, PredicateMap predicateMap, IRI referenceIdFromRefObjectMap, boolean inverse) {
-        this(id, MappedTypes.PREDICATE_REF_OBJECT_MAP);
+        this(MappedTypes.PREDICATE_REF_OBJECT_MAP, id);
         convert(predicateMap, referenceIdFromRefObjectMap, inverse);
     }
 
@@ -89,8 +82,7 @@ public class TripleConstraint extends DeclarableTripleExpr {
 
         setPredicate(predicateMap);
 
-        IRI ncId = NodeConstraint.IdGenerator.generateId(getId().getPrefixLabel(), getId().getPrefixIRI(), "NC");
-        ShapeExpr nc = new NodeConstraint(ncId, objectMap);
+        ShapeExpr nc = new NodeConstraint(objectMap);
         setValueExpr(nc);
 
         setMin(0); // temporarily

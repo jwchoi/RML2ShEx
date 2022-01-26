@@ -8,23 +8,28 @@ PREFIX rr: <http://www.w3.org/ns/r2rml#>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 BASE <http://my.example/ns#>
 
-my:SA0 my:NC2 IRI /^http:\/\/example\.com\/sport\/(.*)$/ AND CLOSED {
-  $my:TC1 ex:id my:NC3 LITERAL ?;
-  $my:TC2 ex:description my:NC4 LITERAL ?
+my:S0 IRI /^http:\/\/example\.com\/sport\/(.*)$/ AND CLOSED {
+  ex:description LITERAL ?;
+  ex:id LITERAL ?
 }
 
-my:SA1 my:NC0 IRI /^http:\/\/example\.com\/student\/(.*)$/ AND CLOSED {
-  $my:TC0 ex:plays my:NC1 IRI /^http:\/\/example\.com\/sport\/(.*)$/ ?
+my:S1 @my:S4 OR @my:S5
+
+my:S2 @my:S3 OR @my:S5
+
+my:S3 IRI /^http:\/\/example\.com\/student\/(.*)$/ AND CLOSED {
+  $my:T0 (
+    ex:firstName LITERAL ?;
+    ex:lastName LITERAL ?
+  )
 }
 
-my:SA2 my:NC5 IRI /^http:\/\/example\.com\/student\/(.*)$/ AND CLOSED {
-  $my:TC3 ex:firstName my:NC6 LITERAL ?;
-  $my:TC4 ex:lastName my:NC7 LITERAL ?
+my:S4 IRI /^http:\/\/example\.com\/student\/(.*)$/ AND CLOSED {
+  $my:T1 ex:plays IRI /^http:\/\/example\.com\/sport\/(.*)$/ ?
 }
 
-my:SA3 @my:SA2 AND @my:SA1
-
-my:SO0 @my:SA1 OR @my:SA3
-
-my:SO1 @my:SA2 OR @my:SA3
+my:S5 IRI /^http:\/\/example\.com\/student\/(.*)$/ AND CLOSED {
+  &my:T0;
+  &my:T1
+}
 

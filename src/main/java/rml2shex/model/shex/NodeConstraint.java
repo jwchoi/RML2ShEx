@@ -7,25 +7,12 @@ import rml2shex.model.rml.SubjectMap;
 import rml2shex.model.rml.Template;
 import rml2shex.model.rml.TermMap;
 
-import java.net.URI;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class NodeConstraint extends DeclarableShapeExpr {
-
-    static class IdGenerator {
-        private static int incrementer = 0;
-
-        private static int getPostfix() {
-            return incrementer++;
-        }
-
-        static IRI generateId(String prefixLabel, URI prefixIRI, String localPartPrefix) {
-            return new IRI(prefixLabel, prefixIRI, localPartPrefix + getPostfix());
-        }
-    }
 
     protected enum XSFacets {
         MAX_LENGTH("MAXLENGTH"),
@@ -57,6 +44,9 @@ public class NodeConstraint extends DeclarableShapeExpr {
         xsFacets = new HashSet<>();
         values = new HashSet<>();
     }
+
+    NodeConstraint(SubjectMap subjectMap) { this(null, subjectMap); }
+    NodeConstraint(ObjectMap objectMap) { this(null, objectMap); }
 
     NodeConstraint(IRI id, SubjectMap subjectMap) {
         this(id);

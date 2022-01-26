@@ -3,19 +3,9 @@ package rml2shex.model.shex;
 import rml2shex.util.IRI;
 import rml2shex.util.Symbols;
 
-import java.net.URI;
 import java.util.Optional;
 
 public class Shape extends DeclarableShapeExpr {
-
-    static class IdGenerator {
-        private static int incrementer = 0;
-        private static int getPostfix() { return incrementer++; }
-
-        static IRI generateId(String prefixLabel, URI prefixIRI, String localPartPrefix) {
-            return new IRI(prefixLabel, prefixIRI, localPartPrefix + getPostfix());
-        }
-    }
 
     private Optional<Boolean> closed;
     private Optional<TripleExpr> expression;
@@ -31,12 +21,12 @@ public class Shape extends DeclarableShapeExpr {
         expression = Optional.ofNullable(tripleExpr);
     }
 
+    Shape(boolean closed, TripleExpr tripleExpr) { this(null, closed, tripleExpr); }
+
     Shape(IRI id, boolean closed, TripleExpr tripleExpr) {
         this(id, tripleExpr);
         this.closed = Optional.of(closed);
     }
-
-
 
     @Override
     public String getSerializedShapeExpr() {
