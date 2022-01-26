@@ -238,14 +238,14 @@ public class ShExDocModelFactory {
                 Shape tm2sh;
 
                 if (countOfTripleConstraint == 1) {
-                    tm2sh = new Shape(tm2ShId, tripleConstraintSet.stream().findAny().get()); // one triple constraint
+                    tm2sh = new Shape(tm2ShId, true, tripleConstraintSet.stream().findAny().get()); // one triple constraint
                 } else {
                     IRI tm2EoId = EachOf.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "EO");
                     List<TripleConstraint> tripleConstraintList = tripleConstraintSet.stream().collect(Collectors.toList());
                     EachOf tm2eo = new EachOf(tm2EoId, tripleConstraintList.remove(0), tripleConstraintList.remove(0));
                     tripleConstraintList.stream().forEach(tc -> tm2eo.addTripleExpr(tc));
 
-                    tm2sh = new Shape(tm2ShId, tm2eo); // EachOf as expression
+                    tm2sh = new Shape(tm2ShId, true, tm2eo); // EachOf as expression
                 }
                 IRI tm2SaId = conversionResult.convertedShapeExprId != null ? conversionResult.convertedShapeExprId : ShapeAnd.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "SA");
                 ShapeAnd tm2sa = new ShapeAnd(tm2SaId, nodeConstraint, tm2sh); // node constraint + (EachOf)triple constraints

@@ -12,6 +12,7 @@ public class Symbols {
     public static final String CARET = "^";
     public static final String CLOSE_BRACE = "}";
     public static final String CLOSE_BRACKET = "]";
+    public static final String CLOSED = "CLOSED";
     public static final String CLOSE_PARENTHESIS = ")";
     public static final String COLON = ":";
     public static final String COMMA = ",";

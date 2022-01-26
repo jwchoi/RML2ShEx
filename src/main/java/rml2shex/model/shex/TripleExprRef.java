@@ -12,5 +12,5 @@ public class TripleExprRef extends TripleExpr {
     }
 
     @Override
-    public String getSerializedTripleExpr() { return Symbols.AT + tripleExprLabel.getPrefixedName(); }
+    public String getSerializedTripleExpr() { return Symbols.AMPERSAND + tripleExprLabel.getPrefixedName(); }
 }
