@@ -10,7 +10,7 @@ public abstract class ShapeExpr implements Comparable<ShapeExpr> {
     Kinds getKind() { return kind; }
 
 
-    abstract String getSerializedShapeExpr();
+    public abstract String getSerializedShapeExpr();
 
     @Override
     public String toString() { return getSerializedShapeExpr(); }

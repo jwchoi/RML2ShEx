@@ -15,5 +15,8 @@ public abstract class DeclarableTripleExpr extends TripleExpr {
 
     IRI getId() { return id.isPresent() ? id.get() : null; }
 
-    public String getTripleExprDecl() { return id.get().getPrefixedName() + Symbols.SPACE + getSerializedTripleExpr(); }
+    void setId(IRI id) { this.id = Optional.ofNullable(id); }
+
+    @Override
+    String getSerializedTripleExpr() { return id.isPresent() ? Symbols.DOLLAR + id.get().getPrefixedName() + Symbols.SPACE : Symbols.EMPTY; }
 }

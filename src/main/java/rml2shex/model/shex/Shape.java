@@ -20,7 +20,7 @@ public class Shape extends DeclarableShapeExpr {
     private Optional<Boolean> closed;
     private Optional<TripleExpr> expression;
 
-    Shape(IRI id) {
+    private Shape(IRI id) {
         super(Kinds.Shape, id);
         closed = Optional.empty();
         expression = Optional.empty();
@@ -35,6 +35,8 @@ public class Shape extends DeclarableShapeExpr {
         this(id, tripleExpr);
         this.closed = Optional.of(closed);
     }
+
+
 
     @Override
     public String getSerializedShapeExpr() {

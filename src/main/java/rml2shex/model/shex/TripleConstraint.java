@@ -110,7 +110,7 @@ public class TripleConstraint extends DeclarableTripleExpr {
 
     @Override
     String getSerializedTripleExpr() {
-        StringBuffer sb = new StringBuffer();
+        StringBuffer sb = new StringBuffer(super.getSerializedTripleExpr());
 
         // senseFlags?
         String senseFlags = inverse.isPresent() && inverse.get() ? Symbols.CARET : Symbols.EMPTY;

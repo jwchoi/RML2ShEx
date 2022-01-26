@@ -15,7 +15,8 @@ public abstract class DeclarableShapeExpr extends ShapeExpr {
 
     IRI getId() { return id.isPresent() ? id.get() : null; }
 
-    public String getShapeExprDecl() { return id.get().getPrefixedName() + Symbols.SPACE + getSerializedShapeExpr(); }
+    @Override
+    public String getSerializedShapeExpr() { return id.isPresent() ? id.get().getPrefixedName() + Symbols.SPACE : Symbols.EMPTY; }
 
     @Override
     public int compareTo(ShapeExpr o) {

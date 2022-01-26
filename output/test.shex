@@ -8,21 +8,21 @@ PREFIX rr: <http://www.w3.org/ns/r2rml#>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 BASE <http://my.example/ns#>
 
-my:SA0 IRI /^http:\/\/example\.com\/sport\/(.*)$/ AND CLOSED {
-  ex:description LITERAL ?;
-  ex:id LITERAL ?
+my:SA0 my:NC2 IRI /^http:\/\/example\.com\/sport\/(.*)$/ AND CLOSED {
+  $my:TC1 ex:id my:NC3 LITERAL ?;
+  $my:TC2 ex:description my:NC4 LITERAL ?
 }
 
-my:SA1 IRI /^http:\/\/example\.com\/student\/(.*)$/ AND CLOSED {
-  ex:plays IRI /^http:\/\/example\.com\/sport\/(.*)$/ ?
+my:SA1 my:NC0 IRI /^http:\/\/example\.com\/student\/(.*)$/ AND CLOSED {
+  $my:TC0 ex:plays my:NC1 IRI /^http:\/\/example\.com\/sport\/(.*)$/ ?
 }
 
-my:SA2 IRI /^http:\/\/example\.com\/student\/(.*)$/ AND CLOSED {
-  ex:firstName LITERAL ?;
-  ex:lastName LITERAL ?
+my:SA2 my:NC5 IRI /^http:\/\/example\.com\/student\/(.*)$/ AND CLOSED {
+  $my:TC3 ex:firstName my:NC6 LITERAL ?;
+  $my:TC4 ex:lastName my:NC7 LITERAL ?
 }
 
-my:SA3 @my:SA1 AND @my:SA2
+my:SA3 @my:SA2 AND @my:SA1
 
 my:SO0 @my:SA1 OR @my:SA3
 

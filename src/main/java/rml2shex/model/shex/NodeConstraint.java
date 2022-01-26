@@ -170,7 +170,7 @@ public class NodeConstraint extends DeclarableShapeExpr {
 
     @Override
     public String getSerializedShapeExpr() {
-        StringBuffer sb = new StringBuffer();
+        StringBuffer sb = new StringBuffer(super.getSerializedShapeExpr());
 
         if (values.size() > 0) {
             String valueSet = values.stream()

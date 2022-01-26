@@ -33,9 +33,15 @@ public class ShapeOr extends DeclarableShapeExpr {
 
     @Override
     public String getSerializedShapeExpr() {
-        return shapeExprs.stream()
+        StringBuffer sb = new StringBuffer(super.getSerializedShapeExpr());
+
+        String shapeExpression = shapeExprs.stream()
                 .map(ShapeExpr::getSerializedShapeExpr)
                 .sorted()
                 .collect(Collectors.joining(Symbols.SPACE + Symbols.OR + Symbols.SPACE));
+
+        sb.append(shapeExpression);
+
+        return sb.toString();
     }
 }
