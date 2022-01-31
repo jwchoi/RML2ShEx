@@ -1,7 +1,7 @@
 package rml2shex.model.shex;
 
 import com.google.common.collect.Sets;
-import rml2shex.util.IRI;
+import rml2shex.commons.IRI;
 import rml2shex.model.rml.*;
 
 import java.net.URI;
@@ -133,11 +133,11 @@ public class ShExDocModelFactory {
 
                 IRI referenceId = DeclarableShapeExpr.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "S");
 
-                conversionResult.referenceIdOfShapeExpr = referenceId;
+                conversionResult.referenceId4ShapeExpr = referenceId;
                 conversionResult.countOfTheGroupMembers = sizeOfSubgroup;
 
                 if (sizeOfSubgroup == 1)
-                    conversionResult.convertedShapeExprId = conversionResult.referenceIdOfShapeExpr;
+                    conversionResult.convertedShapeExprId = conversionResult.referenceId4ShapeExpr;
             }
 
         }
@@ -193,7 +193,7 @@ public class ShExDocModelFactory {
 
         ConversionResult conversionResult = tmcrMap.get(foundTriplesMap);
 
-        return conversionResult.referenceIdOfShapeExpr;
+        return conversionResult.referenceId4ShapeExpr;
     }
 
     private static void convertTriplesMap2ShapeExpr(String shexBasePrefix, URI shexBaseIRI, Set<ConversionResult> conversionResults) {
@@ -221,7 +221,7 @@ public class ShExDocModelFactory {
                     if (conversionResult.countOfTheGroupMembers > 1) {
                         IRI tcId = DeclarableTripleExpr.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "T");
                         tc.setId(tcId);
-                        conversionResult.referenceIdOfTripleExpr = tcId;
+                        conversionResult.referenceId4TripleExpr = tcId;
                     }
 
                     tm2sh = new Shape(true, tc); // one triple constraint
@@ -233,7 +233,7 @@ public class ShExDocModelFactory {
                     if (conversionResult.countOfTheGroupMembers > 1) {
                         IRI eoId = DeclarableTripleExpr.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "T");
                         tm2eo.setId(eoId);
-                        conversionResult.referenceIdOfTripleExpr = eoId;
+                        conversionResult.referenceId4TripleExpr = eoId;
                     }
 
                     tm2sh = new Shape(true, tm2eo); // EachOf as expression
@@ -281,8 +281,8 @@ public class ShExDocModelFactory {
                         NodeConstraint nodeConstraint = combination.stream().findAny().get().nodeConstraint;
 
                         List<IRI> refIds = combination.stream()
-                                .filter(conversionResult -> conversionResult.referenceIdOfTripleExpr != null)
-                                .map(conversionResult -> conversionResult.referenceIdOfTripleExpr)
+                                .filter(conversionResult -> conversionResult.referenceId4TripleExpr != null)
+                                .map(conversionResult -> conversionResult.referenceId4TripleExpr)
                                 .collect(Collectors.toList());
 
                         int sizeOfRefIds = refIds.size();
@@ -301,7 +301,7 @@ public class ShExDocModelFactory {
             }
 
             for (ConversionResult conversionResult: conversionResultSubgroup) {
-                IRI referenceId = conversionResult.referenceIdOfShapeExpr;
+                IRI referenceId = conversionResult.referenceId4ShapeExpr;
                 List<IRI> ids = shapeExprIdsInferredFromConversionResult.get(conversionResult).stream().collect(Collectors.toList());
                 ShapeOr shapeOr = new ShapeOr(referenceId, new ShapeExprRef(ids.remove(0)), new ShapeExprRef(ids.remove(0)));
                 ids.stream().forEach(id -> shapeOr.addShapeExpr(new ShapeExprRef(id)));
@@ -321,7 +321,7 @@ public class ShExDocModelFactory {
         private DeclarableShapeExpr convertedShapeExpr; // (nodeConstraint + triplesConstraints) or nodeConstraint
 
         private int countOfTheGroupMembers;
-        private IRI referenceIdOfShapeExpr; // if (groupSize > 1) id of ShapeOr or if (groupSize == 1) convertedShapeExprId
-        private IRI referenceIdOfTripleExpr;
+        private IRI referenceId4ShapeExpr; // if (groupSize > 1) id of ShapeOr or if (groupSize == 1) convertedShapeExprId
+        private IRI referenceId4TripleExpr;
     }
 }

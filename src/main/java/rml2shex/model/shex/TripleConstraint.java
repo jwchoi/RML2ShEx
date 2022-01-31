@@ -1,9 +1,9 @@
 package rml2shex.model.shex;
 
-import rml2shex.util.IRI;
+import rml2shex.commons.IRI;
 import rml2shex.model.rml.ObjectMap;
 import rml2shex.model.rml.PredicateMap;
-import rml2shex.util.Symbols;
+import rml2shex.commons.Symbols;
 
 import java.net.URI;
 import java.util.Optional;

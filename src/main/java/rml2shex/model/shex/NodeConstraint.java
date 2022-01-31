@@ -1,8 +1,8 @@
 package rml2shex.model.shex;
 
 import rml2shex.model.rml.ObjectMap;
-import rml2shex.util.Symbols;
-import rml2shex.util.IRI;
+import rml2shex.commons.Symbols;
+import rml2shex.commons.IRI;
 import rml2shex.model.rml.SubjectMap;
 import rml2shex.model.rml.Template;
 import rml2shex.model.rml.TermMap;
@@ -66,6 +66,7 @@ public class NodeConstraint extends DeclarableShapeExpr {
     private void convert(SubjectMap subjectMap) {
         setNodeKind(subjectMap);
         setXsFacet(subjectMap);
+        setValues(subjectMap);
     }
 
     private void convert(Set<IRI> classes) {
@@ -115,10 +116,23 @@ public class NodeConstraint extends DeclarableShapeExpr {
         if (nodeKind != null) this.nodeKind = Optional.of(nodeKind);
     }
 
+    private void setValues(SubjectMap subjectMap) {
+        if (subjectMap.getIRIConstant().isPresent()) {
+            IRI iriConstant = subjectMap.getIRIConstant().get();
+            values.add(new ValueSetValue.ObjectValue.IRIREF(iriConstant));
+        }
+    }
+
     private void setValues(Set<IRI> classes) { classes.stream().forEach(cls -> values.add(new ValueSetValue.ObjectValue.IRIREF(cls))); }
 
     private void setValues(ObjectMap objectMap) {
-        if (objectMap.getLanguageMap().isPresent()) {
+        if (objectMap.getLiteralConstant().isPresent()) {
+            String literalConstant = objectMap.getLiteralConstant().get();
+            values.add(new ValueSetValue.ObjectValue.ObjectLiteral(literalConstant));
+        } else if (objectMap.getIRIConstant().isPresent()) {
+            IRI iriConstant = objectMap.getIRIConstant().get();
+            values.add(new ValueSetValue.ObjectValue.IRIREF(iriConstant));
+        } else if (objectMap.getLanguageMap().isPresent()) {
             Optional<String> languageTag = objectMap.getLanguageMap().get().getLiteralConstant();
             if (languageTag.isPresent()) values.add(new ValueSetValue.Language(languageTag.get()));
         }

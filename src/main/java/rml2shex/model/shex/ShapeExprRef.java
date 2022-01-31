@@ -1,7 +1,7 @@
 package rml2shex.model.shex;
 
-import rml2shex.util.IRI;
-import rml2shex.util.Symbols;
+import rml2shex.commons.IRI;
+import rml2shex.commons.Symbols;
 
 public class ShapeExprRef extends ShapeExpr {
     private IRI shapeExprLabel;

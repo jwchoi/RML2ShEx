@@ -1,8 +1,8 @@
 package rml2shex.datasource.db;
 
-import rml2shex.util.SqlXsdMap;
-import rml2shex.util.Symbols;
-import rml2shex.util.XSDs;
+import rml2shex.commons.SqlXsdMap;
+import rml2shex.commons.Symbols;
+import rml2shex.commons.XSDs;
 
 import javax.xml.bind.DatatypeConverter;
 import java.sql.ResultSet;

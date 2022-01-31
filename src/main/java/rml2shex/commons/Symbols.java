@@ -1,4 +1,4 @@
-package rml2shex.util;
+package rml2shex.commons;
 
 public class Symbols {
     public static final String A = "a";

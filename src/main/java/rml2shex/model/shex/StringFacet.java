@@ -1,6 +1,6 @@
 package rml2shex.model.shex;
 
-import rml2shex.util.Symbols;
+import rml2shex.commons.Symbols;
 import rml2shex.model.rml.Template;
 
 import java.util.Arrays;

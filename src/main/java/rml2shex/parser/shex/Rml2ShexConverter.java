@@ -1,11 +1,11 @@
-package rml2shex.mapping.shex;
+package rml2shex.parser.shex;
 
 import rml2shex.model.shex.DeclarableShapeExpr;
-import rml2shex.util.Symbols;
+import rml2shex.commons.Symbols;
 import rml2shex.model.rml.*;
 import rml2shex.model.shex.ShExDocModel;
 import rml2shex.model.shex.ShExDocModelFactory;
-import rml2shex.mapping.rml.RMLParser;
+import rml2shex.parser.rml.RMLParser;
 
 import java.io.File;
 import java.io.PrintWriter;

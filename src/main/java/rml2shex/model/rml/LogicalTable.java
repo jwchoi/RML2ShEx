@@ -1,7 +1,7 @@
 package rml2shex.model.rml;
 
 import rml2shex.datasource.db.DBMSTypes;
-import rml2shex.util.Symbols;
+import rml2shex.commons.Symbols;
 
 import java.net.URI;
 import java.util.Optional;

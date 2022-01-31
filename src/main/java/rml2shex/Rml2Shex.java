@@ -1,7 +1,7 @@
 package rml2shex;
 
 import rml2shex.datasource.db.DBBridge;
-import rml2shex.mapping.shex.Rml2ShexConverter;
+import rml2shex.parser.shex.Rml2ShexConverter;
 
 import java.io.File;
 import java.io.FileInputStream;

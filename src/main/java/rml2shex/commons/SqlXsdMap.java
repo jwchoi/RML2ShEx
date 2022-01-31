@@ -1,6 +1,4 @@
-package rml2shex.util;
-
-import rml2shex.util.XSDs;
+package rml2shex.commons;
 
 import java.util.Hashtable;
 import java.util.Map;

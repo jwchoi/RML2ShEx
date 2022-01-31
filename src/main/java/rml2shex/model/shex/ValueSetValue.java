@@ -1,7 +1,7 @@
 package rml2shex.model.shex;
 
-import rml2shex.util.IRI;
-import rml2shex.util.Symbols;
+import rml2shex.commons.IRI;
+import rml2shex.commons.Symbols;
 
 import java.util.Optional;
 
@@ -37,8 +37,18 @@ public abstract class ValueSetValue {
             }
         }
 
-        static abstract class ObjectLiteral extends ObjectValue {
-            ObjectLiteral() { super(ObjectValue.Kinds.ObjectLiteral); }
+        static class ObjectLiteral extends ObjectValue {
+            private String value;
+//            private Optional<String> language;
+//            private Optional<String> type;
+
+            ObjectLiteral(String value) {
+                super(ObjectValue.Kinds.ObjectLiteral);
+                this.value = value;
+            }
+
+            @Override
+            String getSerializedValueSetValue() { return value; }
         }
 
         private Kinds kind;

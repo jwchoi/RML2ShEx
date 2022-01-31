@@ -1,7 +1,7 @@
 package rml2shex.model.rml;
 
-import rml2shex.mapping.rml.RMLParser;
-import rml2shex.util.IRI;
+import rml2shex.parser.rml.RMLParser;
+import rml2shex.commons.IRI;
 
 import java.net.URI;
 import java.util.*;

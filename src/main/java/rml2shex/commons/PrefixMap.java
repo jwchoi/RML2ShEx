@@ -1,4 +1,4 @@
-package rml2shex.util;
+package rml2shex.commons;
 
 import java.net.URI;
 import java.util.Hashtable;

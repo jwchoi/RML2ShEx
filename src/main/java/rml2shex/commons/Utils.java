@@ -1,6 +1,4 @@
-package rml2shex.util;
-
-import rml2shex.util.Symbols;
+package rml2shex.commons;
 
 public class Utils {
     public static String encode(String value) {

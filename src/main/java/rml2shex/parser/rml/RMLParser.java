@@ -1,4 +1,4 @@
-package rml2shex.mapping.rml;
+package rml2shex.parser.rml;
 
 import org.apache.jena.rdf.model.*;
 
