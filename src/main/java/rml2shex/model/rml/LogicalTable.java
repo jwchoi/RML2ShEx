@@ -9,7 +9,6 @@ import java.util.Set;
 import java.util.TreeSet;
 
 public class LogicalTable {
-
     private URI uri;
 
     private Optional<String> tableName; // rr:tableName

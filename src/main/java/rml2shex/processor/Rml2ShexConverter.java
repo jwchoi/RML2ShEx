@@ -1,11 +1,11 @@
-package rml2shex.parser.shex;
+package rml2shex.processor;
 
+import rml2shex.datasource.DataSourceAnalyzer;
 import rml2shex.model.shex.DeclarableShapeExpr;
 import rml2shex.commons.Symbols;
 import rml2shex.model.rml.*;
 import rml2shex.model.shex.ShExDocModel;
 import rml2shex.model.shex.ShExDocModelFactory;
-import rml2shex.parser.rml.RMLParser;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -13,6 +13,8 @@ import java.net.URI;
 import java.util.*;
 
 public class Rml2ShexConverter {
+    private String dataSourceDir;
+
     private String rmlPathname;
     private String shexPathname;
 
@@ -25,6 +27,14 @@ public class Rml2ShexConverter {
     private PrintWriter writer;
 
     public Rml2ShexConverter(String rmlPathname, String shexPathname, String shexBasePrefix, String shexBaseIRI) {
+        this.rmlPathname = rmlPathname;
+        this.shexPathname = shexPathname;
+        this.shexBasePrefix = shexBasePrefix;
+        this.shexBaseIRI = URI.create(shexBaseIRI);
+    }
+
+    public Rml2ShexConverter(String dataSourceDir, String rmlPathname, String shexPathname, String shexBasePrefix, String shexBaseIRI) {
+        this.dataSourceDir = dataSourceDir;
         this.rmlPathname = rmlPathname;
         this.shexPathname = shexPathname;
         this.shexBasePrefix = shexBasePrefix;
@@ -72,6 +82,7 @@ public class Rml2ShexConverter {
 
     public File generateShExFile() {
         RMLModel rmlModel = RMLModelFactory.getRMLModel(getRMLParser());
+        if (dataSourceDir != null) DataSourceAnalyzer.injectMetadataInto(rmlModel, dataSourceDir);
         shExDocModel = ShExDocModelFactory.getShExDocModel(rmlModel, shexBasePrefix, shexBaseIRI);
 
         preProcess();

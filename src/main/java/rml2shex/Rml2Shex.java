@@ -1,7 +1,7 @@
 package rml2shex;
 
 import rml2shex.datasource.db.DBBridge;
-import rml2shex.parser.shex.Rml2ShexConverter;
+import rml2shex.processor.Rml2ShexConverter;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,12 +22,16 @@ public class Rml2Shex {
     }
 
     private static void generateShExFile(Properties properties) {
+        String dataSourceDir = properties.getProperty("dataSource.dir");
         String rmlPathname = properties.getProperty("rml.pathname");
         String shexPathname = properties.getProperty("shex.pathname");
         String shexBasePrefix = properties.getProperty("shex.base.prefix");
         String shexBaseIRI = properties.getProperty("shex.base.iri");
+        boolean useDataSource = Boolean.parseBoolean(properties.getProperty("useDataSource"));
 
-        Rml2ShexConverter converter = new Rml2ShexConverter(rmlPathname, shexPathname, shexBasePrefix, shexBaseIRI);
+        Rml2ShexConverter converter = useDataSource ?
+                new Rml2ShexConverter(dataSourceDir, rmlPathname, shexPathname, shexBasePrefix, shexBaseIRI) :
+                new Rml2ShexConverter(rmlPathname, shexPathname, shexBasePrefix, shexBaseIRI);
 
         try {
             File file = converter.generateShExFile();

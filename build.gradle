@@ -27,6 +27,9 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.mariadb.jdbc/mariadb-java-client
     implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.4'
+
+    // https://mvnrepository.com/artifact/org.apache.spark/spark-sql
+    implementation 'org.apache.spark:spark-sql_2.12:3.2.0'
 }
 
 test {

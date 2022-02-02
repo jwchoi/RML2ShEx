@@ -17,20 +17,18 @@ public class LogicalSource extends LogicalTable {
         iterator = Optional.empty();
     }
 
+    public Source getSource() { return source; }
     void setSource(Source source) { this.source = source; }
+
+    public URI getReferenceFormulation() { return referenceFormulation.orElse(null); }
 
     void setReferenceFormulation(URI referenceFormulation) {
         this.referenceFormulation = Optional.ofNullable(referenceFormulation);
     }
 
+    public String getIterator() { return iterator.orElse(null); }
     void setIterator(String iterator) { this.iterator = Optional.ofNullable(iterator); }
 
     void setQuery(String query) { this.query = Optional.ofNullable(query); }
-
-    public String getQuery() {
-        if (query.isPresent())
-            return query.get();
-
-        return null;
-    }
+    public String getQuery() { return query.orElse(null); }
 }

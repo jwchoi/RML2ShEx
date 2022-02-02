@@ -7,4 +7,6 @@ public class Source {
 
     Source(String source) { this.source = URI.create(source); }
     Source(URI source) { this.source = source; }
+
+    public URI getSource() { return source; }
 }

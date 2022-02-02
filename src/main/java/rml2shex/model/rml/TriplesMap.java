@@ -21,15 +21,35 @@ public class TriplesMap {
 
     void setLogicalSource(LogicalSource logicalSource) { this.logicalTable = Optional.of(logicalSource); }
 
+    public LogicalSource getLogicalSource() {
+        LogicalSource logicalSource = null;
+
+        if (logicalTable.isPresent()) {
+            LogicalTable logicalTable = this.logicalTable.get();
+            if (logicalTable instanceof LogicalSource) logicalSource = (LogicalSource) logicalTable;
+        }
+
+        return logicalSource;
+    }
+
     void setLogicalTable(LogicalTable logicalTable) { this.logicalTable = Optional.of(logicalTable); }
+
+    public LogicalTable getLogicalTable() {
+        LogicalTable logicalTable = null;
+
+        if (this.logicalTable.isPresent()) {
+            logicalTable = this.logicalTable.get();
+            if (logicalTable instanceof LogicalSource) logicalTable = null;
+        }
+
+        return logicalTable;
+    }
 
     void setSubjectMap(SubjectMap subjectMap) { this.subjectMap = subjectMap; }
 
     public void addPredicateObjectMap(PredicateObjectMap predicateObjectMap) {
         predicateObjectMaps.add(predicateObjectMap);
     }
-
-    public LogicalTable getLogicalTable() { return logicalTable.orElse(null); }
 
     public SubjectMap getSubjectMap() { return subjectMap; }
 
