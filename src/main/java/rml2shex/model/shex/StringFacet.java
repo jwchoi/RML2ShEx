@@ -1,11 +1,13 @@
 package rml2shex.model.shex;
 
 import rml2shex.commons.Symbols;
+import rml2shex.datasource.Column;
 import rml2shex.model.rml.Template;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class StringFacet extends XSFacet {
     private Optional<String> pattern;
@@ -31,7 +33,7 @@ public class StringFacet extends XSFacet {
         pattern = pattern.replace(Symbols.DOT, Symbols.BACKSLASH + Symbols.DOT);
 
         // logical references
-        List<String> logicalReferences = template.getLogicalReferences();
+        List<String> logicalReferences = template.getLogicalReferences().stream().map(Column::getName).collect(Collectors.toList());
         for (String logicalReference: logicalReferences)
             pattern = pattern.replace("{" + logicalReference + "}", "(.*)");
 

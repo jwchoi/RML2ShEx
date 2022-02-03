@@ -1,6 +1,7 @@
 package rml2shex.model.rml;
 
 import rml2shex.commons.IRI;
+import rml2shex.datasource.Column;
 
 import java.net.URI;
 import java.util.Optional;
@@ -25,12 +26,12 @@ public abstract class TermMap {
 
     private Optional<String> literalConstant; // rr:constant -> IRI or literal(in object map)
     private Optional<IRI> iriConstant; // rr:constant -> IRI(in subject map, predicate map, object map or graph map)
-    private Optional<String> column; // rr:column
+    private Optional<Column> column; // rr:column
     private Optional<Template> template; // rr:template
     private Optional<TermTypes> termType; // rr:termType
     private Optional<String> inverseExpression; // rr:inverseExpression
 
-    private Optional<String> reference; // rml:reference overrides rr:column
+    private Optional<Column> reference; // rml:reference overrides rr:column
 
     TermMap() {
         literalConstant = Optional.empty();
@@ -58,7 +59,7 @@ public abstract class TermMap {
 
     void setColumn(String column) {
         if (column != null) {
-            this.column = Optional.of(column);
+            this.column = Optional.of(new Column(column));
             setTermType(TermTypes.IRI);
         }
     }
@@ -92,7 +93,7 @@ public abstract class TermMap {
 
     void setReference(String reference) {
         if (reference != null) {
-            this.reference = Optional.of(reference);
+            this.reference = Optional.of(new Column(reference));
             setTermType(TermTypes.IRI);
         }
     }
@@ -112,5 +113,5 @@ public abstract class TermMap {
         return iriConstant;
     }
 
-    public Optional<String> getColumn() { return column; }
+    public Optional<Column> getColumn() { return column; }
 }

@@ -1,20 +1,24 @@
 package rml2shex.model.rml;
 
+import rml2shex.datasource.Column;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Template {
     private String format;
-    private List<String> logicalReferences;
+    private List<Column> logicalReferences;
 
     Template(String format) {
         this.format = format;
-        this.logicalReferences = getLogicalReferencesIn(format);
+        logicalReferences = getLogicalReferencesIn(format).stream().map(Column::new).collect(Collectors.toList());
     }
 
     public String getFormat() { return format; }
 
-    public List<String> getLogicalReferences() { return logicalReferences; }
+    public List<Column> getLogicalReferences() { return logicalReferences; }
 
     private List<String> getLogicalReferencesIn(String template) {
         // because backslashes need to be escaped by a second backslash in the Turtle syntax,
