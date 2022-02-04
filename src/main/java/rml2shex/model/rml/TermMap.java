@@ -114,4 +114,5 @@ public abstract class TermMap {
     }
 
     public Optional<Column> getColumn() { return column; }
+    public Optional<Column> getReference() { return reference; }
 }

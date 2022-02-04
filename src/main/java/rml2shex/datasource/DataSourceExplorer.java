@@ -5,7 +5,7 @@ import rml2shex.model.rml.*;
 import java.net.URI;
 import java.util.*;
 
-public class MetadataExtractor {
+public class DataSourceExplorer {
     public static void injectMetadataInto(RMLModel rmlModel, String dataSourceDir) {
 
         Session session = Session.createSession();
@@ -14,7 +14,11 @@ public class MetadataExtractor {
 
         Map<TriplesMap, DataFrame> tmdfMap = loadLogicalSources(triplesMaps, dataSourceDir, session);
 
-        Map<TriplesMap, Metadata> tmmMap = createMetadata(tmdfMap);
+        assignColumns(tmdfMap);
+
+        acquireColumnMetadata(tmdfMap);
+
+        acquireOccurrenceCount(tmdfMap);
     }
 
     private static Map<TriplesMap, DataFrame> loadLogicalSources(Set<TriplesMap> triplesMaps, String dataSourceDir, Session session) {
@@ -37,20 +41,23 @@ public class MetadataExtractor {
         return  tmdfMap;
     }
 
-    private static Map<TriplesMap, Metadata> createMetadata(Map<TriplesMap, DataFrame> tmdfMap) {
-        Map<TriplesMap, Metadata> tmmMap = new HashMap<>();
-
+    private static void assignColumns(Map<TriplesMap, DataFrame> tmdfMap) {
         Set<TriplesMap> triplesMaps = tmdfMap.keySet();
         for(TriplesMap triplesMap: triplesMaps) {
-            Metadata metadata = new Metadata();
+            DataFrame df = tmdfMap.get(triplesMap);
+
             // SubjectMap
             SubjectMap subjectMap = triplesMap.getSubjectMap();
 
             Optional<Template> template = subjectMap.getTemplate();
-            if (template.isPresent()) metadata.subjectColumns = template.get().getLogicalReferences();
+            if (template.isPresent()) df.setSubjectColumns(template.get().getLogicalReferences());
 
             Optional<Column> column = subjectMap.getColumn();
-            if (column.isPresent()) metadata.subjectColumns.add(column.get());
+            if (column.isPresent()) df.setSubjectColumns(Arrays.asList(column.get()));
+
+            Optional<Column> reference = subjectMap.getReference();
+            if (reference.isPresent()) df.setSubjectColumns(Arrays.asList(reference.get()));
+
             // PredicateObjectMap
             List<PredicateObjectMap> predicateObjectMaps = triplesMap.getPredicateObjectMaps();
             for (PredicateObjectMap predicateObjectMap: predicateObjectMaps) {
@@ -60,19 +67,20 @@ public class MetadataExtractor {
                     Optional<ObjectMap> objectMap = predicateObjectPair.getObjectMap();
                     if (objectMap.isPresent()) {
                         template = objectMap.get().getTemplate();
-                        if (template.isPresent()) metadata.objectColumns.add(template.get().getLogicalReferences());
+                        if (template.isPresent()) df.addObjectColumns(template.get().getLogicalReferences());
 
                         column = objectMap.get().getColumn();
-                        if (column.isPresent()) metadata.objectColumns.add(Arrays.asList(column.get()));
+                        if (column.isPresent()) df.addObjectColumns(Arrays.asList(column.get()));
+
+                        reference = objectMap.get().getReference();
+                        if (reference.isPresent()) df.addObjectColumns(Arrays.asList(reference.get()));
                     }
                 }
             }
-
-            tmmMap.put(triplesMap, metadata);
         }
 
         for(TriplesMap triplesMap: triplesMaps) {
-            Metadata metadata = tmmMap.get(triplesMap);
+            DataFrame df = tmdfMap.get(triplesMap);
 
             // PredicateObjectMap
             List<PredicateObjectMap> predicateObjectMaps = triplesMap.getPredicateObjectMaps();
@@ -84,26 +92,38 @@ public class MetadataExtractor {
                     if (refObjectMap.isPresent()) {
                         URI parentTriplesMapURI = refObjectMap.get().getParentTriplesMap();
                         TriplesMap parentTriplesMap = triplesMaps.stream().filter(other -> parentTriplesMapURI.equals(other.getUri())).findAny().get();
-                        metadata.parents.add(tmmMap.get(parentTriplesMap));
+                        df.addParent(tmdfMap.get(parentTriplesMap));
                     }
                 }
             }
-
-            tmmMap.put(triplesMap, metadata);
         }
-
-        return tmmMap;
     }
 
-    private static class Metadata {
-        private List<Column> subjectColumns;
-        private List<List<Column>> objectColumns;
-        private List<Metadata> parents;
+    private static void acquireColumnMetadata(Map<TriplesMap, DataFrame> tmdfMap) {
+        Set<TriplesMap> triplesMaps = tmdfMap.keySet();
 
-        private Metadata() {
-            subjectColumns = new ArrayList<>();
-            objectColumns = new ArrayList<>();
-            parents = new ArrayList<>();
+        for(TriplesMap triplesMap: triplesMaps) {
+            DataFrame df = tmdfMap.get(triplesMap);
+
+            List<Column> subjectColumns = df.getSubjectColumns();
+            subjectColumns.stream().forEach(df::assignMetadata);
+
+            List<List<Column>> objectColumnsList = df.getObjectColumnsList();
+            objectColumnsList.stream().forEach(list -> list.forEach(df::assignMetadata));
+        }
+    }
+
+    private static void acquireOccurrenceCount(Map<TriplesMap, DataFrame> tmdfMap) {
+        Set<TriplesMap> triplesMaps = tmdfMap.keySet();
+
+        for(TriplesMap triplesMap: triplesMaps) {
+            DataFrame df = tmdfMap.get(triplesMap);
+
+
+            List<Column> subjectColumns = df.getSubjectColumns();
+
+            List<List<Column>> objectColumnsList = df.getObjectColumnsList();
+            for (List<Column> objectColumns: objectColumnsList) df.countOccurrence(subjectColumns, objectColumns);
         }
     }
 }

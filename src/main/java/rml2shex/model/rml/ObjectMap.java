@@ -47,7 +47,7 @@ public class ObjectMap extends TermMap {
     @Override
     void setReference(String reference) {
         if (reference != null) {
-            super.setColumn(reference);
+            super.setReference(reference);
             setTermType(TermTypes.LITERAL);
         }
     }

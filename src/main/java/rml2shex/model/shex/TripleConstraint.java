@@ -1,9 +1,11 @@
 package rml2shex.model.shex;
 
 import rml2shex.commons.IRI;
+import rml2shex.datasource.Column;
 import rml2shex.model.rml.ObjectMap;
 import rml2shex.model.rml.PredicateMap;
 import rml2shex.commons.Symbols;
+import rml2shex.model.rml.Template;
 
 import java.net.URI;
 import java.util.Optional;
@@ -85,8 +87,28 @@ public class TripleConstraint extends DeclarableTripleExpr {
         ShapeExpr nc = new NodeConstraint(objectMap);
         setValueExpr(nc);
 
-        setMin(0); // temporarily
-        setMax(1); // temporarily
+        setMin(objectMap);
+        setMax(-1); // temporarily
+    }
+
+    private void setMin(ObjectMap objectMap) {
+        Optional<Column> reference = objectMap.getReference();
+        if (reference.isPresent()) {
+            if (reference.get().isIncludeNull()) setMin(0);
+            else setMin(1);
+        }
+
+        Optional<Column> column = objectMap.getColumn();
+        if (column.isPresent()) {
+            if (column.get().isIncludeNull()) setMin(0);
+            else setMin(1);
+        }
+
+        Optional<Template> template = objectMap.getTemplate();
+        if (template.isPresent()) {
+            if (template.get().getLogicalReferences().stream().filter(col -> col.isIncludeNull()).count() > 0) setMin(0);
+            else setMin(1);
+        }
     }
 
     private void setInverse(boolean inverse) { this.inverse = Optional.of(inverse); }
