@@ -9,6 +9,8 @@ public class PredicateObjectMap {
 
     private Set<GraphMap> graphMaps; // the size of graphMaps >= 0
 
+    private List<PredicateObjectPair> predicateObjectPairs;
+
     PredicateObjectMap() {
         predicateMaps = new TreeSet<>();
         objectMaps = new ArrayList<>();
@@ -23,7 +25,9 @@ public class PredicateObjectMap {
     void setGraphMaps(Set<GraphMap> graphMaps) { this.graphMaps = graphMaps; }
 
     public List<PredicateObjectPair> getPredicateObjectPairs() {
-        List<PredicateObjectPair> predicateObjectPairs = new ArrayList<>();
+        if (predicateObjectPairs != null) return predicateObjectPairs;
+
+        predicateObjectPairs = new ArrayList<>();
 
         for (PredicateMap predicateMap: predicateMaps) {
             for (ObjectMap objectMap: objectMaps)
@@ -43,6 +47,8 @@ public class PredicateObjectMap {
         private Optional<ObjectMap> objectMap;
         private Optional<RefObjectMap> refObjectMap;
 
+        private Optional<Long> maxOccurs; // acquired from the data source
+
         private PredicateObjectPair(PredicateMap predicateMap) { this.predicateMap = predicateMap; }
 
         PredicateObjectPair(PredicateMap predicateMap, ObjectMap objectMap) {
@@ -60,5 +66,8 @@ public class PredicateObjectMap {
         public PredicateMap getPredicateMap() { return predicateMap; }
         public Optional<ObjectMap> getObjectMap() { return objectMap; }
         public Optional<RefObjectMap> getRefObjectMap() { return refObjectMap; }
+
+        public Optional<Long> getMaxOccurs() { return maxOccurs; }
+        public void setMaxOccurs(long maxOccurs) { this.maxOccurs = Optional.of(maxOccurs); }
     }
 }

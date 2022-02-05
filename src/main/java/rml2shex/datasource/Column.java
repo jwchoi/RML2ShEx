@@ -2,11 +2,11 @@ package rml2shex.datasource;
 
 public class Column {
     private String name;
-    private String type;
-    private boolean includeNull;
-    private String min;
-    private String max;
-    private boolean distinct;
+    private String type; // acquired from the data source
+    private boolean includeNull; // acquired from the data source
+    private String min; // acquired from the data source
+    private String max; // acquired from the data source
+    private boolean distinct; // acquired from the data source
 
     public Column(String name) { this.name = name; }
 

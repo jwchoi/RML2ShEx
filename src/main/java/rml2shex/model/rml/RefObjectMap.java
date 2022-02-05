@@ -18,6 +18,8 @@ public class RefObjectMap implements Comparable<RefObjectMap> {
 
     public URI getParentTriplesMap() { return parentTriplesMap; }
 
+    public List<JoinCondition> getJoinConditions() { return joinConditions; }
+
     @Override
     public int compareTo(RefObjectMap refObjectMap) {
         return parentTriplesMap.compareTo(refObjectMap.parentTriplesMap);

@@ -30,7 +30,7 @@ class Session {
         return session;
     }
 
-    DataFrame createDataFrameFrom(LogicalSource logicalSource, String dataSourceDir) {
+    DataSource createDataFrameFrom(LogicalSource logicalSource, String dataSourceDir) {
         Dataset<Row> df = null;
 
         DataSourceKinds dataSourceKind = detectDataSourceKind(logicalSource);
@@ -45,7 +45,7 @@ class Session {
                         .csv(path);
         }
 
-        return new DataFrame(df);
+        return new DataSource(df);
     }
 
     private DataSourceKinds detectDataSourceKind(LogicalSource logicalSource) {
@@ -61,7 +61,9 @@ class Session {
         return null;
     }
 
-    static DataFrame createDataFrameFrom(LogicalTable logicalTable) {
+    static DataSource createDataFrameFrom(LogicalTable logicalTable) {
         return null;
     }
+
+    Dataset<Row> sql(String sqlText) { return sparkSession.sql(sqlText); }
 }
