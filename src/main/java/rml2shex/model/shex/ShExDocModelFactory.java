@@ -162,6 +162,9 @@ public class ShExDocModelFactory {
                         URI uriOfParentTriplesMap = refObjectMap.getParentTriplesMap();
                         IRI referenceIdFromParentTriplesMap = getReferenceIdFromTriplesMap(uriOfParentTriplesMap, tmcrMap);
 
+                        Optional<Long> minOccurs = getMinOccurs(refObjectMap.getJoinConditions());
+                        Optional<Long> maxOccurs = predicateObjectPair.getMaxOccurs();
+
                         TripleConstraint pr2tc = new TripleConstraint(predicateMap, referenceIdFromParentTriplesMap, false);
 
                         ConversionResult conversionResult = tmcrMap.get(triplesMap);
@@ -311,6 +314,10 @@ public class ShExDocModelFactory {
         }
 
         return inferredDeclarableShapeExprs;
+    }
+
+    private static Optional<Long> getMinOccurs(List<JoinCondition> joinConditions) {
+        return Optional.empty();
     }
 
     private static class ConversionResult {

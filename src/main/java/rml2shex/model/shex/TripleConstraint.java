@@ -58,8 +58,7 @@ public class TripleConstraint extends DeclarableTripleExpr {
 
         setPredicate(predicate);
 
-        IRI ncId = NodeConstraint.IdGenerator.generateId(getId().getPrefixLabel(), getId().getPrefixIRI(), "NC");
-        ShapeExpr nc = new NodeConstraint(ncId, classes);
+        ShapeExpr nc = new NodeConstraint(classes);
         setValueExpr(nc);
 
         int size = classes.size();

@@ -46,6 +46,7 @@ public class NodeConstraint extends DeclarableShapeExpr {
     }
 
     NodeConstraint(SubjectMap subjectMap) { this(null, subjectMap); }
+    NodeConstraint(Set<IRI> classes) { this(null, classes); }
     NodeConstraint(ObjectMap objectMap) { this(null, objectMap); }
 
     NodeConstraint(IRI id, SubjectMap subjectMap) {

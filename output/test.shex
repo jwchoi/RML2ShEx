@@ -4,19 +4,20 @@ PREFIX my: <http://my.example/ns#>
 PREFIX ql: <http://semweb.mmlab.be/ns/ql#>
 PREFIX rml: <http://semweb.mmlab.be/ns/rml#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX rr: <http://www.w3.org/ns/r2rml#>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 BASE <http://my.example/ns#>
 
-my:S0 IRI /^http:\/\/example\.com\/resource\/sport_(.*)$/ AND CLOSED {
-  ^<http://example.com/ontology/practises> @my:S1 ?;
-  rdfs:label LITERAL +
+my:S0 IRI /^http:\/\/example\.com\/(.*)$/ AND CLOSED {
+  ^ex:Sport @my:S1 ?;
+  a [activity:Sport] +
 }
 
-my:S1 IRI /^http:\/\/example\.com\/resource\/student_(.*)$/ AND CLOSED {
-  <http://example.com/ontology/practises> @my:S0 ?;
+my:S1 IRI /^http:\/\/example\.com\/Student\/(.*)\/(.*)$/ AND CLOSED {
+  a [foaf:Person] +;
+  ex:Sport @my:S0 ?;
+  ex:id LITERAL +;
   foaf:name LITERAL +
 }
 
