@@ -83,9 +83,10 @@ public class ShExDocModelFactory {
                 if (predicateObjectPair.getObjectMap().isPresent()) {
                     ObjectMap objectMap = predicateObjectPair.getObjectMap().get();
 
+                    Optional<Long> minOccurs = predicateObjectPair.getMinOccurs();
                     Optional<Long> maxOccurs = predicateObjectPair.getMaxOccurs();
 
-                    TripleConstraint po2tc = new TripleConstraint(predicateMap, objectMap, maxOccurs);
+                    TripleConstraint po2tc = new TripleConstraint(predicateMap, objectMap, minOccurs, maxOccurs);
 
                     conversionResult.tripleConstraints.add(po2tc);
                 }

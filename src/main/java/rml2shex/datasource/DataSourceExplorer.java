@@ -97,6 +97,7 @@ public class DataSourceExplorer {
                             df.acquireMetadata(objectColumns.get(0));
                         }
 
+                        predicateObjectPair.setMinOccurs(df.acquireMinOccurs(objectColumns));
                         predicateObjectPair.setMaxOccurs(df.acquireMaxOccurs(objectColumns));
                     }
                 }

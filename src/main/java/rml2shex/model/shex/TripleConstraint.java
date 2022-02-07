@@ -34,8 +34,8 @@ public class TripleConstraint extends DeclarableTripleExpr {
     }
 
     TripleConstraint(IRI predicate, Set<IRI> classes) { this(null, predicate, classes); }
-    TripleConstraint(PredicateMap predicateMap, ObjectMap objectMap, Optional<Long> maxOccurs) {
-        this(null, predicateMap, objectMap, maxOccurs);
+    TripleConstraint(PredicateMap predicateMap, ObjectMap objectMap, Optional<Long> minOccurs, Optional<Long> maxOccurs) {
+        this(null, predicateMap, objectMap, minOccurs, maxOccurs);
     }
     TripleConstraint(PredicateMap predicateMap, IRI referenceIdFromRefObjectMap, Optional<Long> minOccurs, Optional<Long> maxOccurs, boolean inverse) {
         this(null, predicateMap, referenceIdFromRefObjectMap, minOccurs, maxOccurs, inverse);
@@ -47,9 +47,9 @@ public class TripleConstraint extends DeclarableTripleExpr {
         convert(predicate, classes);
     }
 
-    TripleConstraint(IRI id, PredicateMap predicateMap, ObjectMap objectMap, Optional<Long> maxOccurs) {
+    TripleConstraint(IRI id, PredicateMap predicateMap, ObjectMap objectMap, Optional<Long> minOccurs, Optional<Long> maxOccurs) {
         this(MappedTypes.PREDICATE_OBJECT_MAP, id);
-        convert(predicateMap, objectMap, maxOccurs);
+        convert(predicateMap, objectMap, minOccurs, maxOccurs);
     }
 
     TripleConstraint(IRI id, PredicateMap predicateMap, IRI referenceIdFromRefObjectMap, Optional<Long> minOccurs, Optional<Long> maxOccurs, boolean inverse) {
@@ -85,7 +85,7 @@ public class TripleConstraint extends DeclarableTripleExpr {
         }
     }
 
-    private void convert(PredicateMap predicateMap, ObjectMap objectMap, Optional<Long> maxOccurs) {
+    private void convert(PredicateMap predicateMap, ObjectMap objectMap, Optional<Long> minOccurs, Optional<Long> maxOccurs) {
         setInverse(false);
 
         setPredicate(predicateMap);
@@ -93,16 +93,19 @@ public class TripleConstraint extends DeclarableTripleExpr {
         ShapeExpr nc = new NodeConstraint(objectMap);
         setValueExpr(nc);
 
-        setMin(objectMap);
+        setMin(objectMap, minOccurs);
         setMax(objectMap, maxOccurs);
     }
 
-    private void setMin(ObjectMap objectMap) {
+    private void setMin(ObjectMap objectMap, Optional<Long> minOccurs) {
         Optional<IRI> iriConstant = objectMap.getIRIConstant();
         if (iriConstant.isPresent()) setMin(1);
 
         Optional<String> literalConstant = objectMap.getLiteralConstant();
         if (literalConstant.isPresent()) setMin(1);
+
+        // when column, reference, template
+        if (minOccurs.isPresent() && minOccurs.get() == 1) setMin(1);
     }
 
     private void setMax(ObjectMap objectMap, Optional<Long> maxOccurs) {

@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class DataSource {
 
@@ -61,60 +62,111 @@ public class DataSource {
         acquireIncludeNull(column);
     }
 
+    long acquireMinOccurs(List<Column> objectColumns) {
+        List<String> sbjCols = subjectColumns.stream().map(Column::getName).collect(Collectors.toList());
+
+        Optional<org.apache.spark.sql.Column> sbjsNonNull = sbjCols.stream()
+                .map(df::col)
+                .map(org.apache.spark.sql.Column::isNotNull)
+                .reduce(org.apache.spark.sql.Column::and);
+
+        Dataset<Row> sbjsNonNullDF = sbjsNonNull.isPresent() ? df.where(sbjsNonNull.get()) : df;
+
+        Optional<org.apache.spark.sql.Column> objsNull = objectColumns.stream()
+                    .map(Column::getName)
+                    .map(df::col)
+                    .map(org.apache.spark.sql.Column::isNull)
+                    .reduce(org.apache.spark.sql.Column::or);
+
+        Dataset<Row> nonMappedRowsDF = objsNull.isPresent() ? sbjsNonNullDF.where(objsNull.get()) : sbjsNonNullDF;
+
+        long countOfNonMappedRows = nonMappedRowsDF.count();
+
+        if (countOfNonMappedRows == 0) return 1;
+
+        // groupBy
+        String firstSbjCol = sbjCols.remove(0);
+        String[] restSbjCols = sbjCols.toArray(new String[0]);
+
+        Dataset<Row> groupOfNonMappedRowsDF = nonMappedRowsDF.groupBy(firstSbjCol, restSbjCols).count();
+
+        Dataset<Row> groupDF = df.groupBy(firstSbjCol, restSbjCols).count();
+
+        // join
+        Optional<org.apache.spark.sql.Column> joinExprs = Arrays.stream(groupOfNonMappedRowsDF.columns())
+                .map(col -> groupOfNonMappedRowsDF.col(col).equalTo(groupDF.col(col)))
+                .reduce(org.apache.spark.sql.Column::and);
+
+        long countOfGroupsOfWhichMinOccursAreZero = groupOfNonMappedRowsDF.join(groupDF, joinExprs.get()).count();
+
+        return countOfGroupsOfWhichMinOccursAreZero > 0 ? 0 : 1;
+    }
+
     long acquireMaxOccurs(List<Column> objectColumns) {
         // preprocess
-        List<String> includeNullCols = new ArrayList<>();
-        subjectColumns.stream().filter(Column::isIncludeNull).map(Column::getName).forEach(includeNullCols::add);
-        objectColumns.stream().filter(Column::isIncludeNull).map(Column::getName).forEach(includeNullCols::add);
-
         List<String> sbjCols = subjectColumns.stream().map(Column::getName).collect(Collectors.toList());
         List<String> objCols = objectColumns.stream().map(Column::getName).collect(Collectors.toList());
 
+        List<String> SOCols = new ArrayList<>();
+        sbjCols.stream().forEach(SOCols::add);
+        objCols.stream().forEach(SOCols::add);
+
+        Optional<org.apache.spark.sql.Column> conditionNonNull = SOCols.stream()
+                .map(df::col)
+                .map(org.apache.spark.sql.Column::isNotNull)
+                .reduce(org.apache.spark.sql.Column::and);
+
         String firstSbjCol = sbjCols.remove(0);
+        String[] restSbjCols = sbjCols.toArray(new String[0]);
 
         List<String> restColList = new ArrayList<>();
         restColList.addAll(sbjCols);
         restColList.addAll(objCols);
         String[] restCols = restColList.toArray(new String[0]);
 
-        String[] restSbjCols = sbjCols.toArray(new String[0]);
-
         // groupBy
-        Dataset<Row> df = this.df.select(firstSbjCol, restCols);
-        for (String includeNullCol: includeNullCols) { df = df.where(df.col(includeNullCol).isNotNull()); }
-        df = df.groupBy(firstSbjCol, restSbjCols).count();
-        List<Row> rows = df.select(df.col("count")).summary("max").collectAsList();
+        Dataset<Row> SONonNullDF = conditionNonNull.isPresent() ? df.select(firstSbjCol, restCols).where(conditionNonNull.get()).distinct() : df.select(firstSbjCol, restCols).distinct();
+        Dataset<Row> groupByDF = SONonNullDF.groupBy(firstSbjCol, restSbjCols).count();
+        List<Row> rows = groupByDF.select(groupByDF.col("count")).summary("max").collectAsList();
         long maxOccurs = Long.parseLong(rows.stream().map(row -> row.getString(1)).findAny().get());
 
         return maxOccurs;
     }
 
     long acquireMaxOccurs(DataSource parentDS, List<JoinCondition> joinConditions, boolean inverse) {
+        if (joinConditions.size() == 0) {
+            return inverse ? parentDS.acquireMaxOccurs(subjectColumns) : acquireMaxOccurs(parentDS.subjectColumns);
+        }
+
         // join
         df.createOrReplaceTempView("child");
         parentDS.df.createOrReplaceTempView("parent");
 
         StringBuffer sql = new StringBuffer("SELECT * FROM child, parent");
 
-        if (joinConditions.size() > 0) {
-            String whereClause = joinConditions.stream()
-                    .map(joinCondition -> "child." + joinCondition.getChild().getName() + "=parent." + joinCondition.getParent().getName())
-                    .collect(Collectors.joining(" AND ", " WHERE ", ""));
-            sql.append(whereClause);
-        }
+        String whereClause = joinConditions.stream()
+                .map(joinCondition -> "child." + joinCondition.getChild().getName() + "=parent." + joinCondition.getParent().getName())
+                .collect(Collectors.joining(" AND ", " WHERE ", ""));
+        sql.append(whereClause);
+
 
         Dataset<Row> joinResultDF = session.sql(sql.toString());
 
         // preprocess for groupBy
-        List<String> includeNullCols = new ArrayList<>();
-        subjectColumns.stream().filter(col -> col.isIncludeNull()).map(col -> "child." + col.getName()).forEach(includeNullCols::add);
-        parentDS.subjectColumns.stream().filter(col -> col.isIncludeNull()).map(col -> "parent." + col.getName()).forEach(includeNullCols::add);
+        List<String> childSbjs = subjectColumns.stream().map(col -> "child." + col.getName()).collect(Collectors.toList());
+        List<String> parentSbjs = parentDS.subjectColumns.stream().map(col -> "parent." + col.getName()).collect(Collectors.toList());
+        List<String> bothSbjs = new ArrayList<>();
+        childSbjs.stream().forEach(bothSbjs::add);
+        parentSbjs.stream().forEach(bothSbjs::add);
 
-        for (String includeNullCol: includeNullCols) { joinResultDF = joinResultDF.where(joinResultDF.col(includeNullCol).isNotNull()); }
+        Optional<org.apache.spark.sql.Column> conditionNonNull = bothSbjs.stream()
+                .map(joinResultDF::col)
+                .map(org.apache.spark.sql.Column::isNotNull)
+                .reduce(org.apache.spark.sql.Column::and);
 
-        List<String> sbjCols;
-        if (inverse) sbjCols = parentDS.subjectColumns.stream().map(col -> "parent." + col.getName()).collect(Collectors.toList());
-        else sbjCols = subjectColumns.stream().map(col -> "child." + col.getName()).collect(Collectors.toList());
+        joinResultDF = conditionNonNull.isPresent() ? joinResultDF.where(conditionNonNull.get()) : joinResultDF;
+
+        List<String> sbjCols = inverse ? parentSbjs : childSbjs;
         String firstSbjCol = sbjCols.remove(0);
         String[] restSbjCols = sbjCols.toArray(new String[0]);
 
@@ -132,24 +184,18 @@ public class DataSource {
                 .map(joinCondition -> df.col(joinCondition.getChild().getName()).equalTo(parentDS.df.col(joinCondition.getParent().getName())))
                 .reduce(org.apache.spark.sql.Column::and);
 
-        Optional<org.apache.spark.sql.Column> childSbjsNonNull = subjectColumns.stream()
-                .filter(Column::isIncludeNull)
-                .map(Column::getName)
+        List<String> sbjCols = subjectColumns.stream().map(Column::getName).collect(Collectors.toList());
+
+        Optional<org.apache.spark.sql.Column> childSbjsNonNull = sbjCols.stream()
                 .map(df::col)
                 .map(org.apache.spark.sql.Column::isNotNull)
                 .reduce(org.apache.spark.sql.Column::and);
 
-        Dataset<Row> joinResultDF;
+        // left_anti join includes in case of "null" of join columns.
+        Dataset<Row> joinResultDF = joinExprs.isPresent() ? df.join(parentDS.df, joinExprs.get(), "left_anti") : df;
+        if (childSbjsNonNull.isPresent()) joinResultDF = joinResultDF.where(childSbjsNonNull.get());
 
-        if (joinExprs.isPresent()) {
-            // left_anti join includes in case of "null" of join columns.
-            joinResultDF = df.join(parentDS.df, joinExprs.get(), "left_anti");
-            if (childSbjsNonNull.isPresent()) joinResultDF = joinResultDF.where(childSbjsNonNull.get());
-        } else {
-            joinResultDF = df;
-
-            if (childSbjsNonNull.isPresent()) joinResultDF = joinResultDF.where(childSbjsNonNull.get());
-
+        if (joinConditions.size() == 0) {
             Optional<org.apache.spark.sql.Column> parentSbjsNull = parentDS.subjectColumns.stream()
                     .map(Column::getName)
                     .map(df::col)
@@ -164,7 +210,6 @@ public class DataSource {
         if (countOfNonMatchedRows == 0) return 1;
 
         // groupBy after join
-        List<String> sbjCols = subjectColumns.stream().map(Column::getName).collect(Collectors.toList());
         String firstSbjCol = sbjCols.remove(0);
         String[] restSbjCols = sbjCols.toArray(new String[0]);
 
