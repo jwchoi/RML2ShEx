@@ -34,8 +34,12 @@ public class TripleConstraint extends DeclarableTripleExpr {
     }
 
     TripleConstraint(IRI predicate, Set<IRI> classes) { this(null, predicate, classes); }
-    TripleConstraint(PredicateMap predicateMap, ObjectMap objectMap, Optional<Long> maxOccurs) { this(null, predicateMap, objectMap, maxOccurs); }
-    TripleConstraint(PredicateMap predicateMap, IRI referenceIdFromRefObjectMap, boolean inverse) { this(null, predicateMap, referenceIdFromRefObjectMap, inverse); }
+    TripleConstraint(PredicateMap predicateMap, ObjectMap objectMap, Optional<Long> maxOccurs) {
+        this(null, predicateMap, objectMap, maxOccurs);
+    }
+    TripleConstraint(PredicateMap predicateMap, IRI referenceIdFromRefObjectMap, Optional<Long> minOccurs, Optional<Long> maxOccurs, boolean inverse) {
+        this(null, predicateMap, referenceIdFromRefObjectMap, minOccurs, maxOccurs, inverse);
+    }
 
 
     TripleConstraint(IRI id, IRI predicate, Set<IRI> classes) {
@@ -48,9 +52,9 @@ public class TripleConstraint extends DeclarableTripleExpr {
         convert(predicateMap, objectMap, maxOccurs);
     }
 
-    TripleConstraint(IRI id, PredicateMap predicateMap, IRI referenceIdFromRefObjectMap, boolean inverse) {
+    TripleConstraint(IRI id, PredicateMap predicateMap, IRI referenceIdFromRefObjectMap, Optional<Long> minOccurs, Optional<Long> maxOccurs, boolean inverse) {
         this(MappedTypes.PREDICATE_REF_OBJECT_MAP, id);
-        convert(predicateMap, referenceIdFromRefObjectMap, inverse);
+        convert(predicateMap, referenceIdFromRefObjectMap, minOccurs, maxOccurs, inverse);
     }
 
     private void convert(IRI predicate, Set<IRI> classes) {
@@ -66,7 +70,7 @@ public class TripleConstraint extends DeclarableTripleExpr {
         setMax(size);
     }
 
-    private void convert(PredicateMap predicateMap, IRI referenceIdFromRefObjectMap, boolean inverse) {
+    private void convert(PredicateMap predicateMap, IRI referenceIdFromRefObjectMap, Optional<Long> minOccurs, Optional<Long> maxOccurs, boolean inverse) {
         setInverse(inverse);
 
         setPredicate(predicateMap);
@@ -74,8 +78,11 @@ public class TripleConstraint extends DeclarableTripleExpr {
         ShapeExpr sER = new ShapeExprRef(referenceIdFromRefObjectMap);
         setValueExpr(sER);
 
-        setMin(0); // temporarily
-        setMax(1); // temporarily
+        if (minOccurs.isPresent() && minOccurs.get() > 0) setMin(1);
+        if (maxOccurs.isPresent()) {
+            if (maxOccurs.get() == 0) setMax(0);
+            else if (maxOccurs.get() == 1) setMax(1);
+        }
     }
 
     private void convert(PredicateMap predicateMap, ObjectMap objectMap, Optional<Long> maxOccurs) {

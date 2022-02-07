@@ -47,6 +47,8 @@ public class PredicateObjectMap {
         private Optional<ObjectMap> objectMap;
         private Optional<RefObjectMap> refObjectMap;
 
+        private Optional<Long> minOccurs; // acquired from the data source
+        private Optional<Long> inverseMinOccurs; // acquired from the data source
         private Optional<Long> maxOccurs; // acquired from the data source
         private Optional<Long> inverseMaxOccurs; // acquired from the data source
 
@@ -67,6 +69,12 @@ public class PredicateObjectMap {
         public PredicateMap getPredicateMap() { return predicateMap; }
         public Optional<ObjectMap> getObjectMap() { return objectMap; }
         public Optional<RefObjectMap> getRefObjectMap() { return refObjectMap; }
+
+        public Optional<Long> getMinOccurs() { return minOccurs; }
+        public void setMinOccurs(long minOccurs) { this.minOccurs = Optional.of(minOccurs); }
+
+        public Optional<Long> getInverseMinOccurs() { return inverseMinOccurs; }
+        public void setInverseMinOccurs(long inverseMinOccurs) { this.inverseMinOccurs = Optional.of(inverseMinOccurs); }
 
         public Optional<Long> getMaxOccurs() { return maxOccurs; }
         public void setMaxOccurs(long maxOccurs) { this.maxOccurs = Optional.of(maxOccurs); }

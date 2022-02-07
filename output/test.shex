@@ -10,13 +10,13 @@ PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 BASE <http://my.example/ns#>
 
 my:S0 IRI /^http:\/\/example\.com\/(.*)$/ AND CLOSED {
-  ^ex:Sport @my:S1 ?;
+  ^ex:Sport @my:S1;
   a [activity:Sport]
 }
 
 my:S1 IRI /^http:\/\/example\.com\/Student\/(.*)\/(.*)$/ AND CLOSED {
   a [foaf:Person];
-  ex:Sport @my:S0 ?;
+  ex:Sport @my:S0;
   ex:id LITERAL ?;
   foaf:name LITERAL ?
 }

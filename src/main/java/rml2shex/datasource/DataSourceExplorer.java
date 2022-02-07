@@ -126,7 +126,8 @@ public class DataSourceExplorer {
                             parentDF.acquireMetadata(parentColumn);
                         }
 
-                        predicateObjectPair.setMaxOccurs(df.acquireMinOccurs(parentDF, joinConditions, false));
+                        predicateObjectPair.setMinOccurs(df.acquireMinOccurs(parentDF, joinConditions, false));
+                        predicateObjectPair.setInverseMinOccurs(df.acquireMinOccurs(parentDF, joinConditions, true));
 
                         predicateObjectPair.setMaxOccurs(df.acquireMaxOccurs(parentDF, joinConditions, false));
                         predicateObjectPair.setInverseMaxOccurs(df.acquireMaxOccurs(parentDF, joinConditions, true));

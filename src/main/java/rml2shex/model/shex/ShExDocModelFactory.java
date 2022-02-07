@@ -164,10 +164,10 @@ public class ShExDocModelFactory {
                         URI uriOfParentTriplesMap = refObjectMap.getParentTriplesMap();
                         IRI referenceIdFromParentTriplesMap = getReferenceIdFromTriplesMap(uriOfParentTriplesMap, tmcrMap);
 
-                        Optional<Long> minOccurs = getMinOccurs(refObjectMap.getJoinConditions());
+                        Optional<Long> minOccurs = predicateObjectPair.getMinOccurs();
                         Optional<Long> maxOccurs = predicateObjectPair.getMaxOccurs();
 
-                        TripleConstraint pr2tc = new TripleConstraint(predicateMap, referenceIdFromParentTriplesMap, false);
+                        TripleConstraint pr2tc = new TripleConstraint(predicateMap, referenceIdFromParentTriplesMap, minOccurs, maxOccurs, false);
 
                         ConversionResult conversionResult = tmcrMap.get(triplesMap);
                         conversionResult.tripleConstraints.add(pr2tc);
@@ -176,7 +176,10 @@ public class ShExDocModelFactory {
                         URI uriOfChildTriplesMap = triplesMap.getUri();
                         IRI referenceIdFromChildTriplesMap = getReferenceIdFromTriplesMap(uriOfChildTriplesMap, tmcrMap);
 
-                        TripleConstraint pr2InverseTc = new TripleConstraint(predicateMap, referenceIdFromChildTriplesMap, true);
+                        Optional<Long> inverseMinOccurs = predicateObjectPair.getInverseMinOccurs();
+                        Optional<Long> inverseMaxOccurs = predicateObjectPair.getInverseMaxOccurs();
+
+                        TripleConstraint pr2InverseTc = new TripleConstraint(predicateMap, referenceIdFromChildTriplesMap, inverseMinOccurs, inverseMaxOccurs, true);
 
                         TriplesMap parentTriplesMap = triplesMaps.stream().filter(tm -> tm.getUri().equals(uriOfParentTriplesMap)).findAny().get();
                         ConversionResult conversionResultCorrespondingToParentTriplesMap = tmcrMap.get(parentTriplesMap);
