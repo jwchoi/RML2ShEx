@@ -23,13 +23,13 @@ public class DataSourceExplorer {
         for (TriplesMap triplesMap: triplesMaps) {
             LogicalTable logicalTable = triplesMap.getLogicalTable();
             if (logicalTable != null) {
-                tmdfMap.put(triplesMap, session.createDataFrameFrom(logicalTable));
+                tmdfMap.put(triplesMap, DataSourceFactory.createDataSource(session, logicalTable));
                 continue;
             }
 
             LogicalSource logicalSource = triplesMap.getLogicalSource();
             if (logicalSource != null) {
-                DataSource df = session.createDataFrameFrom(logicalSource, dataSourceDir);
+                DataSource df = DataSourceFactory.createDataSource(session, logicalSource, dataSourceDir);
                 tmdfMap.put(triplesMap, df);
             }
         }
@@ -126,10 +126,10 @@ public class DataSourceExplorer {
                             parentDF.acquireMetadata(parentColumn);
                         }
 
-                        predicateObjectPair.setMaxOccurs(df.acquireMinOccurs(parentDF, joinConditions, session, false));
+                        predicateObjectPair.setMaxOccurs(df.acquireMinOccurs(parentDF, joinConditions, false));
 
-                        predicateObjectPair.setMaxOccurs(df.acquireMaxOccurs(parentDF, joinConditions, session, false));
-                        predicateObjectPair.setInverseMaxOccurs(df.acquireMaxOccurs(parentDF, joinConditions, session, true));
+                        predicateObjectPair.setMaxOccurs(df.acquireMaxOccurs(parentDF, joinConditions, false));
+                        predicateObjectPair.setInverseMaxOccurs(df.acquireMaxOccurs(parentDF, joinConditions, true));
                     }
                 }
             }

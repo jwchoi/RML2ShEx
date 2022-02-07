@@ -5,16 +5,24 @@ import org.apache.spark.sql.Row;
 import rml2shex.model.rml.JoinCondition;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class DataSource {
+
+    enum DataSourceKinds { CSV, JSON, XML, Database }
+
+    private Session session;
     private Dataset<Row> df;
 
     private List<Column> subjectColumns;
 
-    DataSource(Dataset<Row> df) { this.df = df; }
+    DataSource(Session session, Dataset<Row> df) {
+        this.session = session;
+        this.df = df;
+    }
 
     void setSubjectColumns(List<Column> subjectColumns) { this.subjectColumns = subjectColumns; }
 
@@ -81,7 +89,7 @@ public class DataSource {
         return maxOccurs;
     }
 
-    long acquireMaxOccurs(DataSource parentDS, List<JoinCondition> joinConditions, Session session, boolean inverse) {
+    long acquireMaxOccurs(DataSource parentDS, List<JoinCondition> joinConditions, boolean inverse) {
         // join
         df.createOrReplaceTempView("child");
         parentDS.df.createOrReplaceTempView("parent");
@@ -118,7 +126,7 @@ public class DataSource {
         return maxOccurs;
     }
 
-    long acquireMinOccurs(DataSource parentDS, List<JoinCondition> joinConditions, Session session, boolean inverse) {
+    long acquireMinOccurs(DataSource parentDS, List<JoinCondition> joinConditions, boolean inverse) {
         // join
         Optional<org.apache.spark.sql.Column> joinExprs = joinConditions.stream()
                 .map(joinCondition -> df.col(joinCondition.getChild().getName()).equalTo(parentDS.df.col(joinCondition.getParent().getName())))
@@ -130,7 +138,6 @@ public class DataSource {
                 .map(df::col)
                 .map(org.apache.spark.sql.Column::isNotNull)
                 .reduce(org.apache.spark.sql.Column::and);
-
 
         Dataset<Row> joinResultDF;
 
@@ -152,15 +159,27 @@ public class DataSource {
             if (parentSbjsNull.isPresent()) joinResultDF = joinResultDF.where(parentSbjsNull.get());
         }
 
-        // preprocess for groupBy
+        long countOfNonMatchedRows = joinResultDF.count();
+
+        if (countOfNonMatchedRows == 0) return 1;
+
+        // groupBy after join
         List<String> sbjCols = subjectColumns.stream().map(Column::getName).collect(Collectors.toList());
         String firstSbjCol = sbjCols.remove(0);
         String[] restSbjCols = sbjCols.toArray(new String[0]);
 
+        Dataset<Row> groupAfterJoinDF = joinResultDF.groupBy(firstSbjCol, restSbjCols).count();
+
         // groupBy
         Dataset<Row> groupByDF = df.groupBy(firstSbjCol, restSbjCols).count();
 
+        // join with "groupBy after join" and "groupBy with original df"
+        joinExprs = Arrays.stream(groupAfterJoinDF.columns())
+                .map(col -> groupAfterJoinDF.col(col).equalTo(groupByDF.col(col)))
+                .reduce(org.apache.spark.sql.Column::and);
 
-        return joinResultDF.count() > 0 ? 0 : 1;
+        long countOfGroupsOfWhichMinOccursAreZero = groupAfterJoinDF.join(groupByDF, joinExprs.get()).count();
+
+        return countOfGroupsOfWhichMinOccursAreZero > 0 ? 0 : 1;
     }
 }

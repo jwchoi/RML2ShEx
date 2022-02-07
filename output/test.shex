@@ -11,13 +11,13 @@ BASE <http://my.example/ns#>
 
 my:S0 IRI /^http:\/\/example\.com\/(.*)$/ AND CLOSED {
   ^ex:Sport @my:S1 ?;
-  a [activity:Sport] +
+  a [activity:Sport]
 }
 
 my:S1 IRI /^http:\/\/example\.com\/Student\/(.*)\/(.*)$/ AND CLOSED {
-  a [foaf:Person] +;
+  a [foaf:Person];
   ex:Sport @my:S0 ?;
-  ex:id LITERAL +;
-  foaf:name LITERAL +
+  ex:id LITERAL ?;
+  foaf:name LITERAL ?
 }
 

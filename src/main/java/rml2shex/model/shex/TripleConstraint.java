@@ -20,8 +20,8 @@ public class TripleConstraint extends DeclarableTripleExpr {
     private Optional<Boolean> inverse;
     private IRI predicate;
     private Optional<ShapeExpr> valueExpr;
-    private Optional<Integer> min; // if empty, 1
-    private Optional<Integer> max; // if empty, 1. && -1 is treated as unbounded
+    private Optional<Integer> min; // if empty, 0
+    private Optional<Integer> max; // if empty, -1. && -1 is treated as unbounded
 
     private TripleConstraint(MappedTypes mappedType, IRI id) {
         super(Kinds.TripleConstraint, id);
@@ -34,7 +34,7 @@ public class TripleConstraint extends DeclarableTripleExpr {
     }
 
     TripleConstraint(IRI predicate, Set<IRI> classes) { this(null, predicate, classes); }
-    TripleConstraint(PredicateMap predicateMap, ObjectMap objectMap) { this(null, predicateMap, objectMap); }
+    TripleConstraint(PredicateMap predicateMap, ObjectMap objectMap, Optional<Long> maxOccurs) { this(null, predicateMap, objectMap, maxOccurs); }
     TripleConstraint(PredicateMap predicateMap, IRI referenceIdFromRefObjectMap, boolean inverse) { this(null, predicateMap, referenceIdFromRefObjectMap, inverse); }
 
 
@@ -43,9 +43,9 @@ public class TripleConstraint extends DeclarableTripleExpr {
         convert(predicate, classes);
     }
 
-    TripleConstraint(IRI id, PredicateMap predicateMap, ObjectMap objectMap) {
+    TripleConstraint(IRI id, PredicateMap predicateMap, ObjectMap objectMap, Optional<Long> maxOccurs) {
         this(MappedTypes.PREDICATE_OBJECT_MAP, id);
-        convert(predicateMap, objectMap);
+        convert(predicateMap, objectMap, maxOccurs);
     }
 
     TripleConstraint(IRI id, PredicateMap predicateMap, IRI referenceIdFromRefObjectMap, boolean inverse) {
@@ -78,7 +78,7 @@ public class TripleConstraint extends DeclarableTripleExpr {
         setMax(1); // temporarily
     }
 
-    private void convert(PredicateMap predicateMap, ObjectMap objectMap) {
+    private void convert(PredicateMap predicateMap, ObjectMap objectMap, Optional<Long> maxOccurs) {
         setInverse(false);
 
         setPredicate(predicateMap);
@@ -87,33 +87,35 @@ public class TripleConstraint extends DeclarableTripleExpr {
         setValueExpr(nc);
 
         setMin(objectMap);
-        setMax(-1); // temporarily
+        setMax(objectMap, maxOccurs);
     }
 
     private void setMin(ObjectMap objectMap) {
-        Optional<Column> reference = objectMap.getReference();
-        if (reference.isPresent()) {
-            if (reference.get().isIncludeNull()) setMin(0);
-            else setMin(1);
-        }
+        Optional<IRI> iriConstant = objectMap.getIRIConstant();
+        if (iriConstant.isPresent()) setMin(1);
 
-        Optional<Column> column = objectMap.getColumn();
-        if (column.isPresent()) {
-            if (column.get().isIncludeNull()) setMin(0);
-            else setMin(1);
-        }
+        Optional<String> literalConstant = objectMap.getLiteralConstant();
+        if (literalConstant.isPresent()) setMin(1);
+    }
 
-        Optional<Template> template = objectMap.getTemplate();
-        if (template.isPresent()) {
-            if (template.get().getLogicalReferences().stream().filter(col -> col.isIncludeNull()).count() > 0) setMin(0);
-            else setMin(1);
+    private void setMax(ObjectMap objectMap, Optional<Long> maxOccurs) {
+        Optional<IRI> iriConstant = objectMap.getIRIConstant();
+        if (iriConstant.isPresent()) setMax(1);
+
+        Optional<String> literalConstant = objectMap.getLiteralConstant();
+        if (literalConstant.isPresent()) setMax(1);
+
+        // when column, reference, template
+        if (maxOccurs.isPresent()) {
+            if (maxOccurs.get() == 0) setMax(0);
+            else if (maxOccurs.get() == 1) setMax(1);
         }
     }
 
     private void setInverse(boolean inverse) { this.inverse = Optional.of(inverse); }
 
-    private void setMin(int min) { if (min != 1) this.min = Optional.of(min); }
-    private void setMax(int max) { if (max != 1) this.max = Optional.of(max); }
+    private void setMin(int min) { if (min != 0) this.min = Optional.of(min); }
+    private void setMax(int max) { if (max != -1) this.max = Optional.of(max); }
 
     private void setPredicate(IRI predicate) { this.predicate = predicate; }
 
@@ -140,8 +142,8 @@ public class TripleConstraint extends DeclarableTripleExpr {
 
         // cardinality?
         String cardinality;
-        int min = this.min.orElse(1);
-        int max = this.max.orElse(1);
+        int min = this.min.orElse(0);
+        int max = this.max.orElse(-1);
 
         if (min == 1 && max == 1) cardinality = Symbols.EMPTY; // the default of "exactly one"
         else {
