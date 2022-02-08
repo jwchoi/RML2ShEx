@@ -1,14 +1,21 @@
 package rml2shex.datasource;
 
+import java.util.Optional;
+
 public class Column {
     private String name;
     private String type; // acquired from the data source
     private boolean includeNull; // acquired from the data source
-    private String min; // acquired from the data source
-    private String max; // acquired from the data source
+    private Optional<String> min; // acquired from the data source
+    private Optional<String> max; // acquired from the data source
     private boolean distinct; // acquired from the data source
 
-    public Column(String name) { this.name = name; }
+    public Column(String name) {
+        this.name = name;
+
+        min = Optional.empty();
+        max = Optional.empty();
+    }
 
     public String getName() { return name; }
 
@@ -18,11 +25,11 @@ public class Column {
     public String getType() { return type; }
     public void setType(String type) { this.type = type; }
 
-    public String getMin() { return min; }
-    public void setMin(String min) { this.min = min; }
+    public Optional<String> getMin() { return min; }
+    public void setMin(String min) { if (min != null) this.min = Optional.of(min); }
 
-    public String getMax() { return max; }
-    public void setMax(String max) { this.max = max; }
+    public Optional<String> getMax() { return max; }
+    public void setMax(String max) { if (max != null) this.max = Optional.of(max); }
 
     public boolean isDistinct() { return distinct; }
     public void setDistinct(boolean distinct) { this.distinct = distinct; }

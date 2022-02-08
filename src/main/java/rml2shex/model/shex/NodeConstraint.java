@@ -14,23 +14,6 @@ import java.util.stream.Collectors;
 
 public class NodeConstraint extends DeclarableShapeExpr {
 
-    protected enum XSFacets {
-        MAX_LENGTH("MAXLENGTH"),
-        MIN_INCLUSIVE("MININCLUSIVE"), MAX_INCLUSIVE("MAXINCLUSIVE"),
-        TOTAL_DIGITS("TOTALDIGITS"), FRACTION_DIGITS("FRACTIONDIGITS");
-
-        private final String facet;
-
-        XSFacets(String facet) {
-            this.facet = facet;
-        }
-
-        @Override
-        public String toString() {
-            return facet;
-        }
-    }
-
     private Optional<NodeKinds> nodeKind;
     private Set<ValueSetValue> values;
     private Optional<IRI> datatype;
