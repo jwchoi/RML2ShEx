@@ -1,5 +1,6 @@
 package rml2shex.model.shex;
 
+import rml2shex.datasource.Column;
 import rml2shex.model.rml.ObjectMap;
 import rml2shex.commons.Symbols;
 import rml2shex.commons.IRI;
@@ -126,11 +127,27 @@ public class NodeConstraint extends DeclarableShapeExpr {
 
     private void setXsFacet(TermMap termMap) {
         Optional<Template> template = termMap.getTemplate();
-        if (template.isEmpty()) return;
+        if (template.isPresent()) {
+            StringFacet stringFacet = new StringFacet(template.get());
 
-        StringFacet stringFacet = new StringFacet(template.get());
+            xsFacets.add(stringFacet);
+        }
 
-        xsFacets.add(stringFacet);
+        if (termMap.getColumn().isPresent() || termMap.getReference().isPresent()) {
+            Column column = termMap.getColumn().orElse(termMap.getReference().get());
+
+            if (column.isNumeric().isPresent() && column.isNumeric().get()) {
+                if (column.getMin().isPresent()) {
+                    NumericFacet numericFacet = new NumericFacet(NumericFacet.NumericRange.MIN_INCLUSIVE, column.getMin().get());
+                    xsFacets.add(numericFacet);
+                }
+
+                if (column.getMax().isPresent()) {
+                    NumericFacet numericFacet = new NumericFacet(NumericFacet.NumericRange.MAX_INCLUSIVE, column.getMax().get());
+                    xsFacets.add(numericFacet);
+                }
+            }
+        }
     }
 
     private boolean isEquivalentXSFacet(Set<XSFacet> other) {

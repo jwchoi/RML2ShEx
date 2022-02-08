@@ -1,10 +1,13 @@
 package rml2shex.datasource;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 public class Column {
     private String name;
-    private String type; // acquired from the data source
+    private Optional<String> type; // acquired from the data source
     private boolean includeNull; // acquired from the data source
     private Optional<String> min; // acquired from the data source
     private Optional<String> max; // acquired from the data source
@@ -22,8 +25,8 @@ public class Column {
     public boolean isIncludeNull() { return includeNull; }
     void setIncludeNull(boolean includeNull) { this.includeNull = includeNull; }
 
-    public String getType() { return type; }
-    public void setType(String type) { this.type = type; }
+    public Optional<String> getType() { return type; }
+    public void setType(String type) { if (type != null) this.type = Optional.of(type); }
 
     public Optional<String> getMin() { return min; }
     public void setMin(String min) { if (min != null) this.min = Optional.of(min); }
@@ -33,4 +36,14 @@ public class Column {
 
     public boolean isDistinct() { return distinct; }
     public void setDistinct(boolean distinct) { this.distinct = distinct; }
+
+    public Optional<Boolean> isNumeric() {
+        Optional<Boolean> isNumeric = Optional.empty();
+
+        List<String> numericType = Arrays.asList("byte", "decimal", "double", "float", "integer", "long", "short");
+
+        if (type.isPresent()) isNumeric = numericType.contains(type.get()) ? Optional.of(true) : Optional.of(false);
+
+        return isNumeric;
+    }
 }

@@ -1,5 +1,7 @@
 package rml2shex.model.shex;
 
+import rml2shex.commons.Symbols;
+
 public class NumericFacet extends XSFacet {
 
     enum NumericRange {
@@ -20,10 +22,15 @@ public class NumericFacet extends XSFacet {
     private NumericRange numericRange;
     private String numericalLiteral;
 
-    private NumericFacet(NumericRange numericRange, String numericalLiteral) {
+    NumericFacet(NumericRange numericRange, String numericalLiteral) {
         super(Kinds.numericalFacet);
 
         this.numericRange = numericRange;
         this.numericalLiteral = numericalLiteral;
     }
+
+    private String getSerializedStringFacet() { return numericRange + Symbols.SPACE + numericalLiteral; }
+
+    @Override
+    public String toString() { return getSerializedStringFacet(); }
 }
