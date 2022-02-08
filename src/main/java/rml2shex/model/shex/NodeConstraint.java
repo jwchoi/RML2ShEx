@@ -50,8 +50,8 @@ public class NodeConstraint extends DeclarableShapeExpr {
 
     private void convert(SubjectMap subjectMap) {
         setNodeKind(subjectMap);
-        setXsFacet(subjectMap);
         setValues(subjectMap);
+        setXsFacet(subjectMap); // must call the last
     }
 
     private void convert(Set<IRI> classes) {
@@ -62,7 +62,7 @@ public class NodeConstraint extends DeclarableShapeExpr {
         setNodeKind(objectMap);
         setValues(objectMap);
         setDatatype(objectMap);
-        setXsFacet(objectMap);
+        setXsFacet(objectMap); // must call the last
     }
 
     private void setNodeKind(SubjectMap subjectMap) {
@@ -125,26 +125,84 @@ public class NodeConstraint extends DeclarableShapeExpr {
 
     private void setDatatype(ObjectMap objectMap) { datatype = objectMap.getDatatype(); }
 
-    private void setXsFacet(TermMap termMap) {
-        Optional<Template> template = termMap.getTemplate();
+    private void setXsFacet(SubjectMap subjectMap) {
+        Optional<Template> template = subjectMap.getTemplate();
+        if (template.isPresent()) {
+            StringFacet stringFacet = new StringFacet(template.get());
+
+            xsFacets.add(stringFacet);
+        }
+    }
+
+    private void setXsFacet(ObjectMap objectMap) {
+        Optional<Template> template = objectMap.getTemplate();
         if (template.isPresent()) {
             StringFacet stringFacet = new StringFacet(template.get());
 
             xsFacets.add(stringFacet);
         }
 
-        if (termMap.getColumn().isPresent() || termMap.getReference().isPresent()) {
-            Column column = termMap.getColumn().orElse(termMap.getReference().get());
+        Optional<Column> optionalColumn = objectMap.getColumn();
+        if (optionalColumn.isPresent()) {
+            Column column = optionalColumn.get();
+            if (column.getMinValue().isPresent()) {
+                NumericFacet numericFacet = new NumericFacet(NumericFacet.NumericRange.MIN_INCLUSIVE, column.getMinValue().get());
+                xsFacets.add(numericFacet);
+            }
 
-            if (column.isNumeric().isPresent() && column.isNumeric().get()) {
-                if (column.getMin().isPresent()) {
-                    NumericFacet numericFacet = new NumericFacet(NumericFacet.NumericRange.MIN_INCLUSIVE, column.getMin().get());
-                    xsFacets.add(numericFacet);
+            if (column.getMaxValue().isPresent()) {
+                NumericFacet numericFacet = new NumericFacet(NumericFacet.NumericRange.MAX_INCLUSIVE, column.getMaxValue().get());
+                xsFacets.add(numericFacet);
+            }
+
+            Optional<Integer> minLength = column.getMinLength();
+            Optional<Integer> maxLength = column.getMaxLength();
+
+            if (minLength.isPresent() && maxLength.isPresent() && minLength.get().equals(maxLength.get())) {
+                StringFacet stringFacet = new StringFacet(StringFacet.StringLength.LENGTH, minLength.get());
+                xsFacets.add(stringFacet);
+            } else {
+                if (minLength.isPresent()) {
+                    StringFacet stringFacet = new StringFacet(StringFacet.StringLength.MIN_LENGTH, minLength.get());
+                    xsFacets.add(stringFacet);
                 }
+                if (maxLength.isPresent()) {
+                    StringFacet stringFacet = new StringFacet(StringFacet.StringLength.MAX_LENGTH, maxLength.get());
+                    xsFacets.add(stringFacet);
+                }
+            }
+        }
 
-                if (column.getMax().isPresent()) {
-                    NumericFacet numericFacet = new NumericFacet(NumericFacet.NumericRange.MAX_INCLUSIVE, column.getMax().get());
-                    xsFacets.add(numericFacet);
+        Optional<Column> optionalReference = objectMap.getReference();
+        if (optionalReference.isPresent()) {
+            Column reference = optionalReference.get();
+
+
+
+            if (reference.getMinValue().isPresent()) {
+                NumericFacet numericFacet = new NumericFacet(NumericFacet.NumericRange.MIN_INCLUSIVE, reference.getMinValue().get());
+                xsFacets.add(numericFacet);
+            }
+
+            if (reference.getMaxValue().isPresent()) {
+                NumericFacet numericFacet = new NumericFacet(NumericFacet.NumericRange.MAX_INCLUSIVE, reference.getMaxValue().get());
+                xsFacets.add(numericFacet);
+            }
+
+            Optional<Integer> minLength = reference.getMinLength();
+            Optional<Integer> maxLength = reference.getMaxLength();
+
+            if (minLength.isPresent() && maxLength.isPresent() && minLength.get().equals(maxLength.get())) {
+                StringFacet stringFacet = new StringFacet(StringFacet.StringLength.LENGTH, minLength.get());
+                xsFacets.add(stringFacet);
+            } else {
+                if (minLength.isPresent()) {
+                    StringFacet stringFacet = new StringFacet(StringFacet.StringLength.MIN_LENGTH, minLength.get());
+                    xsFacets.add(stringFacet);
+                }
+                if (maxLength.isPresent()) {
+                    StringFacet stringFacet = new StringFacet(StringFacet.StringLength.MAX_LENGTH, maxLength.get());
+                    xsFacets.add(stringFacet);
                 }
             }
         }

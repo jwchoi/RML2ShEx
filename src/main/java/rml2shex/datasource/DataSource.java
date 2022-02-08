@@ -2,6 +2,7 @@ package rml2shex.datasource;
 
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.functions;
 import rml2shex.model.rml.JoinCondition;
 
 import java.util.ArrayList;
@@ -26,39 +27,43 @@ public class DataSource {
 
     void setSubjectColumns(List<Column> subjectColumns) { this.subjectColumns = subjectColumns; }
 
-    private void acquireIncludeNull(Column column) {
-        long nullCount = df.where(df.col(column.getName()).isNull()).count();
-        column.setIncludeNull(nullCount > 0 ? true : false);
-    }
-
     private void acquireType(Column column) {
         column.setType(df.select(column.getName()).schema().apply(column.getName()).dataType().typeName());
     }
 
-    void acquireMetadata(Column column) {
+    private void acquireMinAndMaxValue(Column column) {
         Dataset<Row> colDF = df.select(column.getName());
 
-        String[] attributes = {"min", "max", "count", "count_distinct"};
-
-        long count = 0;
-        long count_distinct = 0;
-
-        List<Row> rows = colDF.summary(attributes).collectAsList();
+        List<Row> rows = colDF.summary("min", "max").collectAsList();
         for (Row row : rows) {
             String key = row.getString(0);
             String value = row.getString(1);
 
-           if (key.equals(attributes[0])) { column.setMin(value); continue; }
-           if (key.equals(attributes[1])) { column.setMax(value); continue; }
-
-           if (key.equals(attributes[2])) { count = Long.parseLong(value); continue; }
-           if (key.equals(attributes[3])) { count_distinct = Long.parseLong(value); continue; }
+            if (key.equals("min")) { column.setMinValue(value); continue; }
+            if (key.equals("max")) { column.setMaxValue(value); continue; }
         }
+    }
 
-        column.setDistinct(count == count_distinct ? true : false);
+    private void acquireMinAndMaxLength(Column column) {
+        String newColumn = column.getName() + "_length";
+        for (int i = 0; Arrays.asList(df.columns()).contains(newColumn); i++) newColumn += i;
 
+        Dataset<Row> colLenDF = df.withColumn(newColumn, functions.length(df.col(column.getName()))).select(newColumn);
+
+        List<Row> rows = colLenDF.summary("min", "max").collectAsList();
+        for (Row row : rows) {
+            String key = row.getString(0);
+            String value = row.getString(1);
+
+            if (key.equals("min")) { column.setMinLength(value); continue; }
+            if (key.equals("max")) { column.setMaxLength(value); continue; }
+        }
+    }
+
+    void acquireMetadata(Column column) {
         acquireType(column);
-        acquireIncludeNull(column);
+        acquireMinAndMaxLength(column);
+        acquireMinAndMaxValue(column);
     }
 
     long acquireMinOccurs(List<Column> objectColumns) {
