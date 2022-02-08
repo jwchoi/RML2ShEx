@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class DataSource {
 
@@ -18,7 +17,7 @@ public class DataSource {
     private Session session;
     private Dataset<Row> df;
 
-    private List<Column> subjectColumns;
+    private List<Column> subjectColumns; // as key columns, but not guaranteed unique and non-null
 
     DataSource(Session session, Dataset<Row> df) {
         this.session = session;
@@ -133,51 +132,6 @@ public class DataSource {
         return maxOccurs;
     }
 
-    long acquireMaxOccurs(DataSource parentDS, List<JoinCondition> joinConditions, boolean inverse) {
-        if (joinConditions.size() == 0) {
-            return inverse ? parentDS.acquireMaxOccurs(subjectColumns) : acquireMaxOccurs(parentDS.subjectColumns);
-        }
-
-        // join
-        df.createOrReplaceTempView("child");
-        parentDS.df.createOrReplaceTempView("parent");
-
-        StringBuffer sql = new StringBuffer("SELECT * FROM child, parent");
-
-        String whereClause = joinConditions.stream()
-                .map(joinCondition -> "child." + joinCondition.getChild().getName() + "=parent." + joinCondition.getParent().getName())
-                .collect(Collectors.joining(" AND ", " WHERE ", ""));
-        sql.append(whereClause);
-
-
-        Dataset<Row> joinResultDF = session.sql(sql.toString());
-
-        // preprocess for groupBy
-        List<String> childSbjs = subjectColumns.stream().map(col -> "child." + col.getName()).collect(Collectors.toList());
-        List<String> parentSbjs = parentDS.subjectColumns.stream().map(col -> "parent." + col.getName()).collect(Collectors.toList());
-        List<String> bothSbjs = new ArrayList<>();
-        childSbjs.stream().forEach(bothSbjs::add);
-        parentSbjs.stream().forEach(bothSbjs::add);
-
-        Optional<org.apache.spark.sql.Column> conditionNonNull = bothSbjs.stream()
-                .map(joinResultDF::col)
-                .map(org.apache.spark.sql.Column::isNotNull)
-                .reduce(org.apache.spark.sql.Column::and);
-
-        joinResultDF = conditionNonNull.isPresent() ? joinResultDF.where(conditionNonNull.get()) : joinResultDF;
-
-        List<String> sbjCols = inverse ? parentSbjs : childSbjs;
-        String firstSbjCol = sbjCols.remove(0);
-        String[] restSbjCols = sbjCols.toArray(new String[0]);
-
-        // groupBy
-        joinResultDF = joinResultDF.groupBy(firstSbjCol, restSbjCols).count();
-        List<Row> rows = joinResultDF.select(joinResultDF.col("count")).summary("max").collectAsList();
-        long maxOccurs = Long.parseLong(rows.stream().map(row -> row.getString(1)).findAny().get());
-
-        return maxOccurs;
-    }
-
     long acquireMinOccurs(DataSource parentDS, List<JoinCondition> joinConditions, boolean inverse) {
         // join
         Optional<org.apache.spark.sql.Column> joinExprs = joinConditions.stream()
@@ -216,7 +170,7 @@ public class DataSource {
         Dataset<Row> groupAfterJoinDF = joinResultDF.groupBy(firstSbjCol, restSbjCols).count();
 
         // groupBy
-        Dataset<Row> groupByDF = df.groupBy(firstSbjCol, restSbjCols).count();
+        Dataset<Row> groupByDF = childSbjsNonNull.isPresent() ? df.where(childSbjsNonNull.get()).groupBy(firstSbjCol, restSbjCols).count() : df.groupBy(firstSbjCol, restSbjCols).count();
 
         // join with "groupBy after join" and "groupBy with original df"
         joinExprs = Arrays.stream(groupAfterJoinDF.columns())
@@ -226,5 +180,53 @@ public class DataSource {
         long countOfGroupsOfWhichMinOccursAreZero = groupAfterJoinDF.join(groupByDF, joinExprs.get()).count();
 
         return countOfGroupsOfWhichMinOccursAreZero > 0 ? 0 : 1;
+    }
+
+    long acquireMaxOccurs(DataSource parentDS, List<JoinCondition> joinConditions, boolean inverse) {
+        if (joinConditions.size() == 0) {
+            return inverse ? parentDS.acquireMaxOccurs(subjectColumns) : acquireMaxOccurs(parentDS.subjectColumns);
+        }
+
+        // join
+        df.createOrReplaceTempView("child");
+        parentDS.df.createOrReplaceTempView("parent");
+
+        StringBuffer sql = new StringBuffer("SELECT * FROM child, parent");
+
+        String whereClause = joinConditions.stream()
+                .map(joinCondition -> "child." + joinCondition.getChild().getName() + "=parent." + joinCondition.getParent().getName())
+                .collect(Collectors.joining(" AND ", " WHERE ", ""));
+        sql.append(whereClause);
+
+
+        Dataset<Row> joinResultDF = session.sql(sql.toString());
+
+        // preprocess for groupBy
+        List<String> childSbjs = subjectColumns.stream().map(col -> "child." + col.getName()).collect(Collectors.toList());
+        List<String> parentSbjs = parentDS.subjectColumns.stream().map(col -> "parent." + col.getName()).collect(Collectors.toList());
+        List<String> bothSbjs = new ArrayList<>();
+        childSbjs.stream().forEach(bothSbjs::add);
+        parentSbjs.stream().forEach(bothSbjs::add);
+
+        Optional<org.apache.spark.sql.Column> conditionNonNull = bothSbjs.stream()
+                .map(joinResultDF::col)
+                .map(org.apache.spark.sql.Column::isNotNull)
+                .reduce(org.apache.spark.sql.Column::and);
+
+        joinResultDF = conditionNonNull.isPresent() ? joinResultDF.where(conditionNonNull.get()) : joinResultDF;
+
+        String firstOutOfBothSbjCol = bothSbjs.remove(0);
+        String[] restOutOfBothSbjCols = bothSbjs.toArray(new String[0]);
+
+        List<String> sbjCols = inverse ? parentSbjs : childSbjs;
+        String firstSbjCol = sbjCols.remove(0);
+        String[] restSbjCols = sbjCols.toArray(new String[0]);
+
+        // groupBy
+        joinResultDF = joinResultDF.select(firstOutOfBothSbjCol, restOutOfBothSbjCols).distinct().groupBy(firstSbjCol, restSbjCols).count();
+        List<Row> rows = joinResultDF.select(joinResultDF.col("count")).summary("max").collectAsList();
+        long maxOccurs = Long.parseLong(rows.stream().map(row -> row.getString(1)).findAny().get());
+
+        return maxOccurs;
     }
 }

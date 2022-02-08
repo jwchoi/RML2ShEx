@@ -17,6 +17,6 @@ my:S0 IRI /^http:\/\/example\.com\/resource\/sport_(.*)$/ AND CLOSED {
 
 my:S1 IRI /^http:\/\/example\.com\/resource\/student_(.*)$/ AND CLOSED {
   <http://example.com/ontology/practises> @my:S0 ?;
-  foaf:name LITERAL
+  foaf:name LITERAL +
 }
 
