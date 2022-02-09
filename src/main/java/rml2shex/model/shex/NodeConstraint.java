@@ -173,7 +173,7 @@ public class NodeConstraint extends DeclarableShapeExpr {
                 if (maxLength.isPresent()) xsFacets.add(new StringFacet(StringFacet.StringLength.MAX_LENGTH, maxLength.get()));
             }
 
-            List<String> numericTypes = Arrays.asList("xsd:integer", "xsd:double");
+            List<String> numericTypes = Arrays.asList("xsd:integer", "xsd:double", "xsd:positiveInteger");
 
             if ((datatype.isPresent() && numericTypes.contains(datatype.get().getPrefixedName())) ||
                     (nodeKind.equals(NodeKinds.LITERAL) && column.isNumeric().orElse(false))) {
@@ -198,7 +198,7 @@ public class NodeConstraint extends DeclarableShapeExpr {
                 if (maxLength.isPresent()) xsFacets.add(new StringFacet(StringFacet.StringLength.MAX_LENGTH, maxLength.get()));
             }
 
-            List<String> numericTypes = Arrays.asList("xsd:integer", "xsd:double");
+            List<String> numericTypes = Arrays.asList("xsd:integer", "xsd:double", "xsd:positiveInteger");
 
             if (datatype.isPresent() && numericTypes.contains(datatype.get().getPrefixedName())) {
                 if (reference.getMinValue().isPresent()) xsFacets.add(new NumericFacet(NumericFacet.NumericRange.MIN_INCLUSIVE, reference.getMinValue().get()));

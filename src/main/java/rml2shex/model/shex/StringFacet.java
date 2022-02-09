@@ -7,7 +7,6 @@ import rml2shex.model.rml.Template;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class StringFacet extends XSFacet {
 
