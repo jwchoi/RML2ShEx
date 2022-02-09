@@ -5,11 +5,10 @@ import rml2shex.model.rml.*;
 import java.net.URI;
 import java.util.*;
 
-public class DataSourceExplorer {
+public class DataSourceMetadataExtractor {
     public static void acquireMetadataFor(RMLModel rmlModel, String dataSourceDir) {
 
         Session session = Session.createSession();
-
         Set<TriplesMap> triplesMaps = rmlModel.getTriplesMaps();
 
         Map<TriplesMap, DataSource> tmdfMap = loadLogicalSources(triplesMaps, dataSourceDir, session);

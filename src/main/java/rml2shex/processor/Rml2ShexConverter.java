@@ -1,6 +1,6 @@
 package rml2shex.processor;
 
-import rml2shex.datasource.DataSourceExplorer;
+import rml2shex.datasource.DataSourceMetadataExtractor;
 import rml2shex.model.shex.DeclarableShapeExpr;
 import rml2shex.commons.Symbols;
 import rml2shex.model.rml.*;
@@ -82,7 +82,7 @@ public class Rml2ShexConverter {
 
     public File generateShExFile() {
         RMLModel rmlModel = RMLModelFactory.getRMLModel(getRMLParser());
-        if (dataSourceDir != null) DataSourceExplorer.acquireMetadataFor(rmlModel, dataSourceDir);
+        if (dataSourceDir != null) DataSourceMetadataExtractor.acquireMetadataFor(rmlModel, dataSourceDir);
         shExDocModel = ShExDocModelFactory.getShExDocModel(rmlModel, shexBasePrefix, shexBaseIRI);
 
         preProcess();

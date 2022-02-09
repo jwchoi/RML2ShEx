@@ -30,6 +30,9 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.apache.spark/spark-sql
     implementation 'org.apache.spark:spark-sql_2.12:3.2.0'
+
+    // https://mvnrepository.com/artifact/com.jayway.jsonpath/json-path
+    implementation 'com.jayway.jsonpath:json-path:2.6.0'
 }
 
 test {

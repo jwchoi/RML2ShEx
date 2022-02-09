@@ -1,10 +1,15 @@
 package rml2shex.datasource;
 
+import com.jayway.jsonpath.JsonPath;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 
 class Session {
     private SparkSession sparkSession;
@@ -23,17 +28,34 @@ class Session {
         return session;
     }
 
-    Dataset<Row> load(DataSource.DataSourceKinds dataSourceKind, String path) {
-        switch (dataSourceKind) {
-            case CSV:
-                return sparkSession.read()
-                        .option("header", "true")
-                        .option("inferSchema", "true")
-                        .option("enforceSchema", "false")
-                        .csv(path);
+    Dataset<Row> loadCSV(String dir, String fileName) {
+        String path = Paths.get(dir, fileName).toAbsolutePath().toString();
+
+        return sparkSession.read()
+                .option("header", "true")
+                .option("inferSchema", "true")
+                .option("enforceSchema", "false")
+                .csv(path);
+    }
+
+    Dataset<Row> loadJSON(String dir, String fileName, String jsonPathExpression) {
+        String path = applyJsonPath(dir, fileName, jsonPathExpression);
+
+        return sparkSession.read()
+                        .option("multiLine", "true")
+                        .json(path);
+    }
+
+    private String applyJsonPath(String dir, String fileName, String jsonPathExpression) {
+        String queryResultFilePath = null;
+        try {
+            String queryResult = JsonPath.parse(new File(dir, fileName)).read(jsonPathExpression).toString();
+            queryResultFilePath = Files.writeString(Paths.get("temp", fileName), queryResult, StandardOpenOption.CREATE).toString();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
-        return null;
+        return queryResultFilePath;
     }
 
     Dataset<Row> sql(String sqlText) { return sparkSession.sql(sqlText); }
