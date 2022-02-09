@@ -9,23 +9,23 @@ PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 BASE <http://my.example/ns#>
 
 my:S0 IRI /^http:\/\/example\.com\/sport\/(.*)$/ AND CLOSED {
-  ex:description LITERAL MININCLUSIVE Football MAXLENGTH 8 MAXINCLUSIVE Tennis MINLENGTH 6;
-  ex:id LITERAL MININCLUSIVE 110 LENGTH 3 MAXINCLUSIVE 112
+  ex:description LITERAL MINLENGTH 6 MAXLENGTH 8;
+  ex:id LITERAL LENGTH 3
 }
 
-my:S1 @my:S4 OR @my:S5
+my:S1 @my:S3 OR @my:S5
 
-my:S2 @my:S3 OR @my:S5
+my:S2 @my:S4 OR @my:S5
 
 my:S3 IRI /^http:\/\/example\.com\/student\/(.*)$/ AND CLOSED {
-  $my:T0 (
-    ex:firstName LITERAL MAXINCLUSIVE Venus MININCLUSIVE David MINLENGTH 5 MAXLENGTH 8;
-    ex:lastName LITERAL MAXINCLUSIVE Williams MINLENGTH 5 MININCLUSIVE Alonso MAXLENGTH 8
-  )
+  $my:T0 ex:plays IRI /^http:\/\/example\.com\/sport\/(.*)$/ +
 }
 
 my:S4 IRI /^http:\/\/example\.com\/student\/(.*)$/ AND CLOSED {
-  $my:T1 ex:plays IRI /^http:\/\/example\.com\/sport\/(.*)$/ +
+  $my:T1 (
+    ex:firstName LITERAL MINLENGTH 5 MAXLENGTH 8;
+    ex:lastName LITERAL MINLENGTH 5 MAXLENGTH 8
+  )
 }
 
 my:S5 IRI /^http:\/\/example\.com\/student\/(.*)$/ AND CLOSED {

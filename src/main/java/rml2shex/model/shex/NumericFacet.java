@@ -33,4 +33,12 @@ public class NumericFacet extends XSFacet {
 
     @Override
     public String toString() { return getSerializedStringFacet(); }
+
+    @Override
+    public int compareTo(XSFacet o) {
+        int resultFromSuper = super.compareTo(o);
+        if (resultFromSuper != 0) return resultFromSuper;
+
+        return Integer.compare(numericRange.ordinal(), ((NumericFacet) o).numericRange.ordinal());
+    }
 }

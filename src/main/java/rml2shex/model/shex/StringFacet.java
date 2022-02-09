@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 
 public class StringFacet extends XSFacet {
 
+    enum Kinds { REGEXP, STRING_LENGTH }
+
     enum StringLength {
         LENGTH("LENGTH"), MIN_LENGTH("MINLENGTH"), MAX_LENGTH("MAXLENGTH");
 
@@ -26,7 +28,7 @@ public class StringFacet extends XSFacet {
         }
     }
 
-    // stringFacet ::= stringLength INTEGER | REGEXP
+    private Kinds kind;
 
     // REGEXP
     private Optional<String> pattern;
@@ -37,7 +39,7 @@ public class StringFacet extends XSFacet {
     private Optional<Integer> INTEGER;
 
     private StringFacet() {
-        super(Kinds.stringFacet);
+        super(XSFacet.Kinds.stringFacet);
 
         pattern = Optional.empty();
         flags = Optional.empty();
@@ -48,13 +50,13 @@ public class StringFacet extends XSFacet {
 
     StringFacet(Template template) {
         this();
-
+        kind = Kinds.REGEXP;
         setPattern(template);
     }
 
     StringFacet(StringLength stringLength, int INTEGER) {
-        super(Kinds.stringFacet);
-
+        super(XSFacet.Kinds.stringFacet);
+        kind = Kinds.STRING_LENGTH;
         this.stringLength = Optional.of(stringLength);
         this.INTEGER = Optional.of(INTEGER);
     }
@@ -100,5 +102,19 @@ public class StringFacet extends XSFacet {
         }
 
         return false;
+    }
+
+    @Override
+    public int compareTo(XSFacet o) {
+        int resultFromSuper = super.compareTo(o);
+        if (resultFromSuper != 0) return resultFromSuper;
+
+        StringFacet other = (StringFacet) o;
+        int resultFromThis = Integer.compare(kind.ordinal(), other.kind.ordinal());
+        if (resultFromThis != 0) return resultFromThis;
+
+        if (kind.equals(Kinds.REGEXP)) return toString().compareTo(other.toString());
+
+        return Integer.compare(stringLength.get().ordinal(), other.stringLength.get().ordinal());
     }
 }
