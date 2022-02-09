@@ -9,8 +9,8 @@ PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 BASE <http://my.example/ns#>
 
 my:S0 IRI /^http:\/\/example\.com\/sport\/(.*)$/ AND CLOSED {
-  ex:description LITERAL MINLENGTH 6 MAXLENGTH 8 MAXINCLUSIVE Tennis MININCLUSIVE Football;
-  ex:id LITERAL LENGTH 3 MININCLUSIVE 110 MAXINCLUSIVE 112
+  ex:description LITERAL MININCLUSIVE Football MAXLENGTH 8 MAXINCLUSIVE Tennis MINLENGTH 6;
+  ex:id LITERAL MININCLUSIVE 110 LENGTH 3 MAXINCLUSIVE 112
 }
 
 my:S1 @my:S4 OR @my:S5
@@ -19,8 +19,8 @@ my:S2 @my:S3 OR @my:S5
 
 my:S3 IRI /^http:\/\/example\.com\/student\/(.*)$/ AND CLOSED {
   $my:T0 (
-    ex:firstName LITERAL MININCLUSIVE David MAXINCLUSIVE Venus MAXLENGTH 8 MINLENGTH 5;
-    ex:lastName LITERAL MININCLUSIVE Alonso MINLENGTH 5 MAXLENGTH 8 MAXINCLUSIVE Williams
+    ex:firstName LITERAL MAXINCLUSIVE Venus MININCLUSIVE David MINLENGTH 5 MAXLENGTH 8;
+    ex:lastName LITERAL MAXINCLUSIVE Williams MINLENGTH 5 MININCLUSIVE Alonso MAXLENGTH 8
   )
 }
 

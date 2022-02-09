@@ -82,7 +82,7 @@ public class Rml2ShexConverter {
 
     public File generateShExFile() {
         RMLModel rmlModel = RMLModelFactory.getRMLModel(getRMLParser());
-        if (dataSourceDir != null) DataSourceExplorer.injectMetadataInto(rmlModel, dataSourceDir);
+        if (dataSourceDir != null) DataSourceExplorer.acquireMetadataFor(rmlModel, dataSourceDir);
         shExDocModel = ShExDocModelFactory.getShExDocModel(rmlModel, shexBasePrefix, shexBaseIRI);
 
         preProcess();

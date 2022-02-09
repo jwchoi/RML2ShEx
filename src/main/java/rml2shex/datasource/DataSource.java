@@ -44,7 +44,7 @@ public class DataSource {
         }
     }
 
-    private void acquireMinAndMaxLength(Column column) {
+    void acquireMinAndMaxLength(Column column) {
         String newColumn = column.getName() + "_length";
         for (int i = 0; Arrays.asList(df.columns()).contains(newColumn); i++) newColumn += i;
 
@@ -144,7 +144,7 @@ public class DataSource {
 
         // join
         Optional<org.apache.spark.sql.Column> joinExprs = joinConditions.stream()
-                .map(joinCondition -> df.col(joinCondition.getChild().getName()).equalTo(parentDataSource.df.col(joinCondition.getParent().getName())))
+                .map(joinCondition -> df.col(joinCondition.getChild()).equalTo(parentDataSource.df.col(joinCondition.getParent())))
                 .reduce(org.apache.spark.sql.Column::and);
 
         DataSource childDS = inverse ? parentDataSource : this;
@@ -197,7 +197,7 @@ public class DataSource {
         StringBuffer sql = new StringBuffer("SELECT * FROM child, parent");
 
         String whereClause = joinConditions.stream()
-                .map(joinCondition -> "child." + joinCondition.getChild().getName() + "=parent." + joinCondition.getParent().getName())
+                .map(joinCondition -> "child." + joinCondition.getChild() + "=parent." + joinCondition.getParent())
                 .collect(Collectors.joining(" AND ", " WHERE ", ""));
         sql.append(whereClause);
 

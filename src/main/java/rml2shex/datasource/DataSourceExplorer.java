@@ -6,7 +6,7 @@ import java.net.URI;
 import java.util.*;
 
 public class DataSourceExplorer {
-    public static void injectMetadataInto(RMLModel rmlModel, String dataSourceDir) {
+    public static void acquireMetadataFor(RMLModel rmlModel, String dataSourceDir) {
 
         Session session = Session.createSession();
 
@@ -14,7 +14,9 @@ public class DataSourceExplorer {
 
         Map<TriplesMap, DataSource> tmdfMap = loadLogicalSources(triplesMaps, dataSourceDir, session);
 
-        acquireMetadata(tmdfMap, session);
+        acquireMetadataForSubjectMap(tmdfMap);
+        acquireMetadataForPredicateObjectMap(tmdfMap);
+        acquireMetadataForPredicateRefObjectMap(tmdfMap);
     }
 
     private static Map<TriplesMap, DataSource> loadLogicalSources(Set<TriplesMap> triplesMaps, String dataSourceDir, Session session) {
@@ -37,10 +39,10 @@ public class DataSourceExplorer {
         return  tmdfMap;
     }
 
-    private static void acquireMetadata(Map<TriplesMap, DataSource> tmdfMap, Session session) {
+    private static void acquireMetadataForSubjectMap(Map<TriplesMap, DataSource> tmdfMap) {
         Set<TriplesMap> triplesMaps = tmdfMap.keySet();
 
-        for(TriplesMap triplesMap: triplesMaps) {
+        for (TriplesMap triplesMap : triplesMaps) {
             DataSource df = tmdfMap.get(triplesMap);
 
             // SubjectMap
@@ -51,22 +53,22 @@ public class DataSourceExplorer {
             Optional<Template> template = subjectMap.getTemplate();
             if (template.isPresent()) {
                 template.get().getLogicalReferences().forEach(subjectColumns::add);
-                subjectColumns.forEach(df::acquireMetadata);
+                subjectColumns.forEach(df::acquireMinAndMaxLength);
             }
 
-            Optional<Column> column = subjectMap.getColumn();
-            if (column.isPresent()) {
-                subjectColumns.add(column.get());
-                df.acquireMetadata(subjectColumns.get(0));
-            }
+            subjectMap.getColumn().stream().forEach(subjectColumns::add);
 
-            Optional<Column> reference = subjectMap.getReference();
-            if (reference.isPresent()) {
-                subjectColumns.add(reference.get());
-                df.acquireMetadata(subjectColumns.get(0));
-            }
+            subjectMap.getReference().stream().forEach(subjectColumns::add);
 
             df.setSubjectColumns(subjectColumns);
+        }
+    }
+
+    private static void acquireMetadataForPredicateObjectMap(Map<TriplesMap, DataSource> tmdfMap) {
+        Set<TriplesMap> triplesMaps = tmdfMap.keySet();
+
+        for(TriplesMap triplesMap: triplesMaps) {
+            DataSource df = tmdfMap.get(triplesMap);
 
             // PredicateObjectMap
             List<PredicateObjectMap> predicateObjectMaps = triplesMap.getPredicateObjectMaps();
@@ -79,19 +81,19 @@ public class DataSourceExplorer {
 
                         List<Column> objectColumns = new ArrayList<>();
 
-                        template = objectMap.get().getTemplate();
+                        Optional<Template> template = objectMap.get().getTemplate();
                         if (template.isPresent()) {
                             template.get().getLogicalReferences().forEach(objectColumns::add);
-                            objectColumns.forEach(df::acquireMetadata);
+                            objectColumns.forEach(df::acquireMinAndMaxLength);
                         }
 
-                        column = objectMap.get().getColumn();
+                        Optional<Column> column = objectMap.get().getColumn();
                         if (column.isPresent()) {
                             objectColumns.add(column.get());
                             df.acquireMetadata(objectColumns.get(0));
                         }
 
-                        reference = objectMap.get().getReference();
+                        Optional<Column> reference = objectMap.get().getReference();
                         if (reference.isPresent()) {
                             objectColumns.add(reference.get());
                             df.acquireMetadata(objectColumns.get(0));
@@ -103,6 +105,10 @@ public class DataSourceExplorer {
                 }
             }
         }
+    }
+
+    private static void acquireMetadataForPredicateRefObjectMap(Map<TriplesMap, DataSource> tmdfMap) {
+        Set<TriplesMap> triplesMaps = tmdfMap.keySet();
 
         for(TriplesMap triplesMap: triplesMaps) {
             DataSource df = tmdfMap.get(triplesMap);
@@ -120,12 +126,6 @@ public class DataSourceExplorer {
                         DataSource parentDF = tmdfMap.get(parentTriplesMap);
 
                         List<JoinCondition> joinConditions = refObjectMap.get().getJoinConditions();
-                        for (JoinCondition joinCondition: joinConditions) {
-                            Column childColumn = joinCondition.getChild();
-                            df.acquireMetadata(childColumn);
-                            Column parentColumn = joinCondition.getParent();
-                            parentDF.acquireMetadata(parentColumn);
-                        }
 
                         predicateObjectPair.setMinOccurs(df.acquireMinOccurs(parentDF, joinConditions, false));
                         predicateObjectPair.setInverseMinOccurs(df.acquireMinOccurs(parentDF, joinConditions, true));
