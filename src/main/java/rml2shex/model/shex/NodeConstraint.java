@@ -8,10 +8,7 @@ import rml2shex.model.rml.SubjectMap;
 import rml2shex.model.rml.Template;
 import rml2shex.model.rml.TermMap;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class NodeConstraint extends DeclarableShapeExpr {
@@ -172,20 +169,17 @@ public class NodeConstraint extends DeclarableShapeExpr {
             if (minLength.isPresent() && maxLength.isPresent() && minLength.get().equals(maxLength.get()))
                 xsFacets.add(new StringFacet(StringFacet.StringLength.LENGTH, minLength.get()));
             else {
-                if (minLength.isPresent())
-                    xsFacets.add(new StringFacet(StringFacet.StringLength.MIN_LENGTH, minLength.get()));
-                if (maxLength.isPresent())
-                    xsFacets.add(new StringFacet(StringFacet.StringLength.MAX_LENGTH, maxLength.get()));
+                if (minLength.isPresent()) xsFacets.add(new StringFacet(StringFacet.StringLength.MIN_LENGTH, minLength.get()));
+                if (maxLength.isPresent()) xsFacets.add(new StringFacet(StringFacet.StringLength.MAX_LENGTH, maxLength.get()));
             }
 
-            if (column.getMinValue().isPresent()) {
-                NumericFacet numericFacet = new NumericFacet(NumericFacet.NumericRange.MIN_INCLUSIVE, column.getMinValue().get());
-                xsFacets.add(numericFacet);
-            }
+            List<String> numericTypes = Arrays.asList("xsd:integer", "xsd:double");
 
-            if (column.getMaxValue().isPresent()) {
-                NumericFacet numericFacet = new NumericFacet(NumericFacet.NumericRange.MAX_INCLUSIVE, column.getMaxValue().get());
-                xsFacets.add(numericFacet);
+            if ((datatype.isPresent() && numericTypes.contains(datatype.get().getPrefixedName())) ||
+                    (nodeKind.equals(NodeKinds.LITERAL) && column.isNumeric().orElse(false))) {
+
+                if (column.getMinValue().isPresent()) xsFacets.add(new NumericFacet(NumericFacet.NumericRange.MIN_INCLUSIVE, column.getMinValue().get()));
+                if (column.getMaxValue().isPresent()) xsFacets.add(new NumericFacet(NumericFacet.NumericRange.MAX_INCLUSIVE, column.getMaxValue().get()));
             }
         }
 
@@ -200,22 +194,15 @@ public class NodeConstraint extends DeclarableShapeExpr {
             if (minLength.isPresent() && maxLength.isPresent() && minLength.get().equals(maxLength.get()))
                 xsFacets.add(new StringFacet(StringFacet.StringLength.LENGTH, minLength.get()));
             else {
-                if (minLength.isPresent())
-                    xsFacets.add(new StringFacet(StringFacet.StringLength.MIN_LENGTH, minLength.get()));
-                if (maxLength.isPresent())
-                    xsFacets.add(new StringFacet(StringFacet.StringLength.MAX_LENGTH, maxLength.get()));
+                if (minLength.isPresent()) xsFacets.add(new StringFacet(StringFacet.StringLength.MIN_LENGTH, minLength.get()));
+                if (maxLength.isPresent()) xsFacets.add(new StringFacet(StringFacet.StringLength.MAX_LENGTH, maxLength.get()));
             }
 
-            if (datatype.isPresent() && (datatype.get().getLocalPart().endsWith("integer") || datatype.get().getLocalPart().endsWith("double"))) {
-                if (reference.getMinValue().isPresent()) {
-                    NumericFacet numericFacet = new NumericFacet(NumericFacet.NumericRange.MIN_INCLUSIVE, reference.getMinValue().get());
-                    xsFacets.add(numericFacet);
-                }
+            List<String> numericTypes = Arrays.asList("xsd:integer", "xsd:double");
 
-                if (reference.getMaxValue().isPresent()) {
-                    NumericFacet numericFacet = new NumericFacet(NumericFacet.NumericRange.MAX_INCLUSIVE, reference.getMaxValue().get());
-                    xsFacets.add(numericFacet);
-                }
+            if (datatype.isPresent() && numericTypes.contains(datatype.get().getPrefixedName())) {
+                if (reference.getMinValue().isPresent()) xsFacets.add(new NumericFacet(NumericFacet.NumericRange.MIN_INCLUSIVE, reference.getMinValue().get()));
+                if (reference.getMaxValue().isPresent()) xsFacets.add(new NumericFacet(NumericFacet.NumericRange.MAX_INCLUSIVE, reference.getMaxValue().get()));
             }
         }
     }

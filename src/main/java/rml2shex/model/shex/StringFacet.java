@@ -68,9 +68,12 @@ public class StringFacet extends XSFacet {
         pattern = pattern.replace(Symbols.DOT, Symbols.BACKSLASH + Symbols.DOT);
 
         // logical references
-        List<String> logicalReferences = template.getLogicalReferences().stream().map(Column::getName).collect(Collectors.toList());
-        for (String logicalReference: logicalReferences)
-            pattern = pattern.replace("{" + logicalReference + "}", "(.*)");
+        List<Column> logicalReferences = template.getLogicalReferences();
+        for (Column logicalReference: logicalReferences) {
+            String columnName = logicalReference.getName();
+            String quantifier = logicalReference.getMinLength().isPresent() ? "{" + logicalReference.getMinLength().get() + ",}" : "*";
+            pattern = pattern.replace("{" + columnName + "}", "(." + quantifier + ")");
+        }
 
         pattern = Symbols.SLASH + Symbols.CARET + pattern + Symbols.DOLLAR + Symbols.SLASH;
 

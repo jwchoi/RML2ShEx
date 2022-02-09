@@ -41,7 +41,7 @@ public class Column {
     public Optional<Integer> getMaxLength() { return maxLength; }
     void setMaxLength(String maxLength) { this.maxLength = Optional.of(Integer.parseUnsignedInt(maxLength)); }
 
-    Optional<Boolean> isNumeric() {
+    public Optional<Boolean> isNumeric() {
         Optional<Boolean> isNumeric = Optional.empty();
 
         List<String> numericType = Arrays.asList("byte", "decimal", "double", "float", "integer", "long", "short");
