@@ -28,6 +28,12 @@ class DataSourceFactory {
                 df = session.loadJSON(dataSourceDir, fileName, jsonPathExpression);
                 break;
             }
+            case XML: {
+                String fileName = logicalSource.getSource().getSource().toString();
+                String xPathExpression = logicalSource.getIterator();
+                df = session.loadXML(dataSourceDir, fileName, xPathExpression);
+                break;
+            }
         }
 
         return new DataSource(session, df);
@@ -48,6 +54,10 @@ class DataSourceFactory {
         if ((referenceFormulation != null && referenceFormulation.equals(URI.create("http://semweb.mmlab.be/ns/ql#JSONPath")))
                 || sourceAsString.toLowerCase().endsWith(".json"))
             return DataSource.DataSourceKinds.JSON;
+
+        if ((referenceFormulation != null && referenceFormulation.equals(URI.create("http://semweb.mmlab.be/ns/ql#XPath")))
+                || sourceAsString.toLowerCase().endsWith(".xml"))
+            return DataSource.DataSourceKinds.XML;
 
         return null;
     }

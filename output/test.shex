@@ -13,19 +13,19 @@ my:S0 IRI /^http:\/\/example\.com\/sport\/(.{3,})$/ AND CLOSED {
   ex:id LITERAL LENGTH 3
 }
 
-my:S1 @my:S3 OR @my:S5
+my:S1 @my:S4 OR @my:S5
 
-my:S2 @my:S4 OR @my:S5
+my:S2 @my:S3 OR @my:S5
 
 my:S3 IRI /^http:\/\/example\.com\/student\/(.{2,})$/ AND CLOSED {
-  $my:T0 ex:plays IRI /^http:\/\/example\.com\/sport\/(.{3,})$/ +
-}
-
-my:S4 IRI /^http:\/\/example\.com\/student\/(.{2,})$/ AND CLOSED {
-  $my:T1 (
+  $my:T0 (
     ex:firstName LITERAL MINLENGTH 5 MAXLENGTH 8;
     ex:lastName LITERAL MINLENGTH 5 MAXLENGTH 8
   )
+}
+
+my:S4 IRI /^http:\/\/example\.com\/student\/(.{2,})$/ AND CLOSED {
+  $my:T1 ex:plays IRI /^http:\/\/example\.com\/sport\/(.{3,})$/ +
 }
 
 my:S5 IRI /^http:\/\/example\.com\/student\/(.{2,})$/ AND CLOSED {

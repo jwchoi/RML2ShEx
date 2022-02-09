@@ -33,6 +33,9 @@ dependencies {
 
     // https://mvnrepository.com/artifact/com.jayway.jsonpath/json-path
     implementation 'com.jayway.jsonpath:json-path:2.6.0'
+
+    // https://mvnrepository.com/artifact/com.databricks/spark-xml
+    implementation 'com.databricks:spark-xml_2.12:0.13.0'
 }
 
 test {
