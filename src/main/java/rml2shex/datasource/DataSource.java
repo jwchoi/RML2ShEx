@@ -25,11 +25,11 @@ public class DataSource {
     void setSubjectColumns(List<Column> subjectColumns) { this.subjectColumns = subjectColumns; }
 
     private void acquireType(Column column) {
-        column.setType(df.select(column.getName()).schema().apply(column.getName()).dataType().typeName());
+        column.setType(df.select(column.getNameInBackticks()).schema().apply(column.getName()).dataType().typeName());
     }
 
     void acquireMinAndMaxValue(Column column) {
-        Dataset<Row> colDF = df.select(column.getName());
+        Dataset<Row> colDF = df.select(column.getNameInBackticks());
 
         List<Row> rows = colDF.summary("min", "max").collectAsList();
         for (Row row : rows) {
@@ -46,8 +46,8 @@ public class DataSource {
         for (int i = 0; Arrays.asList(df.columns()).contains(newColumn); i++) newColumn += i;
 
         Dataset<Row> colLenDF = df.select("*")
-                .withColumn(newColumn, functions.length(df.col(column.getName())))
-                .select(newColumn);
+                .withColumn(newColumn, functions.length(df.col(column.getNameInBackticks())))
+                .select(encloseWithBackticks(newColumn));
 
         List<Row> rows = colLenDF.summary("min", "max").collectAsList();
         for (Row row : rows) {
@@ -66,7 +66,7 @@ public class DataSource {
     }
 
     long acquireMinOccurs(List<Column> objectColumns) {
-        List<String> sbjCols = subjectColumns.stream().map(Column::getName).collect(Collectors.toList());
+        List<String> sbjCols = subjectColumns.stream().map(Column::getNameInBackticks).collect(Collectors.toList());
 
         Optional<org.apache.spark.sql.Column> sbjsNonNull = sbjCols.stream()
                 .map(df::col)
@@ -76,7 +76,7 @@ public class DataSource {
         Dataset<Row> sbjsNonNullDF = sbjsNonNull.isPresent() ? df.where(sbjsNonNull.get()) : df;
 
         Optional<org.apache.spark.sql.Column> objsNull = objectColumns.stream()
-                    .map(Column::getName)
+                    .map(Column::getNameInBackticks)
                     .map(df::col)
                     .map(org.apache.spark.sql.Column::isNull)
                     .reduce(org.apache.spark.sql.Column::or);
@@ -107,8 +107,8 @@ public class DataSource {
 
     long acquireMaxOccurs(List<Column> objectColumns) {
         // preprocess
-        List<String> sbjCols = subjectColumns.stream().map(Column::getName).collect(Collectors.toList());
-        List<String> objCols = objectColumns.stream().map(Column::getName).collect(Collectors.toList());
+        List<String> sbjCols = subjectColumns.stream().map(Column::getNameInBackticks).collect(Collectors.toList());
+        List<String> objCols = objectColumns.stream().map(Column::getNameInBackticks).collect(Collectors.toList());
 
         List<String> SOCols = new ArrayList<>();
         sbjCols.stream().forEach(SOCols::add);
@@ -231,4 +231,6 @@ public class DataSource {
 
         return maxOccurs;
     }
+
+    String encloseWithBackticks(String columnName) { return "`" + columnName + "`"; }
 }

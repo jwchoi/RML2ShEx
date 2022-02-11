@@ -13,7 +13,6 @@ import org.apache.spark.sql.types.StructType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import scala.Tuple2;
 import scala.collection.Iterator;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -33,10 +32,8 @@ import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 class Session {
     private SparkSession sparkSession;
@@ -68,9 +65,11 @@ class Session {
     Dataset<Row> loadJSON(String dir, String fileName, String jsonPathExpression) {
         String path = applyJsonPath(dir, fileName, jsonPathExpression);
 
-        return sparkSession.read()
+        Dataset<Row> df = sparkSession.read()
                         .option("multiLine", "true")
                         .json(path);
+
+        return flatten(df, ".");
     }
 
     private String applyJsonPath(String dir, String fileName, String jsonPathExpression) {
@@ -93,7 +92,7 @@ class Session {
                 .option("attributePrefix", "@")
                 .load(pathAndRowTag.get("path"));
 
-        df = flatten(df);
+        df = flatten(df, "/");
 
         // remove the suffix "/_VALUE"
         String[] colNames = df.columns();
@@ -149,7 +148,7 @@ class Session {
         return pathAndRowTag;
     }
 
-    private Dataset<Row> flatten(Dataset<Row> df) {
+    private Dataset<Row> flatten(Dataset<Row> df, String delimiter) {
         StructType schema = df.schema();
         int fieldCount = schema.length();
         Iterator<StructField> iterator = schema.iterator();
@@ -162,15 +161,15 @@ class Session {
                     df = df.select("*", name + ".*");
                     String[] existingNames = df.columns();
                     String[] newNames = existingNames;
-                    for (int i = fieldCount; i < existingNames.length; i++) newNames[i] = name + "/" + existingNames[i];
+                    for (int i = fieldCount; i < existingNames.length; i++) newNames[i] = name + delimiter + existingNames[i];
                     df = df.toDF(newNames);
                     df = df.drop(name);
-                    return flatten(df);
+                    return flatten(df, delimiter);
                 case "array":
                     df = df.select(df.col("*"), functions.explode_outer(df.col(name)))
                             .drop(name)
                             .withColumnRenamed("col", name);
-                    return flatten(df);
+                    return flatten(df, delimiter);
                 default:
                     break;
             }

@@ -1,13 +1,8 @@
-<Student>
+<student>
     <ID>10</ID>
-    <FirstName>Venus</FirstName>
-    <LastName>Williams</LastName>
-  </Student><Student>
-    <ID>11</ID>
-    <FirstName>Fernando</FirstName>
-    <LastName>Alonso</LastName>
-  </Student><Student>
-    <ID>12</ID>
-    <FirstName>David</FirstName>
-    <LastName>Villa</LastName>
-  </Student>
+    <Name>Venus Williams</Name>
+    <Sport>100</Sport>
+  </student><student>
+    <ID>20</ID>
+    <Name>Demi Moore</Name>
+  </student>

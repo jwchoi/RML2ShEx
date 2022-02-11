@@ -26,14 +26,13 @@ class DataSourceFactory {
                 String fileName = logicalSource.getSource().getSource().toString();
                 String jsonPathExpression = logicalSource.getIterator();
                 df = session.loadJSON(dataSourceDir, fileName, jsonPathExpression);
-                df.show();
-                break;
+                return new HierarchicalDataSource(session, df, ".");
             }
             case XML: {
                 String fileName = logicalSource.getSource().getSource().toString();
                 String xPathExpression = logicalSource.getIterator();
                 df = session.loadXML(dataSourceDir, fileName, xPathExpression);
-                return new XMLDataSource(session, df);
+                return new HierarchicalDataSource(session, df, "/");
             }
         }
 
