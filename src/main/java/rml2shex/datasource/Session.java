@@ -5,9 +5,14 @@ import org.apache.commons.io.FileUtils;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.functions;
+import org.apache.spark.sql.types.StructField;
+import org.apache.spark.sql.types.StructType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import scala.Tuple2;
+import scala.collection.Iterator;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -26,8 +31,10 @@ import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 class Session {
     private SparkSession sparkSession;
@@ -77,11 +84,23 @@ class Session {
     Dataset<Row> loadXML(String dir, String fileName, String xPathExpression) {
         Map<String, String> pathAndRowTag = applyXPath(dir, fileName, xPathExpression);
 
-        return sparkSession.read()
+        Dataset<Row> df = sparkSession.read()
                 .format("xml")
                 .option("rowTag", pathAndRowTag.get("rowTag"))
                 .option("attributePrefix", "@")
                 .load(pathAndRowTag.get("path"));
+
+        df = flatten(df);
+
+        // remove the suffix "/_VALUE"
+        String[] colNames = df.columns();
+        String suffix = "/_VALUE";
+        for (int i = 0; i < colNames.length; i++) {
+            if (colNames[i].endsWith(suffix)) colNames[i] = colNames[i].substring(0, colNames[i].lastIndexOf(suffix));
+        }
+        df = df.toDF(colNames);
+
+        return df;
     }
 
     private Map<String, String> applyXPath(String dir, String fileName, String xPathExpression) {
@@ -125,6 +144,36 @@ class Session {
         } catch (Exception e) { e.printStackTrace(); }
 
         return pathAndRowTag;
+    }
+
+    private Dataset<Row> flatten(Dataset<Row> df) {
+        StructType schema = df.schema();
+        int fieldCount = schema.length();
+        Iterator<StructField> iterator = schema.iterator();
+        while (iterator.hasNext()) {
+            StructField field = iterator.next();
+            String name = field.name();
+            String typeName = field.dataType().typeName();
+            switch (typeName) {
+                case "struct":
+                    df = df.select("*", name + ".*");
+                    String[] existingNames = df.columns();
+                    String[] newNames = existingNames;
+                    for (int i = fieldCount; i < existingNames.length; i++) newNames[i] = name + "/" + existingNames[i];
+                    df = df.toDF(newNames);
+                    df = df.drop(name);
+                    return flatten(df);
+                case "array":
+                    df = df.select(df.col("*"), functions.explode_outer(df.col(name)))
+                            .drop(name)
+                            .withColumnRenamed("col", name);
+                    return flatten(df);
+                default:
+                    break;
+            }
+        }
+
+        return df;
     }
 
     Dataset<Row> sql(String sqlText) { return sparkSession.sql(sqlText); }

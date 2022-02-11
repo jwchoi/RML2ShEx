@@ -5,10 +5,7 @@ import org.apache.spark.sql.Row;
 import org.apache.spark.sql.functions;
 import rml2shex.model.rml.JoinCondition;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class DataSource {
@@ -31,7 +28,7 @@ public class DataSource {
         column.setType(df.select(column.getName()).schema().apply(column.getName()).dataType().typeName());
     }
 
-    private void acquireMinAndMaxValue(Column column) {
+    void acquireMinAndMaxValue(Column column) {
         Dataset<Row> colDF = df.select(column.getName());
 
         List<Row> rows = colDF.summary("min", "max").collectAsList();
@@ -48,7 +45,9 @@ public class DataSource {
         String newColumn = column.getName() + "_length";
         for (int i = 0; Arrays.asList(df.columns()).contains(newColumn); i++) newColumn += i;
 
-        Dataset<Row> colLenDF = df.withColumn(newColumn, functions.length(df.col(column.getName()))).select(newColumn);
+        Dataset<Row> colLenDF = df.select("*")
+                .withColumn(newColumn, functions.length(df.col(column.getName())))
+                .select(newColumn);
 
         List<Row> rows = colLenDF.summary("min", "max").collectAsList();
         for (Row row : rows) {

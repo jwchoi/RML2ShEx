@@ -32,7 +32,7 @@ class DataSourceFactory {
                 String fileName = logicalSource.getSource().getSource().toString();
                 String xPathExpression = logicalSource.getIterator();
                 df = session.loadXML(dataSourceDir, fileName, xPathExpression);
-                break;
+                return new XMLDataSource(session, df);
             }
         }
 

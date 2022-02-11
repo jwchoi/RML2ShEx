@@ -159,50 +159,30 @@ public class NodeConstraint extends DeclarableShapeExpr {
         }
 
         Optional<Column> optionalColumn = objectMap.getColumn();
-        if (optionalColumn.isPresent()) {
-            Column column = optionalColumn.get();
-
-            // LENGTH, MINLENGTH and MAXLENGTH are applied to all node kinds and even all data types
-            Optional<Integer> minLength = column.getMinLength();
-            Optional<Integer> maxLength = column.getMaxLength();
-
-            if (minLength.isPresent() && maxLength.isPresent() && minLength.get().equals(maxLength.get()))
-                xsFacets.add(new StringFacet(StringFacet.StringLength.LENGTH, minLength.get()));
-            else {
-                if (minLength.isPresent()) xsFacets.add(new StringFacet(StringFacet.StringLength.MIN_LENGTH, minLength.get()));
-                if (maxLength.isPresent()) xsFacets.add(new StringFacet(StringFacet.StringLength.MAX_LENGTH, maxLength.get()));
-            }
-
-            List<String> numericTypes = Arrays.asList("xsd:integer", "xsd:double", "xsd:positiveInteger");
-
-            if ((datatype.isPresent() && numericTypes.contains(datatype.get().getPrefixedName())) ||
-                    (nodeKind.equals(NodeKinds.LITERAL) && column.isNumeric().orElse(false))) {
-
-                if (column.getMinValue().isPresent()) xsFacets.add(new NumericFacet(NumericFacet.NumericRange.MIN_INCLUSIVE, column.getMinValue().get()));
-                if (column.getMaxValue().isPresent()) xsFacets.add(new NumericFacet(NumericFacet.NumericRange.MAX_INCLUSIVE, column.getMaxValue().get()));
-            }
-        }
-
         Optional<Column> optionalReference = objectMap.getReference();
-        if (optionalReference.isPresent()) {
-            Column reference = optionalReference.get();
+        if (optionalColumn.isPresent() || optionalReference.isPresent()) {
+            Column column = optionalColumn.isPresent() ? optionalColumn.get() : optionalReference.get();
 
-            // LENGTH, MINLENGTH and MAXLENGTH are applied to all node kinds and even all data types
-            Optional<Integer> minLength = reference.getMinLength();
-            Optional<Integer> maxLength = reference.getMaxLength();
-
-            if (minLength.isPresent() && maxLength.isPresent() && minLength.get().equals(maxLength.get()))
-                xsFacets.add(new StringFacet(StringFacet.StringLength.LENGTH, minLength.get()));
-            else {
-                if (minLength.isPresent()) xsFacets.add(new StringFacet(StringFacet.StringLength.MIN_LENGTH, minLength.get()));
-                if (maxLength.isPresent()) xsFacets.add(new StringFacet(StringFacet.StringLength.MAX_LENGTH, maxLength.get()));
-            }
-
-            List<String> numericTypes = Arrays.asList("xsd:integer", "xsd:double", "xsd:positiveInteger");
-
+            List<String> numericTypes = Arrays.asList("xsd:int", "xsd:integer", "xsd:double", "xsd:positiveInteger");
             if (datatype.isPresent() && numericTypes.contains(datatype.get().getPrefixedName())) {
-                if (reference.getMinValue().isPresent()) xsFacets.add(new NumericFacet(NumericFacet.NumericRange.MIN_INCLUSIVE, reference.getMinValue().get()));
-                if (reference.getMaxValue().isPresent()) xsFacets.add(new NumericFacet(NumericFacet.NumericRange.MAX_INCLUSIVE, reference.getMaxValue().get()));
+                if (optionalReference.isPresent() /* in RML */ || /* in R2RML */
+                        (nodeKind.equals(NodeKinds.LITERAL) && column.isNumeric().orElse(false))) {
+                    if (column.getMinValue().isPresent()) xsFacets.add(new NumericFacet(NumericFacet.NumericRange.MIN_INCLUSIVE, column.getMinValue().get()));
+                    if (column.getMaxValue().isPresent()) xsFacets.add(new NumericFacet(NumericFacet.NumericRange.MAX_INCLUSIVE, column.getMaxValue().get()));
+                }
+            } else { /* when not numeric */
+                // LENGTH, MINLENGTH and MAXLENGTH are applied to all node kinds and even all data types
+                Optional<Integer> minLength = column.getMinLength();
+                Optional<Integer> maxLength = column.getMaxLength();
+
+                if (minLength.isPresent() && maxLength.isPresent() && minLength.get().equals(maxLength.get()))
+                    xsFacets.add(new StringFacet(StringFacet.StringLength.LENGTH, minLength.get()));
+                else {
+                    if (minLength.isPresent())
+                        xsFacets.add(new StringFacet(StringFacet.StringLength.MIN_LENGTH, minLength.get()));
+                    if (maxLength.isPresent())
+                        xsFacets.add(new StringFacet(StringFacet.StringLength.MAX_LENGTH, maxLength.get()));
+                }
             }
         }
     }
