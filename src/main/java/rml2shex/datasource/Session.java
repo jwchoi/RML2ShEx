@@ -1,6 +1,8 @@
 package rml2shex.datasource;
 
+import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.Option;
 import org.apache.commons.io.FileUtils;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
@@ -74,7 +76,8 @@ class Session {
     private String applyJsonPath(String dir, String fileName, String jsonPathExpression) {
         String queryResultFilePath = null;
         try {
-            String queryResult = JsonPath.parse(new File(dir, fileName)).read(jsonPathExpression).toString();
+            Configuration conf = Configuration.builder().options(Option.ALWAYS_RETURN_LIST).build();
+            String queryResult = JsonPath.using(conf).parse(new File(dir, fileName)).read(jsonPathExpression).toString();
             queryResultFilePath = Files.writeString(Paths.get("temp", fileName), queryResult, StandardOpenOption.CREATE).toString();
         } catch (IOException e) { e.printStackTrace(); }
 

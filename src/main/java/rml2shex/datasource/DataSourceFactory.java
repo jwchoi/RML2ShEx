@@ -26,6 +26,7 @@ class DataSourceFactory {
                 String fileName = logicalSource.getSource().getSource().toString();
                 String jsonPathExpression = logicalSource.getIterator();
                 df = session.loadJSON(dataSourceDir, fileName, jsonPathExpression);
+                df.show();
                 break;
             }
             case XML: {
