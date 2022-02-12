@@ -1,7 +1,6 @@
 package rml2shex;
 
 import rml2shex.datasource.Database;
-import rml2shex.datasource.db.DBBridge;
 import rml2shex.processor.Rml2ShexConverter;
 
 import java.io.File;
@@ -11,8 +10,6 @@ import java.util.Properties;
 
 public class Rml2Shex {
     private static final String PROPERTIES_FILE = "rml2shex.properties";
-
-    public static DBBridge dbBridge;
 
     public static void main(String[] args) {
         Properties properties = loadPropertiesFile(PROPERTIES_FILE);
@@ -28,7 +25,7 @@ public class Rml2Shex {
         String shexBasePrefix = properties.getProperty("shex.base.prefix");
         String shexBaseIRI = properties.getProperty("shex.base.iri");
 
-        Rml2ShexConverter converter = null;
+        Rml2ShexConverter converter;
 
         boolean useDataSource = Boolean.parseBoolean(properties.getProperty("useDataSource"));
         if (useDataSource) {
