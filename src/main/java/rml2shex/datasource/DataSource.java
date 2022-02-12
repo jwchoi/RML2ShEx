@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 public class DataSource {
 
-    enum DataSourceKinds { CSV, JSON, XML, Database }
+    enum DataSourceKinds { CSV, JSON, XML, DATABASE, SERVICE }
 
     private Session session;
     private Dataset<Row> df;

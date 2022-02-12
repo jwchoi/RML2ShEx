@@ -6,31 +6,31 @@ import java.net.URI;
 import java.util.*;
 
 public class DataSourceMetadataExtractor {
-    public static void acquireMetadataFor(RMLModel rmlModel, String dataSourceDir) {
+    public static void acquireMetadataFor(RMLModel rmlModel, Optional<String> dataSourceDir, Optional<Database> database) {
 
         Session session = Session.createSession();
         Set<TriplesMap> triplesMaps = rmlModel.getTriplesMaps();
 
-        Map<TriplesMap, DataSource> tmdfMap = loadLogicalSources(triplesMaps, dataSourceDir, session);
+        Map<TriplesMap, DataSource> tmdfMap = loadLogicalSources(session, triplesMaps, dataSourceDir, database);
 
         acquireMetadataForSubjectMap(tmdfMap);
         acquireMetadataForPredicateObjectMap(tmdfMap);
         acquireMetadataForPredicateRefObjectMap(tmdfMap);
     }
 
-    private static Map<TriplesMap, DataSource> loadLogicalSources(Set<TriplesMap> triplesMaps, String dataSourceDir, Session session) {
+    private static Map<TriplesMap, DataSource> loadLogicalSources(Session session, Set<TriplesMap> triplesMaps, Optional<String> dataSourceDir, Optional<Database> database) {
         Map<TriplesMap, DataSource> tmdfMap = new HashMap<>();
 
         for (TriplesMap triplesMap: triplesMaps) {
             LogicalTable logicalTable = triplesMap.getLogicalTable();
             if (logicalTable != null) {
-                tmdfMap.put(triplesMap, DataSourceFactory.createDataSource(session, logicalTable));
+                tmdfMap.put(triplesMap, DataSourceFactory.createDataSource(session, logicalTable, database));
                 continue;
             }
 
             LogicalSource logicalSource = triplesMap.getLogicalSource();
             if (logicalSource != null) {
-                DataSource df = DataSourceFactory.createDataSource(session, logicalSource, dataSourceDir);
+                DataSource df = DataSourceFactory.createDataSource(session, logicalSource, dataSourceDir, database);
                 tmdfMap.put(triplesMap, df);
             }
         }

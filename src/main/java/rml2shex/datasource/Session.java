@@ -4,10 +4,7 @@ import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 import org.apache.commons.io.FileUtils;
-import org.apache.spark.sql.Dataset;
-import org.apache.spark.sql.Row;
-import org.apache.spark.sql.SparkSession;
-import org.apache.spark.sql.functions;
+import org.apache.spark.sql.*;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.w3c.dom.Document;
@@ -176,6 +173,24 @@ class Session {
         }
 
         return df;
+    }
+
+    Dataset<Row> loadDatabase(Database database, String tableName, String query) {
+        DataFrameReader dfReader = sparkSession.read()
+                .format("jdbc")
+                .option("driver", database.getJdbcDriver())
+                .option("url", database.getJdbcDSN())
+                .option("user", database.getUsername())
+                .option("password", database.getPassword());
+
+        if (tableName != null) dfReader.option("dbtable", tableName);
+        if (query != null) {
+            if (query.endsWith(";")) query = query.substring(0, query.length()-1);
+
+            dfReader.option("query", query);
+        }
+
+        return dfReader.load();
     }
 
     Dataset<Row> sql(String sqlText) { return sparkSession.sql(sqlText); }

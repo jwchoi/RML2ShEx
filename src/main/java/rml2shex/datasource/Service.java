@@ -1,4 +1,4 @@
-package rml2shex.model.rml;
+package rml2shex.datasource;
 
 import java.net.URI;
 
@@ -9,11 +9,13 @@ public class Service {
     private URI supportedLanguage;
     private URI resultFormat;
 
-    Service(URI uri, URI endpoint, URI supportedLanguage, URI resultFormat) {
+    public Service(URI uri, URI endpoint, URI supportedLanguage, URI resultFormat) {
         this.uri = uri;
 
         this.endpoint = endpoint;
         this.supportedLanguage = supportedLanguage;
         this.resultFormat = resultFormat;
     }
+
+    public URI getUri() { return uri; }
 }

@@ -1,5 +1,6 @@
 package rml2shex;
 
+import rml2shex.datasource.Database;
 import rml2shex.datasource.db.DBBridge;
 import rml2shex.processor.Rml2ShexConverter;
 
@@ -22,16 +23,40 @@ public class Rml2Shex {
     }
 
     private static void generateShExFile(Properties properties) {
-        String dataSourceDir = properties.getProperty("dataSource.dir");
         String rmlPathname = properties.getProperty("rml.pathname");
         String shexPathname = properties.getProperty("shex.pathname");
         String shexBasePrefix = properties.getProperty("shex.base.prefix");
         String shexBaseIRI = properties.getProperty("shex.base.iri");
-        boolean useDataSource = Boolean.parseBoolean(properties.getProperty("useDataSource"));
 
-        Rml2ShexConverter converter = useDataSource ?
-                new Rml2ShexConverter(dataSourceDir, rmlPathname, shexPathname, shexBasePrefix, shexBaseIRI) :
-                new Rml2ShexConverter(rmlPathname, shexPathname, shexBasePrefix, shexBaseIRI);
+        Rml2ShexConverter converter = null;
+
+        boolean useDataSource = Boolean.parseBoolean(properties.getProperty("useDataSource"));
+        if (useDataSource) {
+            String dataSourceFileDir = properties.getProperty("dataSource.file.dir");
+
+            String dataSourceJdbcUrl = properties.getProperty("dataSource.jdbc.url");
+            String dataSourceJdbcDriver = properties.getProperty("dataSource.jdbc.driver");
+            String dataSourceJdbcUser = properties.getProperty("dataSource.jdbc.user");
+            String dataSourceJdbcPassword = properties.getProperty("dataSource.jdbc.password");
+
+            if (dataSourceJdbcUrl == null || dataSourceJdbcDriver == null || dataSourceJdbcUser == null || dataSourceJdbcPassword == null) {
+                if (dataSourceFileDir != null)
+                    converter = new Rml2ShexConverter(dataSourceFileDir, rmlPathname, shexPathname, shexBasePrefix, shexBaseIRI);
+                else {
+                    System.err.println("dataSource.file or some sub-properties of dataSource.jdbc are not specified.");
+                    return;
+                }
+            } else {
+                Database database = new Database(dataSourceJdbcUrl, dataSourceJdbcDriver, dataSourceJdbcUser, dataSourceJdbcPassword);
+                if (dataSourceFileDir != null)
+                    converter = new Rml2ShexConverter(dataSourceFileDir, database, rmlPathname, shexPathname, shexBasePrefix, shexBaseIRI);
+                else
+                    converter = new Rml2ShexConverter(database, rmlPathname, shexPathname, shexBasePrefix, shexBaseIRI);
+            }
+        }
+        else {
+            converter = new Rml2ShexConverter(rmlPathname, shexPathname, shexBasePrefix, shexBaseIRI);
+        }
 
         try {
             File file = converter.generateShExFile();

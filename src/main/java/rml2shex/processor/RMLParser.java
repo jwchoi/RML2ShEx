@@ -124,13 +124,15 @@ public class RMLParser {
         return objects.size() > 0 ? objects.toArray(new String[0])[0] : null;
     }
 
-    public Set<String> getDatabases() {
+    public boolean isDatabase(String source) {
         // a d2rq:Database
+        Resource s = createResource(source);
         Property p = model.createProperty("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
-        Resource o = model.createResource("http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#Database");
+        URI o = URI.create("http://www.wiwiss.fu-berlin.de/suhl/bizer/D2RQ/0.1#Database");
 
-        ResIterator subjects = model.listSubjectsWithProperty(p, o);
-        return subjects.mapWith(resource -> resource.toString()).toSet();
+        Set<URI> objects = getIRIObjectsOf(s, p);
+
+        return objects.stream().filter(o::equals).count() > 0;
     }
 
     public String getJdbcDSN(String database) {
@@ -169,13 +171,15 @@ public class RMLParser {
         return objects.toArray(new String[0])[0];
     }
 
-    public Set<String> getServices() {
+    public boolean isService(String source) {
         // a sd:Service
+        Resource s = createResource(source);
         Property p = model.createProperty("http://www.w3.org/1999/02/22-rdf-syntax-ns#type");
-        Resource o = model.createResource("http://www.w3.org/ns/sparql-service-description#Service");
+        URI o = URI.create("http://www.w3.org/ns/sparql-service-description#Service");
 
-        ResIterator subjects = model.listSubjectsWithProperty(p, o);
-        return subjects.mapWith(resource -> resource.toString()).toSet();
+        Set<URI> objects = getIRIObjectsOf(s, p);
+
+        return objects.stream().filter(o::equals).count() > 0;
     }
 
     public URI getEndpoint(String service) {

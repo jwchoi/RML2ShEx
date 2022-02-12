@@ -1,6 +1,8 @@
 package rml2shex.model.rml;
 
 import rml2shex.commons.IRI;
+import rml2shex.datasource.Database;
+import rml2shex.datasource.Service;
 import rml2shex.processor.RMLParser;
 
 import java.net.URI;
@@ -17,11 +19,6 @@ public class RMLModelFactory {
         Set<String> keySet = prefixMap.keySet();
         for (String key : keySet)
             rmlModel.addPrefixMap(key, prefixMap.get(key));
-
-        // databases
-        rmlModel.setDatabases(getDatabases(parser));
-        // SPARQL
-        rmlModel.setServices(getServices(parser));
 
         // triples maps
         Set<String> triplesMaps = parser.getTriplesMaps();
@@ -48,7 +45,10 @@ public class RMLModelFactory {
                 buildLogicalTable(parser, logicalSourceAsResource, logicalSource);
 
                 // rml:source -> (string or URI) in the rml file -> but must be only URI in the rml specification
-                Source source = new Source(parser.getSource(logicalSourceAsResource));
+                String sourceAsResource = parser.getSource(logicalSourceAsResource);
+                Source source = new Source(sourceAsResource);
+                source.setDatabase(getDatabase(parser, sourceAsResource));
+                source.setService(getService(parser, sourceAsResource));
                 logicalSource.setSource(source);
 
                 // rml:referenceFormulation
@@ -278,36 +278,34 @@ public class RMLModelFactory {
         termMap.setTermType(termType);
     }
 
-    private static Set<Database> getDatabases(RMLParser parser) {
-        Set<Database> databases = new HashSet<>();
+    private static Optional<Database> getDatabase(RMLParser parser, String sourceAsResource) {
+        Optional<Database> optionalDatabase = Optional.empty();
 
-        Set<String> databasesAsResource = parser.getDatabases();
-        for (String databaseAsResource : databasesAsResource) {
-            Database database = new Database(URI.create(databaseAsResource),
-                    parser.getJdbcDSN(databaseAsResource),
-                    parser.getJdbcDriver(databaseAsResource),
-                    parser.getUsername(databaseAsResource),
-                    parser.getPassword(databaseAsResource));
+        if (parser.isDatabase(sourceAsResource)) {
+            Database database = new Database(URI.create(sourceAsResource),
+                    parser.getJdbcDSN(sourceAsResource),
+                    parser.getJdbcDriver(sourceAsResource),
+                    parser.getUsername(sourceAsResource),
+                    parser.getPassword(sourceAsResource));
 
-            databases.add(database);
+            optionalDatabase = Optional.of(database);
         }
 
-        return databases;
+        return optionalDatabase;
     }
 
-    private static Set<Service> getServices(RMLParser parser) {
-        Set<Service> services = new HashSet<>();
+    private static Optional<Service> getService(RMLParser parser, String sourceAsResource) {
+        Optional<Service> optionalService = Optional.empty();
 
-        Set<String> servicesAsResource = parser.getServices();
-        for (String serviceAsResource : servicesAsResource) {
-            Service service = new Service(URI.create(serviceAsResource),
-                    parser.getEndpoint(serviceAsResource),
-                    parser.getSupportedLanguage(serviceAsResource),
-                    parser.getResultFormat(serviceAsResource));
+        if (parser.isService(sourceAsResource)) {
+            Service service = new Service(URI.create(sourceAsResource),
+                    parser.getEndpoint(sourceAsResource),
+                    parser.getSupportedLanguage(sourceAsResource),
+                    parser.getResultFormat(sourceAsResource));
 
-            services.add(service);
+            optionalService = Optional.of(service);
         }
 
-        return services;
+        return optionalService;
     }
 }

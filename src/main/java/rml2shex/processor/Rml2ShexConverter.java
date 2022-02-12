@@ -1,6 +1,7 @@
 package rml2shex.processor;
 
 import rml2shex.datasource.DataSourceMetadataExtractor;
+import rml2shex.datasource.Database;
 import rml2shex.model.shex.DeclarableShapeExpr;
 import rml2shex.commons.Symbols;
 import rml2shex.model.rml.*;
@@ -13,7 +14,8 @@ import java.net.URI;
 import java.util.*;
 
 public class Rml2ShexConverter {
-    private String dataSourceDir;
+    private Optional<String> dataSourceDir;
+    private Optional<Database> database;
 
     private String rmlPathname;
     private String shexPathname;
@@ -27,6 +29,9 @@ public class Rml2ShexConverter {
     private PrintWriter writer;
 
     public Rml2ShexConverter(String rmlPathname, String shexPathname, String shexBasePrefix, String shexBaseIRI) {
+        this.dataSourceDir = Optional.empty();
+        this.database = Optional.empty();
+
         this.rmlPathname = rmlPathname;
         this.shexPathname = shexPathname;
         this.shexBasePrefix = shexBasePrefix;
@@ -34,11 +39,19 @@ public class Rml2ShexConverter {
     }
 
     public Rml2ShexConverter(String dataSourceDir, String rmlPathname, String shexPathname, String shexBasePrefix, String shexBaseIRI) {
-        this.dataSourceDir = dataSourceDir;
-        this.rmlPathname = rmlPathname;
-        this.shexPathname = shexPathname;
-        this.shexBasePrefix = shexBasePrefix;
-        this.shexBaseIRI = URI.create(shexBaseIRI);
+        this(rmlPathname, shexPathname, shexBasePrefix, shexBaseIRI);
+        this.dataSourceDir = Optional.of(dataSourceDir);
+    }
+
+    public Rml2ShexConverter(Database database, String rmlPathname, String shexPathname, String shexBasePrefix, String shexBaseIRI) {
+        this(rmlPathname, shexPathname, shexBasePrefix, shexBaseIRI);
+        this.database = Optional.of(database);
+    }
+
+    public Rml2ShexConverter(String dataSourceDir, Database database, String rmlPathname, String shexPathname, String shexBasePrefix, String shexBaseIRI) {
+        this(rmlPathname, shexPathname, shexBasePrefix, shexBaseIRI);
+        this.dataSourceDir = Optional.of(dataSourceDir);
+        this.database = Optional.of(database);
     }
 
     private RMLParser getRMLParser() { return new RMLParser(rmlPathname, RMLParser.Lang.TTL); }
@@ -82,7 +95,7 @@ public class Rml2ShexConverter {
 
     public File generateShExFile() {
         RMLModel rmlModel = RMLModelFactory.getRMLModel(getRMLParser());
-        if (dataSourceDir != null) DataSourceMetadataExtractor.acquireMetadataFor(rmlModel, dataSourceDir);
+        if (dataSourceDir.isPresent() || database.isPresent()) DataSourceMetadataExtractor.acquireMetadataFor(rmlModel, dataSourceDir, database);
         shExDocModel = ShExDocModelFactory.getShExDocModel(rmlModel, shexBasePrefix, shexBaseIRI);
 
         preProcess();

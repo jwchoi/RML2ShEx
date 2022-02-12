@@ -1,8 +1,5 @@
 package rml2shex.model.rml;
 
-import rml2shex.datasource.db.DBMSTypes;
-import rml2shex.commons.Symbols;
-
 import java.net.URI;
 import java.util.Optional;
 import java.util.Set;
@@ -23,32 +20,14 @@ public class LogicalTable {
 
     void setUri(URI uri) { this.uri = uri; }
 
+    public String getTableName() { return tableName.orElse(null); }
     void setTableName(String tableName) { this.tableName = Optional.ofNullable(tableName); }
 
+    public String getSqlQuery() { return sqlQuery.orElse(null); }
     public void setSqlQuery(String sqlQuery) { this.sqlQuery = Optional.ofNullable(sqlQuery); }
 
     void setSqlVersions(Set<URI> sqlVersions) { this.sqlVersions = sqlVersions; }
-
-    public String getSqlQuery(DBMSTypes DBMSType) {
-        if (sqlQuery.isPresent())
-            return sqlQuery.get();
-
-        if (tableName.isPresent()) {
-            String tableName = this.tableName.get();
-            if (tableName.startsWith("\"") && tableName.endsWith("\"")) {
-                switch (DBMSType) {
-                    case MARIADB:
-                    case MYSQL:
-                        tableName = Symbols.GRAVE_ACCENT + tableName.substring(1, tableName.length() - 1) + Symbols.GRAVE_ACCENT;
-                        break;
-                }
-            }
-
-            return "SELECT * FROM " + tableName;
-        }
-
-        return null;
-    }
+    public Set<URI> getSqlVersions() { return sqlVersions; }
 
     public URI getUri() { return uri; }
 }

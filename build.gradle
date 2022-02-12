@@ -25,9 +25,6 @@ dependencies {
     // https://mvnrepository.com/artifact/org.slf4j/slf4j-log4j12
     implementation 'org.slf4j:slf4j-log4j12:1.7.32'
 
-    // https://mvnrepository.com/artifact/org.mariadb.jdbc/mariadb-java-client
-    implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.4'
-
     // https://mvnrepository.com/artifact/org.apache.spark/spark-sql
     implementation 'org.apache.spark:spark-sql_2.12:3.2.0'
 
@@ -36,6 +33,9 @@ dependencies {
 
     // https://mvnrepository.com/artifact/com.databricks/spark-xml
     implementation 'com.databricks:spark-xml_2.12:0.13.0'
+
+    // https://mvnrepository.com/artifact/mysql/mysql-connector-java
+    implementation 'mysql:mysql-connector-java:8.0.28'
 }
 
 test {
