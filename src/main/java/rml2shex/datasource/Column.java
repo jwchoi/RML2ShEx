@@ -25,7 +25,9 @@ public class Column {
     }
 
     public String getName() { return name; }
-    public String getNameInBackticks() { return "`" + name + "`"; }
+    public String getNameInBackticks() {
+        return (name.startsWith("`") && name.endsWith("`")) ? getName() : "`" + name + "`";
+    }
 
     public Optional<String> getType() { return type; }
     void setType(String type) { if (type != null) this.type = Optional.of(type); }

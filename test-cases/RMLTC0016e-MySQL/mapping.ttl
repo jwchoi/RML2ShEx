@@ -31,7 +31,7 @@
     .
 
 <#DB_source> a d2rq:Database;
-  d2rq:jdbcDSN "CONNECTIONDSN";
+  d2rq:jdbcDSN "jdbc:mysql://localhost:3306/test";
   d2rq:jdbcDriver "com.mysql.cj.jdbc.Driver";
   d2rq:username "root";
   d2rq:password "" .

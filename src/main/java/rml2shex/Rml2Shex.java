@@ -41,7 +41,7 @@ public class Rml2Shex {
                     converter = new Rml2ShexConverter(dataSourceFileDir, rmlPathname, shexPathname, shexBasePrefix, shexBaseIRI);
                 else {
                     System.err.println("dataSource.file or some sub-properties of dataSource.jdbc are not specified.");
-                    return;
+                    converter = new Rml2ShexConverter(rmlPathname, shexPathname, shexBasePrefix, shexBaseIRI);
                 }
             } else {
                 Database database = new Database(dataSourceJdbcUrl, dataSourceJdbcDriver, dataSourceJdbcUser, dataSourceJdbcPassword);

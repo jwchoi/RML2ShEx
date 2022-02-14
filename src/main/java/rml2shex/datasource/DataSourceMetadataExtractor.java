@@ -30,7 +30,7 @@ public class DataSourceMetadataExtractor {
 
             LogicalSource logicalSource = triplesMap.getLogicalSource();
             if (logicalSource != null) {
-                DataSource df = DataSourceFactory.createDataSource(session, logicalSource, dataSourceDir, database);
+                DataSource df = DataSourceFactory.createDataSource(session, logicalSource, dataSourceDir);
                 tmdfMap.put(triplesMap, df);
             }
         }

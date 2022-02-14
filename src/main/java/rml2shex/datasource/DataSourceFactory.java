@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.Set;
 
 class DataSourceFactory {
-    static DataSource createDataSource(Session session, LogicalSource logicalSource, Optional<String> dataSourceDir, Optional<Database> database) {
+    static DataSource createDataSource(Session session, LogicalSource logicalSource, Optional<String> dataSourceDir) {
         DataSource.DataSourceKinds dataSourceKind = detectDataSourceKind(logicalSource);
 
         Dataset<Row> df = null;
@@ -37,6 +37,7 @@ class DataSourceFactory {
                 return new HierarchicalDataSource(session, df, "/");
             }
             case DATABASE: {
+                Optional<Database> database = logicalSource.getSource().getDatabase();
                 String tableName = logicalSource.getTableName();
                 String query = logicalSource.getQuery();
                 df = session.loadDatabase(database.orElseThrow(), tableName, query);
