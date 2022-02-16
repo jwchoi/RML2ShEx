@@ -36,6 +36,12 @@ dependencies {
 
     // https://mvnrepository.com/artifact/mysql/mysql-connector-java
     implementation 'mysql:mysql-connector-java:8.0.28'
+
+    // https://mvnrepository.com/artifact/org.postgresql/postgresql
+    implementation 'org.postgresql:postgresql:42.3.3'
+
+    // https://mvnrepository.com/artifact/com.microsoft.sqlserver/mssql-jdbc
+    implementation 'com.microsoft.sqlserver:mssql-jdbc:10.2.0.jre11'
 }
 
 test {

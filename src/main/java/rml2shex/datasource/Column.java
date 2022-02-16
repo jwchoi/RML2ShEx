@@ -30,7 +30,7 @@ public class Column {
     }
 
     public Optional<String> getType() { return type; }
-    void setType(String type) { if (type != null) this.type = Optional.of(type); }
+    void setType(String type) {if (type != null) this.type = Optional.of(type); }
 
     public Optional<String> getMinValue() { return minValue; }
     void setMinValue(String minValue) { if (minValue != null) this.minValue = Optional.of(minValue); }
