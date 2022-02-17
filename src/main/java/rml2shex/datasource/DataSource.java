@@ -25,7 +25,7 @@ public class DataSource {
     void setSubjectColumns(List<Column> subjectColumns) { this.subjectColumns = subjectColumns; }
 
     private void acquireType(Column column) {
-        column.setType(df.select(column.getNameInBackticks()).schema().apply(column.getName()).dataType().typeName());
+        column.setType(df.select(column.getNameInBackticks()).schema().apply(column.getName()).dataType().sql());
     }
 
     void acquireMinAndMaxValue(Column column) {

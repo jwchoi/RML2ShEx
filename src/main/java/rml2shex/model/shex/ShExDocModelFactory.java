@@ -50,6 +50,7 @@ public class ShExDocModelFactory {
             shExDocModel.addPrefixDecl(entry.getKey(), entry.getValue());
 
         shExDocModel.addPrefixDecl("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+        shExDocModel.addPrefixDecl("xsd", "http://www.w3.org/2001/XMLSchema#");
     }
 
     // subject map -> node constraint
@@ -320,10 +321,6 @@ public class ShExDocModelFactory {
         }
 
         return inferredDeclarableShapeExprs;
-    }
-
-    private static Optional<Long> getMinOccurs(List<JoinCondition> joinConditions) {
-        return Optional.empty();
     }
 
     private static class ConversionResult {

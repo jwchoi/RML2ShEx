@@ -1,12 +1,9 @@
 package rml2shex.model.shex;
 
 import rml2shex.datasource.Column;
-import rml2shex.model.rml.ObjectMap;
+import rml2shex.model.rml.*;
 import rml2shex.commons.Symbols;
 import rml2shex.commons.IRI;
-import rml2shex.model.rml.SubjectMap;
-import rml2shex.model.rml.Template;
-import rml2shex.model.rml.TermMap;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -120,7 +117,18 @@ public class NodeConstraint extends DeclarableShapeExpr {
         }
     }
 
-    private void setDatatype(ObjectMap objectMap) { datatype = objectMap.getDatatype(); }
+    private void setDatatype(ObjectMap objectMap) {
+        datatype = objectMap.getDatatype();
+
+        // only if R2RML
+        // https://www.w3.org/TR/r2rml/#natural-mapping
+        Optional<Column> column = objectMap.getColumn();
+        if (column.isPresent()) {
+            if (nodeKind.get().equals(NodeKinds.LITERAL) && values.isEmpty() && datatype.isEmpty()) {
+                datatype = column.get().getRdfDatatype();
+            }
+        }
+    }
 
     private void setXsFacet(SubjectMap subjectMap) {
         Optional<Template> template = subjectMap.getTemplate();
@@ -163,13 +171,9 @@ public class NodeConstraint extends DeclarableShapeExpr {
         if (optionalColumn.isPresent() || optionalReference.isPresent()) {
             Column column = optionalColumn.isPresent() ? optionalColumn.get() : optionalReference.get();
 
-            List<String> numericTypes = Arrays.asList("xsd:int", "xsd:integer", "xsd:double", "xsd:positiveInteger");
-            if (datatype.isPresent() && numericTypes.contains(datatype.get().getPrefixedName())) {
-                if (optionalReference.isPresent() /* in RML */ || /* in R2RML */
-                        (nodeKind.equals(NodeKinds.LITERAL) && column.isNumeric().orElse(false))) {
-                    if (column.getMinValue().isPresent()) xsFacets.add(new NumericFacet(NumericFacet.NumericRange.MIN_INCLUSIVE, column.getMinValue().get()));
-                    if (column.getMaxValue().isPresent()) xsFacets.add(new NumericFacet(NumericFacet.NumericRange.MAX_INCLUSIVE, column.getMaxValue().get()));
-                }
+            if (datatype.isPresent() && isNumericRdfDatatype(datatype.get())) {
+                if (column.getMinValue().isPresent()) xsFacets.add(new NumericFacet(NumericFacet.NumericRange.MIN_INCLUSIVE, column.getMinValue().get()));
+                if (column.getMaxValue().isPresent()) xsFacets.add(new NumericFacet(NumericFacet.NumericRange.MAX_INCLUSIVE, column.getMaxValue().get()));
             } else { /* when not numeric */
                 // LENGTH, MINLENGTH and MAXLENGTH are applied to all node kinds and even all data types
                 Optional<Integer> minLength = column.getMinLength();
@@ -185,6 +189,12 @@ public class NodeConstraint extends DeclarableShapeExpr {
                 }
             }
         }
+    }
+
+    private boolean isNumericRdfDatatype(IRI rdfDatatype) {
+        String localPart = rdfDatatype.getLocalPart().toLowerCase();
+        List<String> numericTypes = Arrays.asList("byte", "short", "int", "long", "float", "double");
+        return numericTypes.stream().filter(localPart::contains).count() > 0 ? true : false;
     }
 
     private boolean isEquivalentXSFacet(Set<XSFacet> other) {

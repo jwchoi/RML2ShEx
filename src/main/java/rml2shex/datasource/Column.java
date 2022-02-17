@@ -1,7 +1,8 @@
 package rml2shex.datasource;
 
-import java.util.Arrays;
-import java.util.List;
+import rml2shex.commons.IRI;
+
+import java.net.URI;
 import java.util.Optional;
 
 public class Column {
@@ -29,7 +30,6 @@ public class Column {
         return (name.startsWith("`") && name.endsWith("`")) ? getName() : "`" + name + "`";
     }
 
-    public Optional<String> getType() { return type; }
     void setType(String type) {if (type != null) this.type = Optional.of(type); }
 
     public Optional<String> getMinValue() { return minValue; }
@@ -44,24 +44,28 @@ public class Column {
     public Optional<Integer> getMaxLength() { return maxLength; }
     void setMaxLength(String maxLength) { this.maxLength = Optional.of(Integer.parseUnsignedInt(maxLength)); }
 
-    public Optional<Boolean> isNumeric() {
-        Optional<Boolean> isNumeric = Optional.empty();
+    public Optional<IRI> getRdfDatatype() {
+        Optional<IRI> rdfDatatype = Optional.empty();
 
-        List<String> numericType = Arrays.asList("byte", "decimal", "double", "float", "integer", "long", "short");
+        if (type.isEmpty()) return rdfDatatype;
 
-        if (type.isPresent()) isNumeric = numericType.contains(type.get()) ? Optional.of(true) : Optional.of(false);
+        String prefixLabel = "xsd";
+        URI prefixIRI = URI.create("http://www.w3.org/2001/XMLSchema#");
+        String localPart = null;
 
-        return isNumeric;
+        switch (type.get()) {
+            case "BINARY": localPart = "hexBinary"; break;
+            case "DECIMAL": case "DEC": case "NUMERIC": localPart = "decimal"; break;
+            case "SHORT": case "SMALLINT": case "INT": case "INTEGER": case "LONG": case "BIGINT": localPart = "integer"; break;
+            case "FLOAT": case "REAL": case "DOUBLE": localPart = "double"; break;
+            case "BOOLEAN": localPart = "boolean"; break;
+            case "DATE": localPart = "date"; break;
+            case "TIMESTAMP": localPart = "dateTime"; break;
+            default: break;
+        }
 
-    }
+        if (localPart != null) rdfDatatype = Optional.of(new IRI(prefixLabel, prefixIRI, localPart));
 
-    Optional<Boolean> isString() {
-        Optional<Boolean> isString = Optional.empty();
-
-        List<String> stringType = Arrays.asList("char", "string", "varchar");
-
-        if (type.isPresent()) isString = stringType.contains(type.get()) ? Optional.of(true) : Optional.of(false);
-
-        return isString;
+        return rdfDatatype;
     }
 }

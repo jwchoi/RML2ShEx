@@ -70,7 +70,7 @@ public class StringFacet extends XSFacet {
         List<Column> logicalReferences = template.getLogicalReferences();
         for (Column logicalReference: logicalReferences) {
             String columnName = logicalReference.getName();
-            String quantifier = logicalReference.getMinLength().isPresent() ? "{" + logicalReference.getMinLength().get() + ",}" : "*";
+            String quantifier = logicalReference.getMinLength().isPresent() ? "{" + logicalReference.getMinLength().get() + ",}" : "+";
             pattern = pattern.replace("{" + columnName + "}", "(." + quantifier + ")");
         }
 
@@ -98,12 +98,21 @@ public class StringFacet extends XSFacet {
 
         StringFacet o = (StringFacet) other;
 
-        if (pattern.equals(o.pattern)) {
+        if (isEquivalentPattern(o.pattern)) {
             if (Arrays.compare(flags.orElse("").toCharArray(), o.flags.orElse("").toCharArray()) == 0)
                 return true;
         }
 
         return false;
+    }
+
+    private boolean isEquivalentPattern(Optional<String> pattern) {
+        if (this.pattern.isEmpty() || pattern.isEmpty()) return false;
+
+        String normalizedThisPattern = this.pattern.get().replaceAll("\\(\\.\\{\\d+\\,\\}\\)", "(.+)");
+        String normalizedOtherPattern = pattern.get().replaceAll("\\(\\.\\{\\d+\\,\\}\\)", "(.+)");
+
+        return normalizedThisPattern.equals(normalizedOtherPattern);
     }
 
     @Override
