@@ -52,7 +52,13 @@ public class PredicateObjectMap {
         private Optional<Long> maxOccurs; // acquired from the data source
         private Optional<Long> inverseMaxOccurs; // acquired from the data source
 
-        private PredicateObjectPair(PredicateMap predicateMap) { this.predicateMap = predicateMap; }
+        private PredicateObjectPair(PredicateMap predicateMap) {
+            this.predicateMap = predicateMap;
+            minOccurs = Optional.empty();
+            inverseMinOccurs = Optional.empty();
+            maxOccurs = Optional.empty();
+            inverseMaxOccurs = Optional.empty();
+        }
 
         PredicateObjectPair(PredicateMap predicateMap, ObjectMap objectMap) {
             this(predicateMap);

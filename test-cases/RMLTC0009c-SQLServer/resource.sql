@@ -3,15 +3,15 @@ DROP TABLE IF EXISTS Sport;
 DROP TABLE IF EXISTS Student;
 
 CREATE TABLE Sport (
-ID integer,
-Name varchar (50),
+[ID] integer,
+[Name] varchar (50),
 PRIMARY KEY (ID)
 );
 
 CREATE TABLE Student (
-ID integer,
-Name varchar(50),
-Sport integer,
+[ID] integer,
+[Name] varchar(50),
+[Sport] integer,
 PRIMARY KEY (ID),
 FOREIGN KEY(Sport) REFERENCES Sport(ID)
 );

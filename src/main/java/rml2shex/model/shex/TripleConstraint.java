@@ -163,7 +163,7 @@ public class TripleConstraint extends DeclarableTripleExpr {
             else if (min == 0 && max == -1) cardinality += Symbols.ASTERISK; // "*" - zero or more
             else if (min == 0 && max == 1) cardinality += Symbols.QUESTION_MARK; // "?" - zero or one
             else if (min == max) cardinality += Symbols.OPEN_BRACE + min + Symbols.CLOSE_BRACE; // "{m}" - exactly m
-            else cardinality = Symbols.OPEN_BRACE + min + Symbols.COMMA + (max != -1 ? max : Symbols.ASTERISK) + Symbols.CLOSE_BRACE; // "{m,n}" - at least m, no more than n
+            else cardinality += Symbols.OPEN_BRACE + min + Symbols.COMMA + (max != -1 ? max : Symbols.ASTERISK) + Symbols.CLOSE_BRACE; // "{m,n}" - at least m, no more than n
         }
         sb.append(cardinality);
 

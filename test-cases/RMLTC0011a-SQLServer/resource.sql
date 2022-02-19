@@ -3,17 +3,17 @@ EXEC sp_msforeachtable 'ALTER TABLE ? NOCHECK CONSTRAINT all'
 EXEC sp_msforeachtable 'DROP TABLE ?'
 
 CREATE TABLE Student (
-ID integer PRIMARY KEY,
-FirstName varchar(50),
-LastName varchar(50)
+[ID] integer PRIMARY KEY,
+[FirstName] varchar(50),
+[LastName] varchar(50)
 );
 CREATE TABLE Sport (
-ID integer PRIMARY KEY,
-Description varchar(50)
+[ID] integer PRIMARY KEY,
+[Description] varchar(50)
 );
 CREATE TABLE Student_Sport (
-ID_Student integer,
-ID_Sport integer,
+[ID_Student] integer,
+[ID_Sport] integer,
 PRIMARY KEY (ID_Student,ID_Sport),
 FOREIGN KEY (ID_Student) REFERENCES Student(ID),
 FOREIGN KEY (ID_Sport) REFERENCES Sport(ID)

@@ -39,10 +39,10 @@ public class Column {
     void setMaxValue(String maxValue) { if (maxValue != null) this.maxValue = Optional.of(maxValue); }
 
     public Optional<Integer> getMinLength() { return minLength; }
-    void setMinLength(String minLength) { this.minLength = Optional.of(Integer.parseUnsignedInt(minLength)); }
+    void setMinLength(String minLength) { if (minLength != null) this.minLength = Optional.of(Integer.parseUnsignedInt(minLength)); }
 
     public Optional<Integer> getMaxLength() { return maxLength; }
-    void setMaxLength(String maxLength) { this.maxLength = Optional.of(Integer.parseUnsignedInt(maxLength)); }
+    void setMaxLength(String maxLength) { if (maxLength != null) this.maxLength = Optional.of(Integer.parseUnsignedInt(maxLength)); }
 
     public Optional<IRI> getRdfDatatype() {
         Optional<IRI> rdfDatatype = Optional.empty();

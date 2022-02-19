@@ -183,11 +183,14 @@ class Session {
                 .option("user", database.getUsername())
                 .option("password", database.getPassword());
 
-        if (tableName != null) dfReader.option("dbtable", tableName);
         if (query != null) {
-            if (query.endsWith(";")) query = query.substring(0, query.length()-1);
+            if (query.endsWith(";")) {
+                query = query.substring(0, query.length()-1);
+            }
 
             dfReader.option("query", query);
+        } else if (tableName != null) {
+            dfReader.option("dbtable", tableName);
         }
 
         return dfReader.load();

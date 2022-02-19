@@ -73,7 +73,9 @@ public class DataSource {
                 .map(org.apache.spark.sql.Column::isNotNull)
                 .reduce(org.apache.spark.sql.Column::and);
 
+        // rows that generate a subject
         Dataset<Row> sbjsNonNullDF = sbjsNonNull.isPresent() ? df.where(sbjsNonNull.get()) : df;
+        if (sbjsNonNullDF.count() == 0) return 0;
 
         Optional<org.apache.spark.sql.Column> objsNull = objectColumns.stream()
                     .map(Column::getNameInBackticks)
@@ -127,8 +129,11 @@ public class DataSource {
         restColList.addAll(objCols);
         String[] restCols = restColList.toArray(new String[0]);
 
-        // groupBy
+        // rows that generate a triple
         Dataset<Row> SONonNullDF = conditionNonNull.isPresent() ? df.select(firstSbjCol, restCols).where(conditionNonNull.get()).distinct() : df.select(firstSbjCol, restCols).distinct();
+        if (SONonNullDF.count() == 0) return 0;
+
+        // groupBy
         Dataset<Row> groupByDF = SONonNullDF.groupBy(firstSbjCol, restSbjCols).count();
         List<Row> rows = groupByDF.select(groupByDF.col("count")).summary("max").collectAsList();
         long maxOccurs = Long.parseLong(rows.stream().map(row -> row.getString(1)).findAny().get());
