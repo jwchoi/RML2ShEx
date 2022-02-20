@@ -52,6 +52,11 @@ class Session {
     Dataset<Row> loadCSV(String dir, String fileName) {
         String path = Paths.get(dir, fileName).toAbsolutePath().toString();
 
+        if (!Paths.get(dir, fileName).toFile().exists()) {
+            System.err.println("ERROR: " + path + " does not exist.");
+            return null;
+        }
+
         return sparkSession.read()
                 .option("header", "true")
                 .option("inferSchema", "true")
@@ -60,6 +65,11 @@ class Session {
     }
 
     Dataset<Row> loadJSON(String dir, String fileName, String jsonPathExpression) {
+        if (!Paths.get(dir, fileName).toFile().exists()) {
+            System.err.println("ERROR: " + Paths.get(dir, fileName).toAbsolutePath() + " does not exist.");
+            return null;
+        }
+
         String path = applyJsonPath(dir, fileName, jsonPathExpression);
 
         Dataset<Row> df = sparkSession.read()
@@ -81,11 +91,16 @@ class Session {
     }
 
     Dataset<Row> loadXML(String dir, String fileName, String xPathExpression) {
+        if (!Paths.get(dir, fileName).toFile().exists()) {
+            System.err.println("ERROR: " + Paths.get(dir, fileName).toAbsolutePath() + " does not exist.");
+            return null;
+        }
+
         Map<String, String> pathAndRowTag = applyXPath(dir, fileName, xPathExpression);
 
         Dataset<Row> df = sparkSession.read()
                 .format("xml")
-                .option("rowTag", pathAndRowTag.get("rowTag"))
+                .option("rowTag", pathAndRowTag.getOrDefault("rowTag", "ROWS"))
                 .option("attributePrefix", "@")
                 .load(pathAndRowTag.get("path"));
 
@@ -139,7 +154,7 @@ class Session {
 
             // make a return value
             pathAndRowTag.put("path", queryResultFilePath);
-            pathAndRowTag.put("rowTag", queryResultNode.getNodeName());
+            if (queryResultNode != null) pathAndRowTag.put("rowTag", queryResultNode.getNodeName());
         } catch (Exception e) { e.printStackTrace(); }
 
         return pathAndRowTag;

@@ -13,6 +13,11 @@ public class DataSourceMetadataExtractor {
 
         Map<TriplesMap, DataSource> tmdfMap = loadLogicalSources(session, triplesMaps, dataSourceDir, database);
 
+        if (tmdfMap.values().stream().filter(Objects::isNull).count() > 0) {
+            System.out.println("It will be executed as useDataSource=false.");
+            return;
+        }
+
         acquireMetadataForSubjectMap(tmdfMap);
         acquireMetadataForPredicateObjectMap(tmdfMap);
         acquireMetadataForPredicateRefObjectMap(tmdfMap);
@@ -77,6 +82,8 @@ public class DataSourceMetadataExtractor {
                     // ObjectMap
                     Optional<ObjectMap> objectMap = predicateObjectPair.getObjectMap();
                     if (objectMap.isPresent()) {
+
+                        if (objectMap.get().getLiteralConstant().isPresent() || objectMap.get().getIRIConstant().isPresent()) continue;
 
                         List<Column> objectColumns = new ArrayList<>();
 

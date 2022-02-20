@@ -24,11 +24,17 @@ public class DataSource {
 
     void setSubjectColumns(List<Column> subjectColumns) { this.subjectColumns = subjectColumns; }
 
-    private void acquireType(Column column) {
+    void acquireType(Column column) {
+        // If the column in csv, database, flattened json or flattened xml is not included in df, it's an error.
+        if (!isExistent(column)) return;
+
         column.setType(df.select(column.getNameInBackticks()).schema().apply(column.getName()).dataType().sql());
     }
 
     void acquireMinAndMaxValue(Column column) {
+        // If the column in csv, database, flattened json or flattened xml is not included in df, it's an error.
+        if (!isExistent(column)) return;
+
         Dataset<Row> colDF = df.select(column.getNameInBackticks());
 
         List<Row> rows = colDF.summary("min", "max").collectAsList();
@@ -42,6 +48,9 @@ public class DataSource {
     }
 
     void acquireMinAndMaxLength(Column column) {
+        // If the column in csv, database, flattened json or flattened xml is not included in df, it's an error.
+        if (!isExistent(column)) return;
+
         String newColumn = column.getName() + "_length";
         for (int i = 0; Arrays.asList(df.columns()).contains(newColumn); i++) newColumn += i;
 
@@ -66,6 +75,9 @@ public class DataSource {
     }
 
     long acquireMinOccurs(List<Column> objectColumns) {
+        // If the columns in csv, database, flattened json or flattened xml are not included in df, it's an error.
+        if (objectColumns.stream().filter(this::isExistent).count() != objectColumns.size()) return 0;
+
         List<String> sbjCols = subjectColumns.stream().map(Column::getNameInBackticks).collect(Collectors.toList());
 
         Optional<org.apache.spark.sql.Column> sbjsNonNull = sbjCols.stream()
@@ -108,6 +120,9 @@ public class DataSource {
     }
 
     long acquireMaxOccurs(List<Column> objectColumns) {
+        // If the columns in csv, database, flattened json or flattened xml are not included in df, it's an error.
+        if (objectColumns.stream().filter(this::isExistent).count() != objectColumns.size()) return 0;
+
         // preprocess
         List<String> sbjCols = subjectColumns.stream().map(Column::getNameInBackticks).collect(Collectors.toList());
         List<String> objCols = objectColumns.stream().map(Column::getNameInBackticks).collect(Collectors.toList());
@@ -238,4 +253,6 @@ public class DataSource {
     }
 
     String encloseWithBackticks(String columnName) { return "`" + columnName + "`"; }
+
+    boolean isExistent(Column column) { return Arrays.asList(df.columns()).contains(column.getName()); }
 }

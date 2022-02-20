@@ -349,7 +349,27 @@ public class RMLParser {
         Resource s = createResource(termMap);
         Property p = createRRProperty("constant");
 
-        Set<String> objects = getLiteralObjectsOf(s, p);
+        Set<String> objects = new TreeSet<>();
+
+        NodeIterator iterator = model.listObjectsOfProperty(s, p);
+
+        while (iterator.hasNext()) {
+            RDFNode o = iterator.next();
+            if (o.isLiteral()) {
+                Literal literal = o.asLiteral();
+                String lexicalForm = literal.getLexicalForm();
+                String language = literal.getLanguage();
+                URI datatypeUri = URI.create(literal.getDatatypeURI());
+
+                String constant = "\"" + lexicalForm + "\"";
+
+                String fragment = datatypeUri.getFragment();
+                if (fragment.equals("langString")) constant = constant + "@" + language;
+                else if (!fragment.equals("string")) constant = constant + "^^" + "<" + datatypeUri + ">";
+
+                objects.add(constant);
+            }
+        }
 
         return objects.size() > 0 ? objects.toArray(new String[0])[0] : null;
     }

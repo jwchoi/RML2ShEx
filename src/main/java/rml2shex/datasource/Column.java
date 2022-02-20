@@ -18,6 +18,8 @@ public class Column {
     public Column(String name) {
         this.name = name;
 
+        type = Optional.empty();
+
         minValue = Optional.empty();
         maxValue = Optional.empty();
 
@@ -30,6 +32,7 @@ public class Column {
         return (name.startsWith("`") && name.endsWith("`")) ? getName() : "`" + name + "`";
     }
 
+    public Optional<String> getType() { return type; }
     void setType(String type) {if (type != null) this.type = Optional.of(type); }
 
     public Optional<String> getMinValue() { return minValue; }
@@ -67,5 +70,9 @@ public class Column {
         if (localPart != null) rdfDatatype = Optional.of(new IRI(prefixLabel, prefixIRI, localPart));
 
         return rdfDatatype;
+    }
+
+    public Optional<Boolean> isStringType() {
+        return type.isPresent() ? Optional.of(type.get().equals("STRING")) : Optional.empty();
     }
 }

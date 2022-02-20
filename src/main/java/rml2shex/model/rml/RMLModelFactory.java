@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 public class RMLModelFactory {
 
-    public static RMLModel getRMLModel(RMLParser parser) {
+    public static RMLModel getRMLModel(RMLParser parser) throws Exception {
         RMLModel rmlModel = new RMLModel();
 
         // prefixes
@@ -68,8 +68,7 @@ public class RMLModelFactory {
             Set<String> subjectMaps = parser.getSubjectMaps(triplesMapAsResource); // rr:subjectMap
 
             if (subjects.size() + subjectMaps.size() != 1) {
-                System.err.println("A triples map must have exactly one subject map.");
-                return null;
+                throw new Exception("A triples map must have exactly one subject map.");
             }
 
             // ?x rr:subject ?y
@@ -221,7 +220,7 @@ public class RMLModelFactory {
         logicalTable.setSqlQuery(parser.getSQLQuery(logicalTableAsResource));
     }
 
-    private static Set<GraphMap> getGraphMapsAssociatedWith(String subjectMapOrPredicateObjectMapAsResource, RMLParser parser, Map<String, String> prefixMap) {
+    private static Set<GraphMap> getGraphMapsAssociatedWith(String subjectMapOrPredicateObjectMapAsResource, RMLParser parser, Map<String, String> prefixMap) throws Exception {
         Set<GraphMap> graphMaps = new HashSet<>();
 
         // rr:graphMap
@@ -247,7 +246,7 @@ public class RMLModelFactory {
         return graphMaps;
     }
 
-    private static void buildTermMap(RMLParser parser, String termMapAsResource, TermMap termMap) {
+    private static void buildTermMap(RMLParser parser, String termMapAsResource, TermMap termMap) throws Exception {
         // rr:constant -> IRI
         URI IRIConstant = parser.getIRIConstant(termMapAsResource);
         termMap.setConstant(IRI.createIRI(IRIConstant, parser.getPrefixes()));

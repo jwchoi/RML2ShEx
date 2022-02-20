@@ -174,8 +174,8 @@ public class NodeConstraint extends DeclarableShapeExpr {
             if (datatype.isPresent() && isNumericRdfDatatype(datatype.get())) {
                 if (column.getMinValue().isPresent()) xsFacets.add(new NumericFacet(NumericFacet.NumericRange.MIN_INCLUSIVE, column.getMinValue().get()));
                 if (column.getMaxValue().isPresent()) xsFacets.add(new NumericFacet(NumericFacet.NumericRange.MAX_INCLUSIVE, column.getMaxValue().get()));
-            } else { /* when not numeric */
-                // LENGTH, MINLENGTH and MAXLENGTH are applied to all node kinds and even all data types
+            } else if (column.getType().isPresent() && column.isStringType().isPresent() && column.isStringType().get()){ /* only if string type */
+                // LENGTH, MINLENGTH and MAXLENGTH are applied to all node kinds and even all data types in ShEx
                 Optional<Integer> minLength = column.getMinLength();
                 Optional<Integer> maxLength = column.getMaxLength();
 

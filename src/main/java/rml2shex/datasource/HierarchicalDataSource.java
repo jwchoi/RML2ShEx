@@ -18,7 +18,16 @@ class HierarchicalDataSource extends DataSource {
     }
 
     @Override
+    void acquireType(Column column) {
+        // Some nested columns in json and xml can be omitted. That's not an error.
+        if (isExistent(column)) super.acquireType(column);
+    }
+
+    @Override
     void acquireMinAndMaxValue(Column column) {
+        // Some nested columns in json and xml can be omitted. That's not an error.
+        if (!isExistent(column)) return;
+
         // if column is not nested
         if (isNestedColumn(column)) {
             super.acquireMinAndMaxValue(column);
@@ -48,6 +57,9 @@ class HierarchicalDataSource extends DataSource {
 
     @Override
     void acquireMinAndMaxLength(Column column) {
+        // Some nested columns in json and xml can be omitted. That's not an error.
+        if (!isExistent(column)) return;
+
         // if column is not nested
         if (isNestedColumn(column)) {
             super.acquireMinAndMaxLength(column);
@@ -73,6 +85,16 @@ class HierarchicalDataSource extends DataSource {
             if (key.equals("min")) { column.setMinLength(value); continue; }
             if (key.equals("max")) { column.setMaxLength(value); continue; }
         }
+    }
+
+    @Override
+    long acquireMinOccurs(List<Column> objectColumns) {
+        return (objectColumns.stream().filter(this::isExistent).count() == objectColumns.size()) ? super.acquireMinOccurs(objectColumns) : 0;
+    }
+
+    @Override
+    long acquireMaxOccurs(List<Column> objectColumns) {
+        return (objectColumns.stream().filter(this::isExistent).count() == objectColumns.size()) ? super.acquireMaxOccurs(objectColumns) : 0;
     }
 
     private boolean isNestedColumn(Column column) { return column.getName().indexOf(delimiter) == -1; }

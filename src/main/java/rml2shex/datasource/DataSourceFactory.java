@@ -16,36 +16,38 @@ class DataSourceFactory {
     static DataSource createDataSource(Session session, LogicalSource logicalSource, Optional<String> dataSourceDir) {
         DataSource.DataSourceKinds dataSourceKind = detectDataSourceKind(logicalSource);
 
-        Dataset<Row> df = null;
-
         switch(dataSourceKind) {
             case CSV: {
                 String fileName = logicalSource.getSource().getSource().toString();
-                df = session.loadCSV(dataSourceDir.orElseThrow(), fileName);
+                Dataset<Row> df = session.loadCSV(dataSourceDir.orElseThrow(), fileName);
+                if (df != null) return new DataSource(session, df);
                 break;
             }
             case JSON: {
                 String fileName = logicalSource.getSource().getSource().toString();
                 String jsonPathExpression = logicalSource.getIterator();
-                df = session.loadJSON(dataSourceDir.orElseThrow(), fileName, jsonPathExpression);
-                return new HierarchicalDataSource(session, df, ".");
+                Dataset<Row> df = session.loadJSON(dataSourceDir.orElseThrow(), fileName, jsonPathExpression);
+                if (df != null) return new HierarchicalDataSource(session, df, ".");
+                break;
             }
             case XML: {
                 String fileName = logicalSource.getSource().getSource().toString();
                 String xPathExpression = logicalSource.getIterator();
-                df = session.loadXML(dataSourceDir.orElseThrow(), fileName, xPathExpression);
-                return new HierarchicalDataSource(session, df, "/");
+                Dataset<Row> df = session.loadXML(dataSourceDir.orElseThrow(), fileName, xPathExpression);
+                if (df != null) return new HierarchicalDataSource(session, df, "/");
+                break;
             }
             case DATABASE: {
                 Optional<Database> database = logicalSource.getSource().getDatabase();
                 String tableName = logicalSource.getTableName();
                 String query = logicalSource.getQuery();
-                df = session.loadDatabase(database.orElseThrow(), tableName, query);
+                Dataset<Row> df = session.loadDatabase(database.orElseThrow(), tableName, query);
+                if (df != null) return new DataSource(session, df);
                 break;
             }
         }
 
-        return new DataSource(session, df);
+        return null;
     }
 
     private static DataSource.DataSourceKinds detectDataSourceKind(LogicalSource logicalSource) {

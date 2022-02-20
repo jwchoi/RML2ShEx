@@ -1,0 +1,15 @@
+PREFIX ex: <http://example.com/>
+PREFIX activity: <http://example.com/activity/>
+PREFIX my: <http://my.example/ns#>
+PREFIX ql: <http://semweb.mmlab.be/ns/ql#>
+PREFIX rml: <http://semweb.mmlab.be/ns/rml#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX rr: <http://www.w3.org/ns/r2rml#>
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+BASE <http://my.example/ns#>
+
+my:S0 IRI /^http:\/\/example\.com\/(.{1,})$/ AND CLOSED {
+  ex:name LITERAL MINLENGTH 7 MAXLENGTH 31
+}
+

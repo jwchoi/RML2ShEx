@@ -72,7 +72,7 @@ public abstract class TermMap {
         }
     }
 
-    void setTermType(URI uri) {
+    void setTermType(URI uri) throws Exception {
         if (uri == null) return;
 
         if (uri.equals(TermTypes.BLANKNODE.getUri()))

@@ -5,7 +5,6 @@ import rml2shex.processor.Rml2ShexConverter;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.Properties;
 
 public class Rml2Shex {
@@ -58,7 +57,8 @@ public class Rml2Shex {
         try {
             File file = converter.generateShExFile();
             System.out.println("SUCCESS: The ShEx file \"" + file.getCanonicalPath() + "\" is generated.");
-        } catch (IOException e) {
+        } catch (Exception e) {
+            System.err.println("ERROR: " + e.getMessage());
             System.err.println("ERROR: To Generate the ShEx file.");
         }
     }
