@@ -11,8 +11,8 @@ class HierarchicalDataSource extends DataSource {
     private Dataset<Row> df;
     private String delimiter;
 
-    HierarchicalDataSource(Session session, Dataset<Row> df, String delimiter) {
-        super(session, df);
+    HierarchicalDataSource(DataSourceKinds kind, Session session, Dataset<Row> df, String delimiter) {
+        super(kind, session, df);
         this.df = df;
         this.delimiter = delimiter;
     }

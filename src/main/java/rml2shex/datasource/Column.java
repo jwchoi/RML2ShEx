@@ -7,6 +7,9 @@ import java.util.Optional;
 
 public class Column {
     private String name;
+
+    private Optional<DataSource.DataSourceKinds> dataSourceKind;
+
     private Optional<String> type; // acquired from the data source
 
     private Optional<String> minValue; // acquired from the data source
@@ -18,6 +21,8 @@ public class Column {
     public Column(String name) {
         this.name = name;
 
+        dataSourceKind = Optional.empty();
+
         type = Optional.empty();
 
         minValue = Optional.empty();
@@ -28,9 +33,12 @@ public class Column {
     }
 
     public String getName() { return name; }
-    public String getNameInBackticks() {
+    String getNameInBackticks() {
         return (name.startsWith("`") && name.endsWith("`")) ? getName() : "`" + name + "`";
     }
+
+    public Optional<DataSource.DataSourceKinds> getDataSourceKind() { return dataSourceKind; }
+    void setDataSourceKind(DataSource.DataSourceKinds dataSourceKind) { if (dataSourceKind != null) this.dataSourceKind = Optional.of(dataSourceKind); }
 
     public Optional<String> getType() { return type; }
     void setType(String type) {if (type != null) this.type = Optional.of(type); }

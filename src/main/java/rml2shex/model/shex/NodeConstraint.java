@@ -1,6 +1,7 @@
 package rml2shex.model.shex;
 
 import rml2shex.datasource.Column;
+import rml2shex.datasource.DataSource;
 import rml2shex.model.rml.*;
 import rml2shex.commons.Symbols;
 import rml2shex.commons.IRI;
@@ -120,12 +121,20 @@ public class NodeConstraint extends DeclarableShapeExpr {
     private void setDatatype(ObjectMap objectMap) {
         datatype = objectMap.getDatatype();
 
-        // only if R2RML
+        // When R2RML
         // https://www.w3.org/TR/r2rml/#natural-mapping
         Optional<Column> column = objectMap.getColumn();
         if (column.isPresent()) {
             if (nodeKind.get().equals(NodeKinds.LITERAL) && values.isEmpty() && datatype.isEmpty()) {
                 datatype = column.get().getRdfDatatype();
+            }
+        }
+
+        // When Database in RML
+        Optional<Column> reference = objectMap.getReference();
+        if (reference.isPresent() && reference.get().getDataSourceKind().isPresent() && reference.get().getDataSourceKind().get().equals(DataSource.DataSourceKinds.DATABASE)) {
+            if (nodeKind.get().equals(NodeKinds.LITERAL) && values.isEmpty() && datatype.isEmpty()) {
+                datatype = reference.get().getRdfDatatype();
             }
         }
     }

@@ -10,14 +10,16 @@ import java.util.stream.Collectors;
 
 public class DataSource {
 
-    enum DataSourceKinds { CSV, JSON, XML, DATABASE, SERVICE }
+    public enum DataSourceKinds { CSV, JSON, XML, DATABASE, SERVICE }
 
+    private DataSourceKinds kind;
     private Session session;
     private Dataset<Row> df;
 
     private List<Column> subjectColumns; // as key columns, but not guaranteed unique and non-null
 
-    DataSource(Session session, Dataset<Row> df) {
+    DataSource(DataSourceKinds kind, Session session, Dataset<Row> df) {
+        this.kind = kind;
         this.session = session;
         this.df = df;
     }
@@ -39,6 +41,8 @@ public class DataSource {
 
         List<Row> rows = colDF.summary("min", "max").collectAsList();
         for (Row row : rows) {
+            if (row.size() < 2) continue;
+
             String key = row.getString(0);
             String value = row.getString(1);
 
@@ -69,6 +73,7 @@ public class DataSource {
     }
 
     void acquireMetadata(Column column) {
+        column.setDataSourceKind(kind);
         acquireType(column);
         acquireMinAndMaxLength(column);
         acquireMinAndMaxValue(column);

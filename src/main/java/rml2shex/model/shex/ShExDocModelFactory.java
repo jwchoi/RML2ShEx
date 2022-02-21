@@ -288,7 +288,7 @@ public class ShExDocModelFactory {
                     } else {
                         IRI id = DeclarableShapeExpr.IdGenerator.generateId(shexBasePrefix, shexBaseIRI, "S");
 
-                        NodeConstraint nodeConstraint = combination.stream().findAny().get().nodeConstraint;
+                        NodeConstraint nodeConstraint = combination.stream().findAny().get().nodeConstraint; // It can cause an error.
 
                         List<IRI> refIds = combination.stream()
                                 .filter(conversionResult -> conversionResult.referenceId4TripleExpr != null)

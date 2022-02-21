@@ -41,8 +41,8 @@
     rml:source <#DB_source>;
     rr:sqlVersion rr:SQL2008;
         rml:query """
-            SELECT "Code", "Name", "Lan"
-            FROM "Country"
+            SELECT `Code`, `Name`, `Lan`
+            FROM `Country`
             WHERE "Lan" = 'ES';
            """
   ];

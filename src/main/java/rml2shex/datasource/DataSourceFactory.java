@@ -20,21 +20,21 @@ class DataSourceFactory {
             case CSV: {
                 String fileName = logicalSource.getSource().getSource().toString();
                 Dataset<Row> df = session.loadCSV(dataSourceDir.orElseThrow(), fileName);
-                if (df != null) return new DataSource(session, df);
+                if (df != null) return new DataSource(dataSourceKind, session, df);
                 break;
             }
             case JSON: {
                 String fileName = logicalSource.getSource().getSource().toString();
                 String jsonPathExpression = logicalSource.getIterator();
                 Dataset<Row> df = session.loadJSON(dataSourceDir.orElseThrow(), fileName, jsonPathExpression);
-                if (df != null) return new HierarchicalDataSource(session, df, ".");
+                if (df != null) return new HierarchicalDataSource(dataSourceKind, session, df, ".");
                 break;
             }
             case XML: {
                 String fileName = logicalSource.getSource().getSource().toString();
                 String xPathExpression = logicalSource.getIterator();
                 Dataset<Row> df = session.loadXML(dataSourceDir.orElseThrow(), fileName, xPathExpression);
-                if (df != null) return new HierarchicalDataSource(session, df, "/");
+                if (df != null) return new HierarchicalDataSource(dataSourceKind, session, df, "/");
                 break;
             }
             case DATABASE: {
@@ -42,7 +42,7 @@ class DataSourceFactory {
                 String tableName = logicalSource.getTableName();
                 String query = logicalSource.getQuery();
                 Dataset<Row> df = session.loadDatabase(database.orElseThrow(), tableName, query);
-                if (df != null) return new DataSource(session, df);
+                if (df != null) return new DataSource(dataSourceKind, session, df);
                 break;
             }
         }
@@ -83,6 +83,6 @@ class DataSourceFactory {
         String sqlQuery = logicalTable.getSqlQuery();
         Dataset<Row> df = session.loadDatabase(database.orElseThrow(), tableName, sqlQuery);
 
-        return new DataSource(session, df);
+        return new DataSource(DataSource.DataSourceKinds.DATABASE, session, df);
     }
 }
