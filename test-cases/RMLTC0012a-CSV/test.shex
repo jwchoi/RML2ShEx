@@ -8,8 +8,20 @@ PREFIX rr: <http://www.w3.org/ns/r2rml#>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 BASE <http://my.example/ns#>
 
-my:S0 BNODE /^(.{3,})(.{5,})(.{2,})$/ AND CLOSED {
-  ex:amount LITERAL;
-  foaf:name LITERAL /^(.{3,}) (.{5,})$/
+my:S0 @my:S2 OR @my:S4
+
+my:S1 @my:S3 OR @my:S4
+
+my:S2 BNODE AND CLOSED {
+  $my:T0 ex:city LITERAL *
+}
+
+my:S3 BNODE AND CLOSED {
+  $my:T1 foaf:name LITERAL /^(.*) (.*)$/ *
+}
+
+my:S4 BNODE AND CLOSED {
+  &my:T0;
+  &my:T1
 }
 

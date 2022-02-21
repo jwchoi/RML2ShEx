@@ -131,8 +131,10 @@ public class NodeConstraint extends DeclarableShapeExpr {
     }
 
     private void setXsFacet(SubjectMap subjectMap) {
-        Optional<Template> template = subjectMap.getTemplate();
-        if (template.isPresent()) xsFacets.add(new StringFacet(template.get()));
+        if (nodeKind.get().equals(NodeKinds.IRI)) {
+            Optional<Template> template = subjectMap.getTemplate();
+            if (template.isPresent()) xsFacets.add(new StringFacet(template.get()));
+        }
 
         Optional<Column> optionalColumn = subjectMap.getColumn();
         Optional<Column> optionalReference = subjectMap.getReference();

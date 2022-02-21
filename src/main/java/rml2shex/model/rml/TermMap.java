@@ -43,7 +43,7 @@ public abstract class TermMap {
         reference = Optional.empty();
     }
 
-    void setConstant(String constant) {
+    void setConstant(String constant) throws Exception {
         if (constant != null) {
             literalConstant = Optional.of(constant);
             setTermType(TermTypes.LITERAL);

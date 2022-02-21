@@ -16,4 +16,12 @@ public class LanguageMap extends TermMap {
             setTermType(TermTypes.LITERAL);
         }
     }
+
+    @Override
+    void setConstant(String constant) throws Exception {
+        if (constant != null) {
+            if (constant.matches("[a-zA-Z]+(\\-[a-zA-Z0-9]+)*")) super.setConstant(constant);
+            else throw new Exception("A term map with invalid rr:language value, which is an error.");
+        }
+    }
 }
