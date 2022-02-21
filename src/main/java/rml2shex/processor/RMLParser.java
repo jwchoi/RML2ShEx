@@ -284,11 +284,20 @@ public class RMLParser {
         return getIRIObjectsOf(s, p);
     }
 
-    public Set<URI> getGraphs(String subjectMapOrPredicateObjectMap) {
+    public Set<URI> getGraphs(String subjectMapOrPredicateObjectMap) throws Exception {
         Resource s = createResource(subjectMapOrPredicateObjectMap);
         Property p = createRRProperty("graph");
 
-        return getIRIObjectsOf(s, p);
+        Set<URI> set = new TreeSet<>();
+
+        NodeIterator iterator = model.listObjectsOfProperty(s, p);
+        while (iterator.hasNext()) {
+            RDFNode o = iterator.next();
+            if (o.isURIResource()) set.add(URI.create(o.asResource().getURI()));
+            else throw new Exception("A non-IRI named graph, which is an error.");
+        }
+
+        return set;
     }
 
     public Set<URI> getPredicates(String predicateObjectMap) {
