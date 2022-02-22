@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.Set;
 
 class DataSourceFactory {
-    static DataSource createDataSource(Session session, LogicalSource logicalSource, Optional<String> dataSourceDir) {
+    static DataSource createDataSource(Session session, LogicalSource logicalSource, Optional<String> dataSourceDir) throws Exception {
         DataSource.DataSourceKinds dataSourceKind = detectDataSourceKind(logicalSource);
 
         switch(dataSourceKind) {
@@ -42,7 +42,9 @@ class DataSourceFactory {
                 String tableName = logicalSource.getTableName();
                 String query = logicalSource.getQuery();
                 Dataset<Row> df = session.loadDatabase(database.orElseThrow(), tableName, query);
-                if (df != null) return new DataSource(dataSourceKind, session, df);
+                if (df != null) {
+                    return new RelationalDataSource(dataSourceKind, session, df, database.orElseThrow(), tableName, query);
+                }
                 break;
             }
         }
@@ -78,11 +80,11 @@ class DataSourceFactory {
         return null;
     }
 
-    static DataSource createDataSource(Session session, LogicalTable logicalTable, Optional<Database> database) {
+    static DataSource createDataSource(Session session, LogicalTable logicalTable, Optional<Database> database) throws Exception {
         String tableName = logicalTable.getTableName();
         String sqlQuery = logicalTable.getSqlQuery();
         Dataset<Row> df = session.loadDatabase(database.orElseThrow(), tableName, sqlQuery);
 
-        return new DataSource(DataSource.DataSourceKinds.DATABASE, session, df);
+        return new RelationalDataSource(DataSource.DataSourceKinds.DATABASE, session, df, database.orElseThrow(), tableName, sqlQuery);
     }
 }

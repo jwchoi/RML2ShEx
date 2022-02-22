@@ -6,7 +6,7 @@ import java.net.URI;
 import java.util.*;
 
 public class DataSourceMetadataExtractor {
-    public static void acquireMetadataFor(RMLModel rmlModel, Optional<String> dataSourceDir, Optional<Database> database) {
+    public static void acquireMetadataFor(RMLModel rmlModel, Optional<String> dataSourceDir, Optional<Database> database) throws Exception {
 
         Session session = Session.createSession();
         Set<TriplesMap> triplesMaps = rmlModel.getTriplesMaps();
@@ -23,7 +23,7 @@ public class DataSourceMetadataExtractor {
         acquireMetadataForPredicateRefObjectMap(tmdfMap);
     }
 
-    private static Map<TriplesMap, DataSource> loadLogicalSources(Session session, Set<TriplesMap> triplesMaps, Optional<String> dataSourceDir, Optional<Database> database) {
+    private static Map<TriplesMap, DataSource> loadLogicalSources(Session session, Set<TriplesMap> triplesMaps, Optional<String> dataSourceDir, Optional<Database> database) throws Exception {
         Map<TriplesMap, DataSource> tmdfMap = new HashMap<>();
 
         for (TriplesMap triplesMap: triplesMaps) {
