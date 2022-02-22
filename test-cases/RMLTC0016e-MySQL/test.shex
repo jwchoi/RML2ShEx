@@ -11,6 +11,6 @@ BASE <http://my.example/ns#>
 
 my:S0 IRI /^http:\/\/example\.com\/Patient(.{2,})$/ AND CLOSED {
   a [foaf:Person];
-  ex:photo IRI /^data:image\/png;hex,(.{85,})$/
+  ex:photo IRI /^data:image\/png;hex,(.{170,})$/
 }
 

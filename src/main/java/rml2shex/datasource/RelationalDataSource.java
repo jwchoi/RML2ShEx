@@ -9,27 +9,19 @@ import java.util.Optional;
 import java.util.Set;
 
 public class RelationalDataSource extends DataSource {
-    private enum Kinds { QUERY, TABLE }
+    private enum Kinds { MySQL, PostgreSQL, SQLServer }
 
     private Kinds kind;
 
-    private Optional<String> table;
-    private Optional<String> query;
+    private String query;
 
     private Set<Column> columnDescriptions;
 
     RelationalDataSource(DataSourceKinds kind, Session session, Dataset<Row> df, Database database, String tableName, String query) throws Exception {
         super(kind, session, df);
 
-        if (query != null) {
-            this.kind = Kinds.QUERY;
-            this.query = query.endsWith(";") ? Optional.of(query.substring(0, query.length()-1)) : Optional.of(query);
-            table = Optional.empty();
-        } else if (tableName != null) {
-            this.kind = Kinds.TABLE;
-            table = Optional.of(tableName);
-            this.query = Optional.empty();
-        }
+        if (query != null) { this.query = query.endsWith(";") ? query.substring(0, query.length()-1) : query; }
+        else if (tableName != null) { this.query = "SELECT * FROM " + tableName; }
 
         columnDescriptions = new HashSet<>();
 
@@ -40,37 +32,24 @@ public class RelationalDataSource extends DataSource {
         Class.forName(database.getJdbcDriver());
         Connection connection = DriverManager.getConnection(database.getJdbcDSN(), database.getUsername(), database.getPassword());
 
-        switch (kind) {
-            case TABLE: {
-                ResultSet columns = connection.getMetaData().getColumns(null, null, table.get(), null);
-                while (columns.next()) {
-                    String columnName = columns.getString("COLUMN_NAME");
-                    String datatype = columns.getString("DATA_TYPE"); // int => SQL type from java.sql.Types
-                    String columnSize = columns.getString("COLUMN_SIZE");
+        switch (connection.getMetaData().getDatabaseProductName()) {
+            case "MySQL": kind = Kinds.MySQL; break;
+            case "PostgreSQL": kind = Kinds.PostgreSQL; break;
+            case "Microsoft SQL Server": kind = Kinds.SQLServer; break;
+        }
 
-                    Column column = new Column(columnName);
-                    column.setType(datatype);
-                    column.setMaxLength(columnSize);
+        ResultSetMetaData metaData = connection.createStatement().executeQuery(query).getMetaData();
+        int columnCount = metaData.getColumnCount();
+        for (int i = 1; i <= columnCount; i++) {
+            String columnLabel = metaData.getColumnLabel(i);
+            String columnType = Integer.toString(metaData.getColumnType(i)); // SQL type from java.sql.Types
+            String columnDisplaySize = Integer.toString(metaData.getColumnDisplaySize(i));
 
-                    columnDescriptions.add(column);
-                }
-                break;
-            }
-            case QUERY: {
-                ResultSetMetaData metaData = connection.createStatement().executeQuery(query.get()).getMetaData();
-                int columnCount = metaData.getColumnCount();
-                for (int i = 1; i <= columnCount; i++) {
-                    String columnLabel = metaData.getColumnLabel(i);
-                    String columnType = Integer.toString(metaData.getColumnType(i)); // SQL type from java.sql.Types
-                    String columnDisplaySize = Integer.toString(metaData.getColumnDisplaySize(i));
+            Column column = new Column(columnLabel);
+            column.setType(columnType);
+            column.setMaxLength(columnDisplaySize);
 
-                    Column column = new Column(columnLabel);
-                    column.setType(columnType);
-                    column.setMaxLength(columnDisplaySize);
-
-                    columnDescriptions.add(column);
-                }
-            }
+            columnDescriptions.add(column);
         }
 
         connection.close();
@@ -78,17 +57,46 @@ public class RelationalDataSource extends DataSource {
 
     @Override
     void acquireMinAndMaxLength(Column column) {
-        super.acquireMinAndMaxLength(column);
-
-        Optional<Column> matchedColumnDescription = columnDescriptions.stream()
+        // for CHAR
+        Optional<Column> charColumn = columnDescriptions.stream()
                 .filter(colDesc -> colDesc.getName().equals(column.getName()))
                 .filter(colDesc -> colDesc.getType().isPresent())
                 .filter(colDesc -> colDesc.getMaxLength().isPresent())
                 .filter(colDesc -> Integer.parseInt(colDesc.getType().get()) == Types.CHAR)
                 .findAny();
 
-        if (matchedColumnDescription.isPresent()) {
-            column.setMaxLength(String.valueOf(matchedColumnDescription.get().getMaxLength().get()));
+        if (charColumn.isPresent()) {
+            column.setMinLength(String.valueOf(charColumn.get().getMaxLength().get()));
+            column.setMaxLength(String.valueOf(charColumn.get().getMaxLength().get()));
+            return;
+        }
+
+        super.acquireMinAndMaxLength(column);
+
+        // for BINARY, VARBINARY, LONGVARBINARY
+        // for CHAR
+        Optional<Column> hexBinaryColumn = columnDescriptions.stream()
+                .filter(colDesc -> colDesc.getName().equals(column.getName()))
+                .filter(colDesc -> colDesc.getType().isPresent())
+                .filter(colDesc -> Integer.parseInt(colDesc.getType().get()) == Types.BINARY
+                        || Integer.parseInt(colDesc.getType().get()) == Types.VARBINARY
+                        || Integer.parseInt(colDesc.getType().get()) == Types.LONGVARBINARY)
+                .findAny();
+
+        if (hexBinaryColumn.isPresent()) {
+            switch (kind) {
+                case MySQL: {
+                    column.setMinLength(String.valueOf(column.getMinLength().get().intValue()*2));
+                    column.setMaxLength(String.valueOf(column.getMaxLength().get().intValue()*2));
+                    break;
+                }
+                case PostgreSQL: {
+                    column.setMinLength(String.valueOf(column.getMinLength().get().intValue()-2));
+                    column.setMaxLength(String.valueOf(column.getMaxLength().get().intValue()-2));
+                    break;
+                }
+                case SQLServer: break;
+            }
         }
     }
 }

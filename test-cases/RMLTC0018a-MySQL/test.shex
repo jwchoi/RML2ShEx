@@ -12,6 +12,6 @@ BASE <http://my.example/ns#>
 my:S0 IRI /^http:\/\/example\.com\/(.{2,})$/ AND CLOSED {
   a [foaf:Person];
   ex:id xsd:integer MININCLUSIVE 10 MAXINCLUSIVE 30;
-  foaf:name LITERAL MINLENGTH 5 MAXLENGTH 15
+  foaf:name LITERAL LENGTH 15
 }
 
