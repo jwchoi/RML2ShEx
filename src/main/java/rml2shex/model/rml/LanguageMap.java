@@ -1,5 +1,9 @@
 package rml2shex.model.rml;
 
+import org.apache.commons.lang3.LocaleUtils;
+
+import java.util.Locale;
+
 public class LanguageMap extends TermMap {
     @Override
     void setReference(String reference) {
@@ -20,7 +24,9 @@ public class LanguageMap extends TermMap {
     @Override
     void setConstant(String constant) throws Exception {
         if (constant != null) {
-            if (constant.matches("[a-zA-Z]+(\\-[a-zA-Z0-9]+)*")) super.setConstant(constant);
+            Locale locale = new Locale.Builder().setLanguageTag(constant).build();
+
+            if (LocaleUtils.isAvailableLocale(locale)) super.setConstant(constant);
             else throw new Exception("A term map with invalid rr:language value, which is an error.");
         }
     }
