@@ -4,9 +4,8 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 
 import java.sql.*;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class RelationalDataSource extends DataSource {
     private enum Kinds { MySQL, PostgreSQL, SQLServer }
@@ -56,27 +55,37 @@ public class RelationalDataSource extends DataSource {
     }
 
     @Override
+    void setSubjectColumns(List<Column> subjectColumns) {
+        List<Column> pseudoColumns = subjectColumns.stream().map(this::getPseudoColumn).collect(Collectors.toList());
+        super.setSubjectColumns(pseudoColumns);
+    }
+
+    @Override
     void acquireMinAndMaxLength(Column column) {
+        Column pseudoColumn = getPseudoColumn(column);
+
         // for CHAR
         Optional<Column> charColumn = columnDescriptions.stream()
-                .filter(colDesc -> colDesc.getName().equals(column.getName()))
+                .filter(colDesc -> colDesc.getName().equals(pseudoColumn.getName()))
                 .filter(colDesc -> colDesc.getType().isPresent())
                 .filter(colDesc -> colDesc.getMaxLength().isPresent())
                 .filter(colDesc -> Integer.parseInt(colDesc.getType().get()) == Types.CHAR)
                 .findAny();
 
         if (charColumn.isPresent()) {
-            column.setMinLength(String.valueOf(charColumn.get().getMaxLength().get()));
-            column.setMaxLength(String.valueOf(charColumn.get().getMaxLength().get()));
+            pseudoColumn.setMinLength(String.valueOf(charColumn.get().getMaxLength().get()));
+            pseudoColumn.setMaxLength(String.valueOf(charColumn.get().getMaxLength().get()));
+
+            apply(pseudoColumn, column);
             return;
         }
 
-        super.acquireMinAndMaxLength(column);
+        super.acquireMinAndMaxLength(pseudoColumn);
 
         // for BINARY, VARBINARY, LONGVARBINARY
         // for CHAR
         Optional<Column> hexBinaryColumn = columnDescriptions.stream()
-                .filter(colDesc -> colDesc.getName().equals(column.getName()))
+                .filter(colDesc -> colDesc.getName().equals(pseudoColumn.getName()))
                 .filter(colDesc -> colDesc.getType().isPresent())
                 .filter(colDesc -> Integer.parseInt(colDesc.getType().get()) == Types.BINARY
                         || Integer.parseInt(colDesc.getType().get()) == Types.VARBINARY
@@ -86,17 +95,94 @@ public class RelationalDataSource extends DataSource {
         if (hexBinaryColumn.isPresent()) {
             switch (kind) {
                 case MySQL: {
-                    column.setMinLength(String.valueOf(column.getMinLength().get().intValue()*2));
-                    column.setMaxLength(String.valueOf(column.getMaxLength().get().intValue()*2));
+                    pseudoColumn.setMinLength(String.valueOf(pseudoColumn.getMinLength().get().intValue()*2));
+                    pseudoColumn.setMaxLength(String.valueOf(pseudoColumn.getMaxLength().get().intValue()*2));
                     break;
                 }
                 case PostgreSQL: {
-                    column.setMinLength(String.valueOf(column.getMinLength().get().intValue()-2));
-                    column.setMaxLength(String.valueOf(column.getMaxLength().get().intValue()-2));
+                    pseudoColumn.setMinLength(String.valueOf(pseudoColumn.getMinLength().get().intValue()-2));
+                    pseudoColumn.setMaxLength(String.valueOf(pseudoColumn.getMaxLength().get().intValue()-2));
                     break;
                 }
                 case SQLServer: break;
             }
         }
+
+        apply(pseudoColumn, column);
+    }
+
+    @Override
+    void acquireMetadata(Column column) {
+        Column pseudoColumn = getPseudoColumn(column);
+
+        super.acquireMetadata(pseudoColumn);
+
+        apply(pseudoColumn, column);
+    }
+
+    @Override
+    long acquireMinOccurs(List<Column> objectColumns) {
+        List<Column> pseudoColumns = objectColumns.stream().map(this::getPseudoColumn).collect(Collectors.toList());
+
+        return super.acquireMinOccurs(pseudoColumns);
+    }
+
+    @Override
+    long acquireMaxOccurs(List<Column> objectColumns) {
+        List<Column> pseudoColumns = objectColumns.stream().map(this::getPseudoColumn).collect(Collectors.toList());
+
+        return super.acquireMaxOccurs(pseudoColumns);
+    }
+
+    @Override
+    boolean isExistent(Column column) {
+        return columnDescriptions.stream()
+                .filter(colDesc -> colDesc.getName().equals(column.getName()))
+                .count() > 0;
+    }
+
+    private boolean isExistentInLowercase(Column column) {
+        return columnDescriptions.stream()
+                .filter(colDesc -> colDesc.getName().equals(column.getName().toLowerCase()))
+                .count() == 1;
+    }
+
+    private void copyExceptName(Column src, Column dest) {
+        Optional<DataSourceKinds> dataSourceKind = src.getDataSourceKind();
+        dest.setDataSourceKind(dataSourceKind.isPresent() ? dataSourceKind.get() : null);
+
+        Optional<String> type = src.getType();
+        dest.setType(type.isPresent() ? type.get() : null);
+
+        Optional<String> minValue = src.getMinValue();
+        dest.setMinValue(minValue.isPresent() ? minValue.get() : null);
+
+        Optional<String> maxValue = src.getMaxValue();
+        dest.setMaxValue(maxValue.isPresent() ? maxValue.get() : null);
+
+        Optional<Integer> minLength = src.getMinLength();
+        dest.setMinLength(minLength.isPresent() ? Integer.toString(minLength.get()) : null);
+
+        Optional<Integer> maxLength = src.getMaxLength();
+        dest.setMaxLength(maxLength.isPresent() ? Integer.toString(maxLength.get()) : null);
+    }
+
+    private Column getPseudoColumn(Column column) {
+        // for upper/lower case problems in PostgreSQL
+        if (kind.equals(Kinds.PostgreSQL)) {
+            if (!isExistent(column) && isExistentInLowercase(column)) {
+                Column fakeColumn = new Column(column.getName().toLowerCase());
+                copyExceptName(column, fakeColumn);
+                return fakeColumn;
+            }
+        }
+
+        return column;
+    }
+
+    private void apply(Column pseudoColumn, Column originalColumn) {
+        if (pseudoColumn == originalColumn) return;
+
+        copyExceptName(pseudoColumn, originalColumn);
     }
 }

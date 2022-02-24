@@ -17,13 +17,13 @@
   ];
 	
   rr:subjectMap [
-    rr:template "http://example.com/Person/{id}/{name}/{DateOfBirth}"
+    rr:template "http://example.com/Person/{id}/{name}/{dateofbirth}"
   ];
 	
   rr:predicateObjectMap [ 
     rr:predicate ex:BirthDay ; 
     rr:objectMap [
-      rml:reference "DateOfBirth";
+      rml:reference "dateofbirth";
     ]
   ];
   .

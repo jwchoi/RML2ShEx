@@ -7,4 +7,4 @@ CREATE TABLE student (
   [FirstName] VARCHAR(50),
   [LastName] VARCHAR(50)
 );
-INSERT INTO student values ('10', 'Venus', 'Williams');
+INSERT INTO student values (10, 'Venus', 'Williams');
