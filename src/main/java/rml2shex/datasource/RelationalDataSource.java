@@ -1,5 +1,8 @@
 package rml2shex.datasource;
 
+import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.statement.select.*;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 
@@ -14,7 +17,7 @@ public class RelationalDataSource extends DataSource {
 
     private String query;
 
-    private Set<Column> columnDescriptions;
+    private List<Column> columnDescriptions;
 
     RelationalDataSource(DataSourceKinds kind, Session session, Dataset<Row> df, Database database, String tableName, String query) throws Exception {
         super(kind, session, df);
@@ -22,7 +25,7 @@ public class RelationalDataSource extends DataSource {
         if (query != null) { this.query = query.endsWith(";") ? query.substring(0, query.length()-1) : query; }
         else if (tableName != null) { this.query = "SELECT * FROM " + tableName; }
 
-        columnDescriptions = new HashSet<>();
+        columnDescriptions = new ArrayList<>();
 
         collectDataSourceMetadata(database);
     }
@@ -50,6 +53,35 @@ public class RelationalDataSource extends DataSource {
 
             columnDescriptions.add(column);
         }
+
+        if (kind.equals(Kinds.SQLServer)) {
+            //columnDescriptions
+        }
+
+//        Select stmt = (Select) CCJSqlParserUtil.parse("SELECT col1 AS a, col2 AS b, col3 AS c FROM table WHERE col1 = 10 AND col2 = 20 AND col3 = 30");
+        Select stmt = (Select) CCJSqlParserUtil.parse(query);
+
+        Map<String, Expression> map = new HashMap<>();
+
+        for (SelectItem selectItem : ((PlainSelect)stmt.getSelectBody()).getSelectItems()) {
+            selectItem.accept(new SelectItemVisitorAdapter() {
+                @Override
+                public void visit(SelectExpressionItem item) {
+                    if (item.getAlias() != null) return;
+
+                    if (columnDescriptions.stream().map(Column::getName).filter(item.getExpression()::equals).count() > 0) return;
+
+
+
+                    System.out.println("item.getExpression() = " + item.getExpression());
+                    System.out.println("item.toString() = " + item.toString());
+                    System.out.println("item.getAlias().isUseAs() = " + item.getAlias().isUseAs());
+                    //map.put(item.getAlias().getName(), item.getExpression());
+                }
+            });
+        }
+
+        System.out.println("map " + map);
 
         connection.close();
     }

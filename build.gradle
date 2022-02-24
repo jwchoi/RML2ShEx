@@ -42,6 +42,9 @@ dependencies {
 
     // https://mvnrepository.com/artifact/com.microsoft.sqlserver/mssql-jdbc
     implementation 'com.microsoft.sqlserver:mssql-jdbc:10.2.0.jre11'
+
+    // https://mvnrepository.com/artifact/com.github.jsqlparser/jsqlparser
+    implementation 'com.github.jsqlparser:jsqlparser:4.3'
 }
 
 test {

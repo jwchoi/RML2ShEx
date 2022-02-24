@@ -42,10 +42,10 @@ class DataSourceFactory {
                 String tableName = logicalSource.getTableName();
                 String query = logicalSource.getQuery();
                 Dataset<Row> df = session.loadDatabase(database.orElseThrow(), tableName, query);
-                if (df != null) {
+//                if (df != null) {
                     return new RelationalDataSource(dataSourceKind, session, df, database.orElseThrow(), tableName, query);
-                }
-                break;
+//                }
+//                break;
             }
         }
 

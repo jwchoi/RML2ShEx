@@ -208,7 +208,8 @@ class Session {
             dfReader.option("dbtable", tableName);
         }
 
-        return dfReader.load();
+//        return dfReader.load();
+        return null;
     }
 
     Dataset<Row> sql(String sqlText) { return sparkSession.sql(sqlText); }
