@@ -72,7 +72,6 @@ public class Rml2ShexConverter {
         Set<DeclarableShapeExpr> declarableShapeExprs = shExDocModel.getDeclarableShapeExprs();
 
         declarableShapeExprs.stream().sorted().forEach(declarableShapeExpr -> writer.println(declarableShapeExpr.getSerializedShapeExpr() + Symbols.NEWLINE));
-        declarableShapeExprs.stream().sorted().forEach(declarableShapeExpr -> System.out.println(declarableShapeExpr.getSerializedShapeExpr() + Symbols.NEWLINE));
     }
 
     private void preProcess() {

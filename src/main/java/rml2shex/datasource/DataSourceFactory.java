@@ -41,11 +41,10 @@ class DataSourceFactory {
                 Optional<Database> database = logicalSource.getSource().getDatabase();
                 String tableName = logicalSource.getTableName();
                 String query = logicalSource.getQuery();
-                Dataset<Row> df = session.loadDatabase(database.orElseThrow(), tableName, query);
-//                if (df != null) {
-                    return new RelationalDataSource(dataSourceKind, session, df, database.orElseThrow(), tableName, query);
-//                }
-//                break;
+                RelationalDataSource.Metadata metadata = new RelationalDataSource.Metadata(database.orElseThrow(), tableName, query);
+                Dataset<Row> df = session.loadDatabase(database.orElseThrow(), metadata.getQuery());
+                if (df != null) return new RelationalDataSource(dataSourceKind, session, df, metadata);
+                break;
             }
         }
 
@@ -83,8 +82,9 @@ class DataSourceFactory {
     static DataSource createDataSource(Session session, LogicalTable logicalTable, Optional<Database> database) throws Exception {
         String tableName = logicalTable.getTableName();
         String sqlQuery = logicalTable.getSqlQuery();
-        Dataset<Row> df = session.loadDatabase(database.orElseThrow(), tableName, sqlQuery);
+        RelationalDataSource.Metadata metadata = new RelationalDataSource.Metadata(database.orElseThrow(), tableName, sqlQuery);
+        Dataset<Row> df = session.loadDatabase(database.orElseThrow(), metadata.getQuery());
 
-        return new RelationalDataSource(DataSource.DataSourceKinds.DATABASE, session, df, database.orElseThrow(), tableName, sqlQuery);
+        return df != null ? new RelationalDataSource(DataSource.DataSourceKinds.DATABASE, session, df, metadata) : null;
     }
 }

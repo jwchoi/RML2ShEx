@@ -59,7 +59,7 @@ public class Rml2Shex {
             System.out.println("SUCCESS: The ShEx file \"" + file.getCanonicalPath() + "\" is generated.");
         } catch (Exception e) {
             System.err.println("ERROR: " + e.getMessage());
-            System.err.println("ERROR: To Generate the ShEx file.");e.printStackTrace();
+            System.err.println("ERROR: To Generate the ShEx file.");
         }
     }
 

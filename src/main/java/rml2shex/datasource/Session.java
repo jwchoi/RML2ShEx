@@ -190,26 +190,15 @@ class Session {
         return df;
     }
 
-    Dataset<Row> loadDatabase(Database database, String tableName, String query) {
-        DataFrameReader dfReader = sparkSession.read()
+    Dataset<Row> loadDatabase(Database database, String query) {
+        return sparkSession.read()
                 .format("jdbc")
                 .option("driver", database.getJdbcDriver())
                 .option("url", database.getJdbcDSN())
                 .option("user", database.getUsername())
-                .option("password", database.getPassword());
-
-        if (query != null) {
-            if (query.endsWith(";")) {
-                query = query.substring(0, query.length()-1);
-            }
-
-            dfReader.option("query", query);
-        } else if (tableName != null) {
-            dfReader.option("dbtable", tableName);
-        }
-
-//        return dfReader.load();
-        return null;
+                .option("password", database.getPassword())
+                .option("query", query)
+                .load();
     }
 
     Dataset<Row> sql(String sqlText) { return sparkSession.sql(sqlText); }

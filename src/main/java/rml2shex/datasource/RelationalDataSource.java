@@ -1,6 +1,6 @@
 package rml2shex.datasource;
 
-import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.select.*;
 import org.apache.spark.sql.Dataset;
@@ -11,79 +11,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class RelationalDataSource extends DataSource {
-    private enum Kinds { MySQL, PostgreSQL, SQLServer }
+    private Metadata metadata;
 
-    private Kinds kind;
-
-    private String query;
-
-    private List<Column> columnDescriptions;
-
-    RelationalDataSource(DataSourceKinds kind, Session session, Dataset<Row> df, Database database, String tableName, String query) throws Exception {
+    RelationalDataSource(DataSourceKinds kind, Session session, Dataset<Row> df, Metadata metadata) throws Exception {
         super(kind, session, df);
-
-        if (query != null) { this.query = query.endsWith(";") ? query.substring(0, query.length()-1) : query; }
-        else if (tableName != null) { this.query = "SELECT * FROM " + tableName; }
-
-        columnDescriptions = new ArrayList<>();
-
-        collectDataSourceMetadata(database);
-    }
-
-    private void collectDataSourceMetadata(Database database) throws Exception {
-        Class.forName(database.getJdbcDriver());
-        Connection connection = DriverManager.getConnection(database.getJdbcDSN(), database.getUsername(), database.getPassword());
-
-        switch (connection.getMetaData().getDatabaseProductName()) {
-            case "MySQL": kind = Kinds.MySQL; break;
-            case "PostgreSQL": kind = Kinds.PostgreSQL; break;
-            case "Microsoft SQL Server": kind = Kinds.SQLServer; break;
-        }
-
-        ResultSetMetaData metaData = connection.createStatement().executeQuery(query).getMetaData();
-        int columnCount = metaData.getColumnCount();
-        for (int i = 1; i <= columnCount; i++) {
-            String columnLabel = metaData.getColumnLabel(i);
-            String columnType = Integer.toString(metaData.getColumnType(i)); // SQL type from java.sql.Types
-            String columnDisplaySize = Integer.toString(metaData.getColumnDisplaySize(i));
-
-            Column column = new Column(columnLabel);
-            column.setType(columnType);
-            column.setMaxLength(columnDisplaySize);
-
-            columnDescriptions.add(column);
-        }
-
-        if (kind.equals(Kinds.SQLServer)) {
-            //columnDescriptions
-        }
-
-//        Select stmt = (Select) CCJSqlParserUtil.parse("SELECT col1 AS a, col2 AS b, col3 AS c FROM table WHERE col1 = 10 AND col2 = 20 AND col3 = 30");
-        Select stmt = (Select) CCJSqlParserUtil.parse(query);
-
-        Map<String, Expression> map = new HashMap<>();
-
-        for (SelectItem selectItem : ((PlainSelect)stmt.getSelectBody()).getSelectItems()) {
-            selectItem.accept(new SelectItemVisitorAdapter() {
-                @Override
-                public void visit(SelectExpressionItem item) {
-                    if (item.getAlias() != null) return;
-
-                    if (columnDescriptions.stream().map(Column::getName).filter(item.getExpression()::equals).count() > 0) return;
-
-
-
-                    System.out.println("item.getExpression() = " + item.getExpression());
-                    System.out.println("item.toString() = " + item.toString());
-                    System.out.println("item.getAlias().isUseAs() = " + item.getAlias().isUseAs());
-                    //map.put(item.getAlias().getName(), item.getExpression());
-                }
-            });
-        }
-
-        System.out.println("map " + map);
-
-        connection.close();
+        this.metadata = metadata;
     }
 
     @Override
@@ -97,7 +29,7 @@ public class RelationalDataSource extends DataSource {
         Column pseudoColumn = getPseudoColumn(column);
 
         // for CHAR
-        Optional<Column> charColumn = columnDescriptions.stream()
+        Optional<Column> charColumn = metadata.columnDescriptions.stream()
                 .filter(colDesc -> colDesc.getName().equals(pseudoColumn.getName()))
                 .filter(colDesc -> colDesc.getType().isPresent())
                 .filter(colDesc -> colDesc.getMaxLength().isPresent())
@@ -116,7 +48,7 @@ public class RelationalDataSource extends DataSource {
 
         // for BINARY, VARBINARY, LONGVARBINARY
         // for CHAR
-        Optional<Column> hexBinaryColumn = columnDescriptions.stream()
+        Optional<Column> hexBinaryColumn = metadata.columnDescriptions.stream()
                 .filter(colDesc -> colDesc.getName().equals(pseudoColumn.getName()))
                 .filter(colDesc -> colDesc.getType().isPresent())
                 .filter(colDesc -> Integer.parseInt(colDesc.getType().get()) == Types.BINARY
@@ -125,7 +57,7 @@ public class RelationalDataSource extends DataSource {
                 .findAny();
 
         if (hexBinaryColumn.isPresent()) {
-            switch (kind) {
+            switch (metadata.dbms) {
                 case MySQL: {
                     pseudoColumn.setMinLength(String.valueOf(pseudoColumn.getMinLength().get().intValue()*2));
                     pseudoColumn.setMaxLength(String.valueOf(pseudoColumn.getMaxLength().get().intValue()*2));
@@ -168,13 +100,13 @@ public class RelationalDataSource extends DataSource {
 
     @Override
     boolean isExistent(Column column) {
-        return columnDescriptions.stream()
+        return metadata.columnDescriptions.stream()
                 .filter(colDesc -> colDesc.getName().equals(column.getName()))
                 .count() > 0;
     }
 
     private boolean isExistentInLowercase(Column column) {
-        return columnDescriptions.stream()
+        return metadata.columnDescriptions.stream()
                 .filter(colDesc -> colDesc.getName().equals(column.getName().toLowerCase()))
                 .count() == 1;
     }
@@ -201,7 +133,7 @@ public class RelationalDataSource extends DataSource {
 
     private Column getPseudoColumn(Column column) {
         // for upper/lower case problems in PostgreSQL
-        if (kind.equals(Kinds.PostgreSQL)) {
+        if (metadata.dbms.equals(Metadata.DBMS.PostgreSQL)) {
             if (!isExistent(column) && isExistentInLowercase(column)) {
                 Column fakeColumn = new Column(column.getName().toLowerCase());
                 copyExceptName(column, fakeColumn);
@@ -216,5 +148,99 @@ public class RelationalDataSource extends DataSource {
         if (pseudoColumn == originalColumn) return;
 
         copyExceptName(pseudoColumn, originalColumn);
+    }
+
+    static class Metadata {
+        private enum DBMS { MySQL, PostgreSQL, SQLServer }
+
+        private DBMS dbms;
+
+        private String query;
+
+        private List<Column> columnDescriptions;
+
+        Metadata(Database database, String tableName, String query) throws Exception {
+            initQuery(tableName, query);
+            collectDataSourceMetadata(database);
+        }
+
+        String getQuery() { return query; }
+        private void setQuery(String query) { this.query = query; }
+
+        private void initQuery(String tableName, String query) {
+            if (query != null) { this.query = query.endsWith(";") ? query.substring(0, query.length()-1) : query; }
+            else if (tableName != null) { this.query = "SELECT * FROM " + tableName; }
+        }
+
+        private void collectDataSourceMetadata(Database database) throws Exception {
+            Connection connection = getConnection(database);
+
+            setDBMSType(connection);
+
+            collectColumnDescriptions(connection);
+
+            rewriteQueryIfNecessary(connection);
+
+            connection.close();
+        }
+
+        private Connection getConnection(Database database) throws Exception {
+            Class.forName(database.getJdbcDriver());
+            return DriverManager.getConnection(database.getJdbcDSN(), database.getUsername(), database.getPassword());
+        }
+
+        private void setDBMSType(Connection connection) throws Exception {
+            switch (connection.getMetaData().getDatabaseProductName()) {
+                case "MySQL": dbms = DBMS.MySQL; break;
+                case "PostgreSQL": dbms = DBMS.PostgreSQL; break;
+                case "Microsoft SQL Server": dbms = DBMS.SQLServer; break;
+            }
+        }
+
+        private void collectColumnDescriptions(Connection connection) throws Exception {
+            columnDescriptions = new ArrayList<>();
+
+            ResultSetMetaData metaData = connection.createStatement().executeQuery(query).getMetaData();
+            int columnCount = metaData.getColumnCount();
+            for (int i = 1; i <= columnCount; i++) {
+                String columnLabel = metaData.getColumnLabel(i);
+                String columnType = Integer.toString(metaData.getColumnType(i)); // SQL type from java.sql.Types
+                String columnDisplaySize = Integer.toString(metaData.getColumnDisplaySize(i));
+
+                Column column = new Column(columnLabel);
+                column.setType(columnType);
+                column.setMaxLength(columnDisplaySize);
+
+                columnDescriptions.add(column);
+            }
+        }
+
+        private void rewriteQueryIfNecessary(Connection connection) throws Exception {
+            if (!dbms.equals(DBMS.SQLServer)) return;
+
+            if (columnDescriptions.stream().map(Column::getName).filter(String::isEmpty).count() == 0) return;
+
+            Select stmt = (Select) CCJSqlParserUtil.parse(query);
+
+            for (SelectItem selectItem : ((PlainSelect)stmt.getSelectBody()).getSelectItems()) {
+                selectItem.accept(new SelectItemVisitorAdapter() {
+                    @Override
+                    public void visit(SelectExpressionItem item) {
+                        if (item.getAlias() != null) return;
+
+                        if (columnDescriptions.stream().map(Column::getName).filter(item.getExpression().toString()::equals).count() > 0) return;
+
+                        String syntheticAlias = item.getExpression().toString().replace("\"", "\"\"");
+                        item.setAlias(new Alias("\"" + syntheticAlias + "\""));
+                    }
+                });
+            }
+
+            // if modified
+            if (!query.equals(stmt.toString())) {
+                setQuery(stmt.toString());
+                collectColumnDescriptions(connection);
+            }
+        }
     }
 }
