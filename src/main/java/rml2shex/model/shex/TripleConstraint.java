@@ -12,20 +12,14 @@ import java.util.Optional;
 import java.util.Set;
 
 public class TripleConstraint extends DeclarableTripleExpr {
-
-    enum MappedTypes {CLASS, PREDICATE_OBJECT_MAP, PREDICATE_REF_OBJECT_MAP}
-
-    private final MappedTypes mappedType;
-
     private Optional<Boolean> inverse;
     private IRI predicate;
     private Optional<ShapeExpr> valueExpr;
     private Optional<Integer> min; // if empty, 0
     private Optional<Integer> max; // if empty, -1. && -1 is treated as unbounded
 
-    private TripleConstraint(MappedTypes mappedType, IRI id) {
+    private TripleConstraint(IRI id) {
         super(Kinds.TripleConstraint, id);
-        this.mappedType = mappedType;
 
         inverse = Optional.empty();
         valueExpr = Optional.empty();
@@ -43,17 +37,17 @@ public class TripleConstraint extends DeclarableTripleExpr {
 
 
     TripleConstraint(IRI id, IRI predicate, Set<IRI> classes) {
-        this(MappedTypes.CLASS, id);
+        this(id);
         convert(predicate, classes);
     }
 
     TripleConstraint(IRI id, PredicateMap predicateMap, ObjectMap objectMap, Optional<Long> minOccurs, Optional<Long> maxOccurs) {
-        this(MappedTypes.PREDICATE_OBJECT_MAP, id);
+        this(id);
         convert(predicateMap, objectMap, minOccurs, maxOccurs);
     }
 
     TripleConstraint(IRI id, PredicateMap predicateMap, IRI referenceIdFromRefObjectMap, Optional<Long> minOccurs, Optional<Long> maxOccurs, boolean inverse) {
-        this(MappedTypes.PREDICATE_REF_OBJECT_MAP, id);
+        this(id);
         convert(predicateMap, referenceIdFromRefObjectMap, minOccurs, maxOccurs, inverse);
     }
 

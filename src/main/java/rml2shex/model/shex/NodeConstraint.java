@@ -6,6 +6,7 @@ import rml2shex.model.rml.*;
 import rml2shex.commons.Symbols;
 import rml2shex.commons.IRI;
 
+import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -79,15 +80,9 @@ public class NodeConstraint extends DeclarableShapeExpr {
 
         if (termType.isPresent()) {
             switch (termType.get()) {
-                case IRI:
-                    setNodeKind(NodeKinds.IRI);
-                    break;
-                case LITERAL:
-                    setNodeKind(NodeKinds.LITERAL);
-                    break;
-                case BLANKNODE:
-                    setNodeKind(NodeKinds.BNODE);
-                    break;
+                case IRI -> setNodeKind(NodeKinds.IRI);
+                case LITERAL -> setNodeKind(NodeKinds.LITERAL);
+                case BLANKNODE -> setNodeKind(NodeKinds.BNODE);
             }
         }
     }
@@ -227,6 +222,10 @@ public class NodeConstraint extends DeclarableShapeExpr {
         if (!nodeKind.equals(other.nodeKind)) return false;
 
         if (!isEquivalentXSFacet(other.xsFacets)) return false;
+
+        if (nodeKind.get().equals(NodeKinds.IRI) && other.nodeKind.get().equals(NodeKinds.IRI)) {
+            if (!values.equals(other.values)) return false;
+        }
 
         return true;
     }

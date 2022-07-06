@@ -10,7 +10,7 @@ BASE <http://my.example/ns#>
 
 my:S0 IRI /^http:\/\/example\.com\/(.{2,})\/(.{5,})$/ AND CLOSED {
   a [foaf:Person];
-  ex:id LITERAL LENGTH 2;
+  ex:id LITERAL;
   foaf:name LITERAL LENGTH 5
 }
 
