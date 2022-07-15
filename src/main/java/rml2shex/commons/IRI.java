@@ -76,7 +76,7 @@ public class IRI implements Comparable<IRI> {
         if (this == o) return true;
         if (!(o instanceof IRI)) return false;
         IRI other = (IRI) o;
-        return iri.equals(other);
+        return iri.equals(other.iri);
     }
 
     @Override
