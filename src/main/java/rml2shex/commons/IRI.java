@@ -75,12 +75,12 @@ public class IRI implements Comparable<IRI> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof IRI)) return false;
-        IRI id = (IRI) o;
-        return Objects.equals(prefixLabel, id.prefixLabel) && Objects.equals(prefixIRI, id.prefixIRI) && Objects.equals(getLocalPart(), id.getLocalPart());
+        IRI other = (IRI) o;
+        return iri.equals(other);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(prefixLabel, prefixIRI, getLocalPart());
+        return Objects.hash(iri);
     }
 }
